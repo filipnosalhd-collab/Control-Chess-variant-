@@ -1,0 +1,4604 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>Control Chess</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%20fill%3D%22%231a1a1e%22/%3E%3Ctext%20x%3D%2216%22%20y%3D%2224%22%20text-anchor%3D%22middle%22%20font-size%3D%2222%22%20font-family%3D%22serif%22%3E%E2%99%9B%3C/text%3E%3C/svg%3E"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Crimson+Pro:wght@400;600&display=swap");
+      :root {
+        --bg: #0d0d0f;
+        --sur: #141416;
+        --pan: #1a1a1e;
+        --brd: #2a2a32;
+        --gold: #c9a84c;
+        --gld2: #f0d080;
+        --lt: #e8d5b0;
+        --dk: #7a5c3a;
+        --txt: #e8e0d0;
+        --dim: #7a7060;
+        --acc: #4a9eff;
+        --red: #e53935;
+        --grn: #4caf50;
+        --sq: clamp(
+          44px,
+          min(calc((100vw - 330px) / 8), calc((100vh - 140px) / 8)),
+          80px
+        );
+        --lbl: 20px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--txt);
+        font-family: "Crimson Pro", serif;
+        overflow: hidden;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ── HEADER ── */
+      header {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--brd);
+        background: var(--sur);
+        gap: 8px;
+      }
+      .logo {
+        font-family: "Cinzel", serif;
+        font-size: 1rem;
+        font-weight: 900;
+        color: var(--gold);
+        white-space: nowrap;
+      }
+      .logo em {
+        color: var(--dim);
+        font-weight: 400;
+        font-style: normal;
+        font-size: 0.8em;
+      }
+      .hright {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .htip {
+        font-size: 0.6rem;
+        color: var(--dim);
+      }
+      .hbtn {
+        padding: 4px 10px;
+        border: 1px solid var(--brd);
+        border-radius: 5px;
+        background: var(--sur);
+        color: var(--txt);
+        font-size: 0.62rem;
+        font-family: "Cinzel", serif;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.18s;
+      }
+      .hbtn:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+      .hbtn.gold {
+        background: var(--gold);
+        color: #111;
+        border-color: var(--gold);
+      }
+      .hbtn.gold:hover {
+        background: var(--gld2);
+      }
+      .online-dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--grn);
+        margin-right: 4px;
+        animation: pulse-g 2s infinite;
+      }
+      @keyframes pulse-g {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+
+      /* ── MAIN ── */
+      .wrap {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      /* ── EVAL BAR — chess.com style, glued to board ── */
+      .evbar {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 14px;
+        flex-shrink: 0;
+        /* height matches board exactly via JS, or use align-self stretch */
+        align-self: center;
+        background: transparent;
+        border: none;
+        position: relative;
+        user-select: none;
+        margin-right: 2px;
+      }
+      .evtrack {
+        /* Height set by JS to match board pixel height */
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        border-radius: 3px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .evb {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #262421;
+        transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .evw {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #f0d9b5;
+        transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .evlbl-w {
+        position: absolute;
+        bottom: 3px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-family: "Cinzel", serif;
+        font-size: 0.38rem;
+        font-weight: 900;
+        color: #1a1a1a;
+        pointer-events: none;
+        z-index: 2;
+        line-height: 1;
+      }
+      .evlbl-b {
+        position: absolute;
+        top: 3px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-family: "Cinzel", serif;
+        font-size: 0.38rem;
+        font-weight: 900;
+        color: #f0d9b5;
+        pointer-events: none;
+        z-index: 2;
+        line-height: 1;
+      }
+      .evsc {
+        position: absolute;
+        left: 18px;
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-family: "Cinzel", serif;
+        font-size: 0.58rem;
+        color: #c9a84c;
+        font-weight: 700;
+        white-space: nowrap;
+        z-index: 100;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .evbar:hover .evsc {
+        opacity: 1;
+      }
+      .evmid {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.12);
+        z-index: 3;
+        pointer-events: none;
+      }
+
+      /* ── CENTER ── */
+      .center {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 10px;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      /* ── PLAYER INFO ── */
+      .pinfo {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: calc(var(--sq) * 8 + var(--lbl) * 2 + 4px);
+        max-width: 100%;
+        padding: 3px 8px;
+        background: var(--pan);
+        border: 1px solid var(--brd);
+        border-radius: 5px;
+        transition:
+          opacity 0.2s,
+          transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .pnm {
+        font-family: "Cinzel", serif;
+        font-size: 0.68rem;
+        font-weight: 700;
+      }
+      .caps {
+        font-size: 0.72rem;
+        display: flex;
+        gap: 1px;
+        flex-wrap: wrap;
+        max-width: 180px;
+      }
+      .psc {
+        font-family: "Cinzel", serif;
+        font-size: 0.65rem;
+        color: var(--dim);
+      }
+      .timer {
+        font-family: "Cinzel", serif;
+        font-size: 1rem;
+        font-weight: 900;
+        color: var(--gold);
+        letter-spacing: 0.04em;
+        min-width: 52px;
+        text-align: right;
+        display: none;
+      }
+      .timer.low {
+        color: var(--red);
+        animation: pulse-r 0.8s infinite;
+      }
+      @keyframes pulse-r {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .timer.active {
+        color: var(--gold);
+      }
+
+      /* ── BOARD WRAPPER (labels outside) ── */
+      .bwrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .bwrap.flipped {
+        transform: rotate(180deg);
+      }
+      .bwrap.flipped .blbl {
+        transform: rotate(180deg);
+      }
+      .bwrap.flipped .pc {
+        transform: rotate(180deg);
+      }
+      .bwrap.flipped .friz {
+        transform: rotate(180deg);
+      }
+      .bwrap.flipped .dot::after {
+        transform: rotate(180deg);
+      }
+      .b-top,
+      .b-bot {
+        display: flex;
+        margin-left: var(--lbl);
+        height: var(--lbl);
+      }
+      .b-mid {
+        display: flex;
+        position: relative;
+      }
+      .b-left,
+      .b-right {
+        width: var(--lbl);
+        display: flex;
+        flex-direction: column;
+      }
+      .blbl {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Cinzel", serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--dim);
+        flex-shrink: 0;
+      }
+      .blbl.f {
+        width: var(--sq);
+        height: var(--lbl);
+      }
+      .blbl.r {
+        width: var(--lbl);
+        height: var(--sq);
+      }
+
+      /* ── BOARD ── */
+      .board {
+        display: grid;
+        grid-template-columns: repeat(8, var(--sq));
+        grid-template-rows: repeat(8, var(--sq));
+        border: 2px solid var(--gold);
+        box-shadow:
+          0 0 24px rgba(201, 168, 76, 0.15),
+          0 8px 32px rgba(0, 0, 0, 0.8);
+        flex-shrink: 0;
+      }
+      .sq {
+        width: var(--sq);
+        height: var(--sq);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        cursor: pointer;
+        user-select: none;
+        touch-action: none;
+      }
+      .lt {
+        background: var(--lt);
+      }
+      .dk {
+        background: var(--dk);
+      }
+      .sel {
+        background: #aad455 !important;
+      }
+      .lm {
+        background: rgba(205, 210, 106, 0.55) !important;
+      }
+      .lm.dk {
+        background: rgba(170, 175, 80, 0.65) !important;
+      }
+      .chk {
+        background: rgba(220, 30, 30, 0.7) !important;
+      }
+      .frz {
+        background: rgba(74, 158, 255, 0.22) !important;
+      }
+      .dot::after {
+        content: "";
+        position: absolute;
+        width: 33%;
+        height: 33%;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.18);
+        pointer-events: none;
+      }
+      .cring::after {
+        content: "";
+        position: absolute;
+        inset: 5%;
+        border-radius: 50%;
+        border: 3px solid rgba(0, 0, 0, 0.22);
+        pointer-events: none;
+      }
+      .pc {
+        font-size: calc(var(--sq) * 0.72);
+        line-height: 1;
+        position: relative;
+        z-index: 2;
+        pointer-events: none;
+      }
+      .pw {
+        color: #fff;
+        filter: drop-shadow(0 0 1px #000) drop-shadow(1px 1px 0 #000);
+      }
+      .pb {
+        color: #1a0a00;
+        filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.9));
+      }
+      .friz {
+        position: absolute;
+        top: 0;
+        right: 1px;
+        font-size: calc(var(--sq) * 0.19);
+        z-index: 3;
+        pointer-events: none;
+      }
+      .pc.dim {
+        opacity: 0.15;
+      }
+
+      /* ── RIGHT PANEL ── */
+      .rpanel {
+        width: 220px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 5px;
+        overflow-y: auto;
+        background: var(--bg);
+      }
+      .rpanel::-webkit-scrollbar {
+        width: 2px;
+      }
+      .rpanel::-webkit-scrollbar-thumb {
+        background: var(--brd);
+        border-radius: 1px;
+      }
+      .card {
+        background: var(--pan);
+        border: 1px solid var(--brd);
+        border-radius: 7px;
+        overflow: hidden;
+      }
+      .chdr {
+        padding: 6px 10px;
+        background: var(--sur);
+        border-bottom: 1px solid var(--brd);
+        font-family: "Cinzel", serif;
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: var(--gold);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .chdr:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .arr {
+        font-style: normal;
+        font-size: 0.56rem;
+        color: var(--dim);
+        transition: transform 0.22s;
+      }
+      .chdr.cl .arr {
+        transform: rotate(-90deg);
+      }
+      .cbody {
+        overflow: hidden;
+        transition:
+          max-height 0.28s,
+          opacity 0.22s;
+        max-height: 400px;
+        opacity: 1;
+      }
+      .cbody.cl {
+        max-height: 0;
+        opacity: 0;
+      }
+      .sbody {
+        padding: 7px 10px;
+        font-size: 0.76rem;
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: wrap;
+        line-height: 1.4;
+      }
+      .tdot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .thk {
+        display: none;
+        padding: 4px 10px;
+        color: var(--acc);
+        font-size: 0.68rem;
+        align-items: center;
+        gap: 4px;
+      }
+      .thk.on {
+        display: flex;
+      }
+      .d {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--acc);
+        animation: bnc 1.2s infinite;
+      }
+      .d:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .d:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes bnc {
+        0%,
+        80%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.4;
+        }
+        40% {
+          transform: translateY(-4px);
+          opacity: 1;
+        }
+      }
+      .rbody {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        min-height: 28px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+      .mbody {
+        padding: 5px 10px;
+        max-height: 120px;
+        overflow-y: auto;
+        font-size: 0.72rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1px;
+        line-height: 1.5;
+      }
+      .mn {
+        color: var(--dim);
+      }
+      .mw {
+        color: var(--txt);
+      }
+      .mb2 {
+        color: var(--dim);
+      }
+      .dwrap {
+        display: flex;
+        gap: 3px;
+        padding: 5px 10px;
+        flex-wrap: wrap;
+      }
+      .lb {
+        padding: 2px 7px;
+        border: 1px solid var(--brd);
+        border-radius: 14px;
+        background: transparent;
+        color: var(--dim);
+        font-size: 0.64rem;
+        cursor: pointer;
+        font-family: "Crimson Pro", serif;
+        transition: all 0.18s;
+      }
+      .lb.on {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: rgba(201, 168, 76, 0.1);
+      }
+      .rls {
+        padding: 7px 10px;
+        font-size: 0.68rem;
+        color: var(--dim);
+        line-height: 1.55;
+      }
+      .rl {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 4px;
+      }
+      .ri {
+        color: var(--gold);
+        flex-shrink: 0;
+      }
+      .brow {
+        display: flex;
+        gap: 5px;
+        padding: 5px 10px;
+      }
+      .btn {
+        flex: 1;
+        padding: 5px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: "Cinzel", serif;
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        transition: all 0.18s;
+      }
+      .bgd {
+        background: var(--gold);
+        color: #111;
+      }
+      .bgd:hover {
+        background: var(--gld2);
+      }
+      .bsc {
+        background: var(--sur);
+        color: var(--txt);
+        border: 1px solid var(--brd);
+      }
+      .bsc:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+
+      /* move rating colors */
+      .br {
+        color: #00e5ff;
+      }
+      .gr {
+        color: #e040fb;
+      }
+      .be {
+        color: #69f0ae;
+      }
+      .ex {
+        color: #b2ff59;
+      }
+      .go {
+        color: #fff176;
+      }
+      .ok {
+        color: #a5d6a7;
+      }
+      .in {
+        color: #ffcc02;
+      }
+      .mi {
+        color: #ff7043;
+      }
+      .bl {
+        color: #ff1744;
+      }
+      .ct {
+        color: #ff6d00;
+      }
+      .ck {
+        color: var(--red);
+      }
+
+      /* ── MOBILE BAR ── */
+      #mbar {
+        display: none;
+        flex-shrink: 0;
+        background: var(--pan);
+        border-top: 1px solid var(--brd);
+        padding: 3px 5px;
+        gap: 3px;
+        flex-direction: column;
+      }
+      .mr {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+      }
+      .mst {
+        flex: 1;
+        font-family: "Cinzel", serif;
+        font-size: 0.6rem;
+        color: var(--txt);
+      }
+      .mev {
+        font-family: "Cinzel", serif;
+        font-size: 0.6rem;
+        color: var(--gold);
+        font-weight: 700;
+        min-width: 30px;
+        text-align: right;
+      }
+      .mrt {
+        font-size: 0.6rem;
+        flex: 1;
+      }
+      .mthk {
+        display: none;
+        align-items: center;
+        gap: 3px;
+        color: var(--acc);
+        font-size: 0.58rem;
+      }
+      .mthk.on {
+        display: flex;
+      }
+      .mpls {
+        display: flex;
+        gap: 2px;
+        overflow-x: auto;
+        flex: 1;
+      }
+      .mpls::-webkit-scrollbar {
+        display: none;
+      }
+      .mpl {
+        padding: 1px 6px;
+        border-radius: 14px;
+        border: 1px solid var(--brd);
+        background: transparent;
+        color: var(--dim);
+        font-size: 0.56rem;
+        cursor: pointer;
+        white-space: nowrap;
+        font-family: "Crimson Pro", serif;
+        flex-shrink: 0;
+        transition: all 0.18s;
+      }
+      .mpl.on {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: rgba(201, 168, 76, 0.1);
+      }
+      .mbtn {
+        padding: 2px 7px;
+        border: 1px solid var(--brd);
+        border-radius: 4px;
+        background: var(--sur);
+        color: var(--dim);
+        font-size: 0.58rem;
+        font-family: "Cinzel", serif;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .mbtn.mgold {
+        background: var(--gold);
+        color: #111;
+        border-color: var(--gold);
+      }
+      .mbtn.on {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: rgba(201, 168, 76, 0.15);
+      }
+
+      /* ── MODALS ── */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 500;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(2px);
+      }
+      .modal.on {
+        display: flex;
+      }
+      .mbox {
+        background: var(--pan);
+        border: 1px solid var(--gold);
+        border-radius: 10px;
+        padding: 20px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        max-width: 90vw;
+      }
+      .mbt {
+        font-family: "Cinzel", serif;
+        font-size: 0.95rem;
+        color: var(--gold);
+        font-weight: 700;
+      }
+      .mbs {
+        font-size: 0.78rem;
+        color: var(--dim);
+        text-align: center;
+        max-width: 240px;
+      }
+      .mbbs {
+        display: flex;
+        gap: 7px;
+      }
+      .mbb {
+        padding: 6px 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: "Cinzel", serif;
+        font-size: 0.64rem;
+        font-weight: 700;
+        transition: all 0.18s;
+      }
+      .mbb.y {
+        background: var(--gold);
+        color: #111;
+      }
+      .mbb.y:hover {
+        background: var(--gld2);
+      }
+      .mbb.n {
+        background: var(--sur);
+        color: var(--txt);
+        border: 1px solid var(--brd);
+      }
+      .mbb.n:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+      .pp {
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 7px;
+        font-size: 2.2rem;
+        transition: background 0.18s;
+        line-height: 1;
+      }
+      .pp:hover {
+        background: rgba(201, 168, 76, 0.2);
+      }
+
+      /* ── TOAST ── */
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--pan);
+        border: 1px solid var(--gold);
+        border-radius: 9px;
+        padding: 12px 16px;
+        font-family: "Cinzel", serif;
+        box-shadow: 0 0 26px rgba(201, 168, 76, 0.2);
+        transform: translateY(14px);
+        opacity: 0;
+        transition: all 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 600;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        min-width: 190px;
+        pointer-events: none;
+      }
+      .toast.on {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .tti {
+        font-size: 0.95rem;
+        font-weight: 900;
+        color: var(--gold);
+      }
+      .tsu {
+        font-size: 0.75rem;
+        color: var(--dim);
+        font-family: "Crimson Pro", serif;
+      }
+      .tbtnrow {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .tbtn {
+        padding: 4px 11px;
+        background: var(--gold);
+        color: #111;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: "Cinzel", serif;
+        font-size: 0.6rem;
+        font-weight: 700;
+      }
+      .tbtn:hover {
+        background: var(--gld2);
+      }
+      .tbtn.sec {
+        background: var(--sur);
+        color: var(--txt);
+        border: 1px solid var(--brd);
+      }
+      .tbtn.sec:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+
+      /* ── LOBBY ── */
+      .lobby {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 700;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      }
+      .lobby.on {
+        display: flex;
+      }
+      .lbox {
+        background: var(--pan);
+        border: 1px solid var(--gold);
+        border-radius: 14px;
+        padding: 24px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: min(440px, 95vw);
+        max-height: 95vh;
+        overflow-y: auto;
+      }
+      .lbox::-webkit-scrollbar {
+        width: 3px;
+      }
+      .lbox::-webkit-scrollbar-thumb {
+        background: var(--brd);
+      }
+      .ltitle {
+        font-family: "Cinzel", serif;
+        font-size: 1.05rem;
+        color: var(--gold);
+        font-weight: 900;
+        text-align: center;
+      }
+      .lsec {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .llabel {
+        font-family: "Cinzel", serif;
+        font-size: 0.6rem;
+        color: var(--dim);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .linput {
+        background: var(--sur);
+        border: 1px solid var(--brd);
+        border-radius: 6px;
+        padding: 7px 10px;
+        font-size: 0.82rem;
+        color: var(--txt);
+        font-family: "Crimson Pro", serif;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.18s;
+      }
+      .linput:focus {
+        border-color: var(--gold);
+      }
+      .llink {
+        background: var(--sur);
+        border: 1px solid var(--brd);
+        border-radius: 6px;
+        padding: 7px 10px;
+        font-size: 0.68rem;
+        color: var(--acc);
+        word-break: break-all;
+        cursor: pointer;
+        font-family: monospace;
+        transition: border-color 0.18s;
+        user-select: all;
+      }
+      .llink:hover {
+        border-color: var(--acc);
+      }
+      .lplayers {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+      }
+      .lplayer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        padding: 10px 14px;
+        border: 1px solid var(--brd);
+        border-radius: 8px;
+        min-width: 110px;
+        flex: 1;
+      }
+      .lplayer.joined {
+        border-color: var(--gold);
+        background: rgba(201, 168, 76, 0.07);
+      }
+      .lpnm {
+        font-family: "Cinzel", serif;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-align: center;
+      }
+      .lpst {
+        font-size: 0.6rem;
+        color: var(--dim);
+      }
+      .lkick {
+        font-size: 0.58rem;
+        color: var(--red);
+        cursor: pointer;
+        border: none;
+        background: none;
+        font-family: "Cinzel", serif;
+        padding: 1px 4px;
+        margin-top: 1px;
+      }
+      .lkick:hover {
+        text-decoration: underline;
+      }
+      .lvs {
+        font-family: "Cinzel", serif;
+        font-size: 1.1rem;
+        color: var(--dim);
+        flex-shrink: 0;
+      }
+      .tpicker {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+      }
+      .tpill {
+        padding: 3px 9px;
+        border: 1px solid var(--brd);
+        border-radius: 14px;
+        background: transparent;
+        color: var(--dim);
+        font-size: 0.68rem;
+        cursor: pointer;
+        font-family: "Crimson Pro", serif;
+        transition: all 0.18s;
+      }
+      .tpill.on {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: rgba(201, 168, 76, 0.1);
+      }
+      .lopts {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .ltoggle {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.72rem;
+        color: var(--dim);
+        cursor: pointer;
+      }
+      .ltoggle input {
+        accent-color: var(--gold);
+      }
+      .lbtnrow {
+        display: flex;
+        gap: 7px;
+      }
+      .lcstat {
+        font-size: 0.6rem;
+        color: var(--dim);
+        text-align: center;
+        min-height: 16px;
+      }
+      .lmsg {
+        font-size: 0.7rem;
+        color: var(--acc);
+        text-align: center;
+        min-height: 16px;
+      }
+
+      /* ── ANIMS ── */
+      @keyframes pfly {
+        0% {
+          opacity: 1;
+          transform: translateY(0) rotate(0);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-600px) rotate(720deg);
+        }
+      }
+      @keyframes cfall {
+        0% {
+          opacity: 1;
+          transform: translateY(-60px) rotate(0);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(110vh) rotate(720deg);
+        }
+      }
+      .cfti {
+        position: fixed;
+        top: -20px;
+        font-size: 1.1rem;
+        z-index: 800;
+        pointer-events: none;
+        animation: cfall 2s ease-in forwards;
+      }
+
+      /* ── DRAG GHOST ── */
+      .ghost {
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
+        line-height: 1;
+        transform: translate(-50%, -60%);
+        filter: drop-shadow(0 5px 14px rgba(0, 0, 0, 0.85));
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      /* ── MOBILE ── */
+      @media (max-width: 700px) {
+        html,
+        body {
+          height: 100dvh;
+          overflow: hidden;
+        }
+
+        /* header slim */
+        header {
+          padding: 3px 8px;
+          min-height: 0;
+        }
+        .logo {
+          font-size: 0.75rem;
+        }
+        .htip {
+          display: none;
+        }
+        .hbtn:not(#mOnlineBtn) {
+          display: none;
+        }
+        #mOnlineBtn {
+          display: block;
+        }
+
+        /* main layout: column */
+        .wrap {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        /* eval bar: horizontal strip on top, slim */
+        /* Eval bar: slim vertical strip next to board on mobile too */
+        .evbar {
+          width: 10px;
+          margin-right: 1px;
+        }
+        .evtrack {
+          border-radius: 2px;
+        }
+        .evlbl-w,
+        .evlbl-b {
+          display: none;
+        }
+        .evsc {
+          left: 13px;
+          font-size: 0.5rem;
+        }
+
+        /* hide right panel entirely on mobile */
+        .rpanel {
+          display: none;
+        }
+
+        /* center: fill all space between evbar and mbar */
+        .center {
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2px 0;
+          gap: 1px;
+          overflow: hidden;
+          width: 100%;
+        }
+
+        /* board size: fill width, but leave room for pinfos + mbar */
+        /* header≈32px evbar≈18px pinfo×2≈28px gaps≈6px mbar≈52px = ~136px overhead */
+        :root {
+          --lbl: 14px;
+        }
+        .board {
+          --bsize: min(100vw, calc(100dvh - 138px));
+          --sq: calc((var(--bsize) - var(--lbl) * 2 - 4px) / 8);
+          border-width: 1px;
+          box-shadow: none;
+        }
+
+        /* player info: match board width */
+        .pinfo {
+          width: calc(var(--sq) * 8 + var(--lbl) * 2 + 4px);
+          max-width: calc(100vw - 4px);
+          padding: 1px 5px;
+          flex-shrink: 0;
+        }
+        .pnm {
+          font-size: 0.52rem;
+        }
+        .caps {
+          font-size: 0.58rem;
+          max-width: 100px;
+        }
+        .psc {
+          font-size: 0.5rem;
+        }
+        .timer {
+          font-size: 0.72rem;
+          min-width: 34px;
+        }
+        .blbl {
+          font-size: 0.52rem;
+        }
+
+        /* mobile bottom bar */
+        #mbar {
+          display: flex;
+          flex-shrink: 0;
+        }
+
+        /* toast: centered */
+        .toast {
+          bottom: auto;
+          top: 50%;
+          right: 50%;
+          min-width: 160px;
+          transform: translate(50%, -50%) translateY(14px);
+        }
+        .toast.on {
+          transform: translate(50%, -50%) translateY(0);
+        }
+
+        /* lobby fits small screens */
+        .lbox {
+          padding: 14px 12px;
+          gap: 8px;
+          width: min(400px, 95vw);
+        }
+        .lplayer {
+          min-width: 70px;
+          padding: 6px 8px;
+        }
+      }
+
+      @media (max-width: 380px) {
+        :root {
+          --lbl: 12px;
+        }
+      }
+      /* ── MOBILE ── */
+      @media (max-width: 700px) {
+        html,
+        body {
+          height: 100dvh;
+          overflow: hidden;
+        }
+
+        /* header slim */
+        header {
+          padding: 3px 8px;
+          min-height: 0;
+        }
+        .logo {
+          font-size: 0.75rem;
+        }
+        .htip {
+          display: none;
+        }
+        .hbtn:not(#mOnlineBtn) {
+          display: none;
+        }
+        #mOnlineBtn {
+          display: block;
+        }
+
+        /* main layout: column */
+        .wrap {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        /* eval bar: horizontal strip on top, slim */
+        .evbar {
+          flex-direction: row;
+          width: 100%;
+          height: 18px;
+          padding: 0 8px;
+          gap: 6px;
+          border-right: none;
+          border-bottom: 1px solid var(--brd);
+          flex-shrink: 0;
+          justify-content: center;
+          align-items: center;
+          background: var(--sur);
+        }
+        .evtrack {
+          flex: 1;
+          width: auto;
+          height: 7px;
+          min-height: 0;
+          border-radius: 4px;
+          overflow: hidden;
+          background: #111;
+          position: relative;
+        }
+        .evw {
+          position: absolute;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          height: 100% !important;
+          width: 50%;
+          border-radius: 0 3px 3px 0;
+          background: linear-gradient(to right, #ccc, #eee);
+          transition: width 0.4s;
+        }
+        .evb {
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          height: 100% !important;
+          width: 50%;
+          border-radius: 3px 0 0 3px;
+          background: linear-gradient(to left, #444, #1a1a1a);
+          transition: width 0.4s;
+        }
+        .evmid {
+          left: 50%;
+          top: 0;
+          bottom: 0;
+          right: auto;
+          width: 1px;
+          height: auto;
+        }
+        .evlbl {
+          font-size: 0.42rem;
+        }
+        .evsc {
+          font-size: 0.5rem;
+          min-width: 22px;
+          text-align: center;
+        }
+
+        /* hide right panel entirely on mobile */
+        .rpanel {
+          display: none;
+        }
+
+        /* center: fill all space between evbar and mbar */
+        .center {
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2px 0;
+          gap: 1px;
+          overflow: hidden;
+          width: 100%;
+        }
+
+        /* board size: fill width, but leave room for pinfos + mbar */
+        /* header≈32px evbar≈18px pinfo×2≈28px gaps≈6px mbar≈52px = ~136px overhead */
+        :root {
+          --lbl: 14px;
+        }
+        .board {
+          --bsize: min(100vw, calc(100dvh - 138px));
+          --sq: calc((var(--bsize) - var(--lbl) * 2 - 4px) / 8);
+          border-width: 1px;
+          box-shadow: none;
+        }
+
+        /* player info: match board width */
+        .pinfo {
+          width: calc(var(--sq) * 8 + var(--lbl) * 2 + 4px);
+          max-width: calc(100vw - 4px);
+          padding: 1px 5px;
+          flex-shrink: 0;
+        }
+        .pnm {
+          font-size: 0.52rem;
+        }
+        .caps {
+          font-size: 0.58rem;
+          max-width: 100px;
+        }
+        .psc {
+          font-size: 0.5rem;
+        }
+        .timer {
+          font-size: 0.72rem;
+          min-width: 34px;
+        }
+        .blbl {
+          font-size: 0.52rem;
+        }
+
+        /* mobile bottom bar */
+        #mbar {
+          display: flex;
+          flex-shrink: 0;
+        }
+
+        /* toast: centered */
+        .toast {
+          bottom: auto;
+          top: 50%;
+          right: 50%;
+          min-width: 160px;
+          transform: translate(50%, -50%) translateY(14px);
+        }
+        .toast.on {
+          transform: translate(50%, -50%) translateY(0);
+        }
+
+        /* lobby fits small screens */
+        .lbox {
+          padding: 14px 12px;
+          gap: 8px;
+          width: min(400px, 95vw);
+        }
+        .lplayer {
+          min-width: 70px;
+          padding: 6px 8px;
+        }
+      }
+
+      @media (max-width: 380px) {
+        :root {
+          --lbl: 12px;
+        }
+      }
+      /* ── LOADING SCREEN ── */
+      #loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: #0d0d0f;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        transition:
+          opacity 0.5s ease,
+          visibility 0.5s ease;
+      }
+      #loader.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .ld-icon {
+        position: relative;
+        width: 72px;
+        height: 72px;
+        background: linear-gradient(145deg, #1e1e24, #141416);
+        border-radius: 16px;
+        border: 1px solid #2a2a32;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          0 0 40px rgba(201, 168, 76, 0.25),
+          0 8px 32px rgba(0, 0, 0, 0.8);
+        animation: ld-pulse 1.8s ease-in-out infinite;
+      }
+      .ld-icon::before {
+        content: "♛";
+        font-size: 44px;
+        color: #c9a84c;
+        filter: drop-shadow(0 0 8px rgba(201, 168, 76, 0.6));
+        line-height: 1;
+      }
+      @keyframes ld-pulse {
+        0%,
+        100% {
+          box-shadow:
+            0 0 30px rgba(201, 168, 76, 0.2),
+            0 8px 32px rgba(0, 0, 0, 0.8);
+          transform: translateY(0);
+        }
+        50% {
+          box-shadow:
+            0 0 55px rgba(201, 168, 76, 0.45),
+            0 12px 40px rgba(0, 0, 0, 0.8);
+          transform: translateY(-3px);
+        }
+      }
+
+      .ld-title {
+        font-family: "Cinzel", serif;
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: #c9a84c;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .ld-sub {
+        font-family: "Crimson Pro", serif;
+        font-size: 0.72rem;
+        color: #7a7060;
+        letter-spacing: 0.08em;
+        margin-top: -14px;
+      }
+
+      .ld-bar {
+        width: 160px;
+        height: 2px;
+        background: #1a1a1e;
+        border-radius: 1px;
+        overflow: hidden;
+        border: 1px solid #2a2a32;
+      }
+      .ld-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(to right, #7a5c1e, #c9a84c, #f0d080);
+        border-radius: 1px;
+        animation: ld-load 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      @keyframes ld-load {
+        0% {
+          width: 0%;
+        }
+        60% {
+          width: 75%;
+        }
+        85% {
+          width: 92%;
+        }
+        100% {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">Control Chess <em>variant</em></div>
+      <div class="hright">
+        <span class="htip">❄ freeze · 🚫 no same-adj · ⚔ no same-capture</span>
+        <button class="hbtn" id="mOnlineBtn" style="display: none">
+          🌐 Online
+        </button>
+        <button class="hbtn gold" id="onlineBtn">🌐 Play Online</button>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <!-- EVAL BAR -->
+      <!-- CENTER -->
+      <div class="center">
+        <div class="pinfo" id="pinfoTop">
+          <div style="display: flex; align-items: center; gap: 5px">
+            <span>♟</span>
+            <div>
+              <div class="pnm" id="pnmTop">Bot (Black)</div>
+              <div class="caps" id="capW"></div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div class="timer" id="timerTop">10:00</div>
+            <div class="psc" id="scB"></div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0; flex-shrink: 0">
+          <div class="evbar" id="evbar">
+            <div class="evtrack" id="evtrack">
+              <div class="evb" id="evB" style="height: 50%"></div>
+              <div class="evw" id="evW" style="height: 50%"></div>
+              <div class="evmid"></div>
+              <div class="evlbl-b" id="evLblB"></div>
+              <div class="evlbl-w" id="evLblW"></div>
+            </div>
+            <div class="evsc" id="evSc">+0.0</div>
+          </div>
+          <div class="bwrap" id="bwrap">
+            <div class="b-top" id="labTop"></div>
+            <div class="b-mid">
+              <div class="b-left" id="labLeft"></div>
+              <div class="board" id="board"></div>
+              <svg
+                id="drawSvg"
+                style="
+                  position: absolute;
+                  inset: 0;
+                  width: 100%;
+                  height: 100%;
+                  pointer-events: none;
+                  z-index: 10;
+                  overflow: visible;
+                "
+              ></svg>
+              <div class="b-right" id="labRight"></div>
+            </div>
+            <div class="b-bot" id="labBot"></div>
+          </div>
+        </div>
+        <!-- end board+evbar row -->
+
+        <div class="pinfo" id="pinfoBot">
+          <div style="display: flex; align-items: center; gap: 5px">
+            <span>♙</span>
+            <div>
+              <div class="pnm" id="pnmBot">You (White)</div>
+              <div class="caps" id="capB"></div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div class="timer" id="timerBot">10:00</div>
+            <div class="psc" id="scW"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="rpanel">
+        <div class="card">
+          <div class="chdr" id="hS">⚔ Status <i class="arr">▼</i></div>
+          <div class="cbody" id="bS">
+            <div class="sbody" id="statusEl"></div>
+            <div class="thk" id="thkEl">
+              <div class="d"></div>
+              <div class="d"></div>
+              <div class="d"></div>
+              <span>Thinking…</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chdr" id="hR">★ Move Quality <i class="arr">▼</i></div>
+          <div class="cbody" id="bR">
+            <div class="rbody" id="ratingEl">
+              <span style="color: var(--dim); font-size: 0.7rem"
+                >— make a move —</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chdr" id="hM">♟ History <i class="arr">▼</i></div>
+          <div class="cbody" id="bM">
+            <div class="mbody" id="movesEl"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chdr" id="hB">🤖 Bot Level <i class="arr">▼</i></div>
+          <div class="cbody" id="bB">
+            <div class="dwrap">
+              <button class="lb" data-l="1">Trivial</button>
+              <button class="lb on" data-l="2">Easy</button>
+              <button class="lb" data-l="3">Medium</button>
+              <button class="lb" data-l="4">Hard</button>
+              <button class="lb" data-l="5">Impossible</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chdr cl" id="hRu">📋 Rules <i class="arr">▼</i></div>
+          <div class="cbody cl" id="bRu">
+            <div class="rls">
+              <div class="rl">
+                <span class="ri">❄</span
+                ><span
+                  ><b>Freeze:</b> After your move, enemy pieces attacked by a
+                  higher-value piece of yours are frozen next turn. Kings &amp;
+                  pawns never freeze.
+                  <b>A frozen piece loses its own freezing power</b> until it is
+                  unfrozen.</span
+                >
+              </div>
+              <div class="rl">
+                <span class="ri">🚫</span
+                ><span
+                  ><b>No same-adj:</b> Pieces (not pawns/kings) can't land
+                  adjacent to same-type ally.</span
+                >
+              </div>
+              <div class="rl">
+                <span class="ri">½</span
+                ><span
+                  ><b>Draws:</b> Pat (brak ruchów), zgoda obu graczy, reguła 50
+                  ruchów (bez bicia/ruchu pionka), trzykrotne powtórzenie
+                  pozycji, niewystarczający materiał (np. K vs K, K+G vs K, K+S
+                  vs K).</span
+                >
+              </div>
+              <div class="rl">
+                <span class="ri">⚔</span
+                ><span
+                  ><b>No same-capture:</b> Can't capture same type. Exception:
+                  pawns can capture pawns.</span
+                >
+              </div>
+              <div class="rl">
+                <span class="ri">✓</span
+                ><span>Castling &amp; promotion OK. No en passant.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chdr" id="hV">👁 View Options <i class="arr">▼</i></div>
+          <div class="cbody" id="bV">
+            <div
+              class="dwrap"
+              style="flex-direction: column; gap: 4px; padding: 4px 0"
+            >
+              <label class="ltoggle" style="font-size: 0.72rem"
+                ><input type="checkbox" id="togEval" checked /> 📊 Eval
+                bar</label
+              >
+              <label class="ltoggle" style="font-size: 0.72rem"
+                ><input type="checkbox" id="togRating" checked /> ★ Move
+                ratings</label
+              >
+              <label class="ltoggle" style="font-size: 0.72rem"
+                ><input type="checkbox" id="togLocal" /> 👥 Local 2-player (same
+                screen)</label
+              >
+            </div>
+          </div>
+        </div>
+        <div class="brow">
+          <button class="btn bgd" id="newBtn">New Game</button>
+          <button class="btn bsc" id="flipBtn">Flip</button>
+        </div>
+        <div class="brow">
+          <button class="btn bsc" id="resignBtn">Resign</button>
+          <button class="btn bsc" id="drawBtn">Offer Draw</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOBILE BAR -->
+    <div id="mbar">
+      <!-- Row 1: status + eval -->
+      <div class="mr">
+        <span class="mst" id="mSt">Your turn</span>
+        <span class="mrt" id="mRt"></span>
+        <span class="mev" id="mEv">0.0</span>
+      </div>
+      <!-- Row 2: mode buttons + game actions -->
+      <div class="mr">
+        <button class="mbtn mgold" id="mOnline2">🌐</button>
+        <button class="mbtn" id="mLocal" title="Local 2-player">👥</button>
+        <div class="mthk" id="mThk">
+          <div class="d"></div>
+          <div class="d"></div>
+          <div class="d"></div>
+        </div>
+        <div class="mpls" id="mBotLvls">
+          <button class="mpl" data-l="1">Trivial</button>
+          <button class="mpl on" data-l="2">Easy</button>
+          <button class="mpl" data-l="3">Medium</button>
+          <button class="mpl" data-l="4">Hard</button>
+          <button class="mpl" data-l="5">Impossible</button>
+        </div>
+        <button class="mbtn" id="mFlip">⇄</button>
+        <button class="mbtn" id="mNew">New</button>
+        <button class="mbtn" id="mRes">Resign</button>
+        <button class="mbtn" id="mDrw">Draw?</button>
+      </div>
+    </div>
+
+    <!-- PROMO -->
+    <div class="modal" id="promoModal">
+      <div class="mbox">
+        <div class="mbt">Promote pawn</div>
+        <div style="display: flex; gap: 10px" id="promoBox"></div>
+      </div>
+    </div>
+
+    <!-- CONFIRM -->
+    <div class="modal" id="confModal">
+      <div class="mbox">
+        <div class="mbt" id="cfTi"></div>
+        <div class="mbs" id="cfSu"></div>
+        <div class="mbbs">
+          <button class="mbb y" id="cfYes">Yes</button>
+          <button class="mbb n" id="cfNo">No</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+      <div class="tti" id="tTi"></div>
+      <div class="tsu" id="tSu"></div>
+      <div class="tbtnrow">
+        <button class="tbtn" id="tNew">New Game</button>
+        <button class="tbtn sec" id="tRematch" style="display: none">
+          ⇄ Rematch
+        </button>
+      </div>
+    </div>
+
+    <!-- LOBBY -->
+    <div class="lobby" id="lobby">
+      <div class="lbox">
+        <div class="ltitle">🌐 Play Online</div>
+
+        <div class="lsec">
+          <div class="llabel">Your Name</div>
+          <input
+            class="linput"
+            id="lobbyName"
+            placeholder="Player"
+            maxlength="20"
+          />
+        </div>
+
+        <div class="lsec" id="lOptsSec">
+          <div class="llabel">Visibility options (host decides)</div>
+          <div class="lopts" style="margin-top: 4px">
+            <label class="ltoggle"
+              ><input type="checkbox" id="optEval" checked /> 📊 Eval bar</label
+            >
+            <label class="ltoggle"
+              ><input type="checkbox" id="optRating" checked /> ★ Move
+              ratings</label
+            >
+          </div>
+        </div>
+
+        <div class="lplayers">
+          <div class="lplayer joined" id="lpHost">
+            <div class="lpnm" id="lpHostNm">You</div>
+            <div class="lpst">Host ♔</div>
+          </div>
+          <div class="lvs">vs</div>
+          <div class="lplayer" id="lpGuest">
+            <div class="lpnm" id="lpGuestNm">Waiting…</div>
+            <div class="lpst" id="lpGuestSt">No one yet</div>
+            <button class="lkick" id="lKick" style="display: none">
+              ✕ Kick
+            </button>
+          </div>
+        </div>
+
+        <div class="lsec" id="lLinkSec" style="display: none">
+          <div class="llabel" id="lLinkLabel">
+            🔗 Invite link — click to copy & send to friend
+          </div>
+          <div class="llink" id="lobbyLink"></div>
+          <div
+            style="font-size: 0.6rem; color: var(--grn); margin-top: 2px"
+            id="lCopyMsg"
+          ></div>
+        </div>
+
+        <div class="lsec" id="lTimeSec" style="display: none">
+          <div class="llabel" style="text-align: center">⏱ Time Control</div>
+          <div class="tpicker" id="tPicker"></div>
+        </div>
+
+        <div class="lmsg" id="lMsg"></div>
+
+        <div class="lbtnrow">
+          <button class="btn bgd" id="lStart" style="display: none; flex: 1">
+            ▶ Start Game
+          </button>
+          <button class="btn bsc" id="lClose" style="flex: 1">✕ Close</button>
+        </div>
+        <div class="lcstat" id="lCStat"></div>
+      </div>
+    </div>
+
+    <script>
+      // ═══════════════════════════════════════
+      // CHESS ENGINE
+      // ═══════════════════════════════════════
+      const SYM = {
+        wK: "♔",
+        wQ: "♕",
+        wR: "♖",
+        wB: "♗",
+        wN: "♘",
+        wP: "♙",
+        bK: "♚",
+        bQ: "♛",
+        bR: "♜",
+        bB: "♝",
+        bN: "♞",
+        bP: "♟",
+      };
+      const VAL = { K: 20000, Q: 900, R: 500, B: 330, N: 320, P: 100 };
+      const PST = {
+        P: [
+          0, 0, 0, 0, 0, 0, 0, 0, 50, 50, 50, 50, 50, 50, 50, 50, 10, 10, 20,
+          30, 30, 20, 10, 10, 5, 5, 10, 25, 25, 10, 5, 5, 0, 0, 0, 20, 20, 0, 0,
+          0, 5, -5, -10, 0, 0, -10, -5, 5, 5, 10, 10, -20, -20, 10, 10, 5, 0, 0,
+          0, 0, 0, 0, 0, 0,
+        ],
+        N: [
+          -50, -40, -30, -30, -30, -30, -40, -50, -40, -20, 0, 0, 0, 0, -20,
+          -40, -30, 0, 10, 15, 15, 10, 0, -30, -30, 5, 15, 20, 20, 15, 5, -30,
+          -30, 0, 15, 20, 20, 15, 0, -30, -30, 5, 10, 15, 15, 10, 5, -30, -40,
+          -20, 0, 5, 5, 0, -20, -40, -50, -40, -30, -30, -30, -30, -40, -50,
+        ],
+        B: [
+          -20, -10, -10, -10, -10, -10, -10, -20, -10, 0, 0, 0, 0, 0, 0, -10,
+          -10, 0, 5, 10, 10, 5, 0, -10, -10, 5, 5, 10, 10, 5, 5, -10, -10, 0,
+          10, 10, 10, 10, 0, -10, -10, 10, 10, 10, 10, 10, 10, -10, -10, 5, 0,
+          0, 0, 0, 5, -10, -20, -10, -10, -10, -10, -10, -10, -20,
+        ],
+        R: [
+          0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 10, 10, 10, 10, 10, 5, -5, 0, 0, 0, 0,
+          0, 0, -5, -5, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, -5, -5, 0,
+          0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, -5, 0, 0, 0, 5, 5, 0, 0, 0,
+        ],
+        Q: [
+          -20, -10, -10, -5, -5, -10, -10, -20, -10, 0, 0, 0, 0, 0, 0, -10, -10,
+          0, 5, 5, 5, 5, 0, -10, -5, 0, 5, 5, 5, 5, 0, -5, 0, 0, 5, 5, 5, 5, 0,
+          -5, -10, 5, 5, 5, 5, 5, 0, -10, -10, 0, 5, 0, 0, 0, 0, -10, -20, -10,
+          -10, -5, -5, -10, -10, -20,
+        ],
+        K: [
+          -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -40,
+          -40, -30, -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50,
+          -50, -40, -40, -30, -20, -30, -30, -40, -40, -30, -30, -20, -10, -20,
+          -20, -20, -20, -20, -20, -10, 20, 20, 0, 0, 0, 0, 20, 20, 20, 30, 10,
+          0, 0, 10, 30, 20,
+        ],
+      };
+      const FILES = "abcdefgh",
+        RANKS = "87654321";
+      const RTNG = [
+        { l: "Brilliant!!", s: "!!", c: "br", mn: 200 },
+        { l: "Great!", s: "!", c: "gr", mn: 80 },
+        { l: "Best", s: "★", c: "be", mn: 30 },
+        { l: "Excellent", s: "✓", c: "ex", mn: 10 },
+        { l: "Good", s: "·", c: "go", mn: 0 },
+        { l: "Okay", s: "○", c: "ok", mn: -15 },
+        { l: "Inaccuracy", s: "?!", c: "in", mn: -40 },
+        { l: "Mistake", s: "?", c: "mi", mn: -100 },
+        { l: "Blunder", s: "??", c: "bl", mn: -200 },
+        { l: "Catastrophe", s: "???", c: "ct", mn: -9999 },
+      ];
+
+      const cp = (b) => b.map((r) => [...r]);
+      const opp = (c) => (c === "w" ? "b" : "w");
+
+      function adj8(r, c) {
+        const a = [];
+        for (let dr = -1; dr <= 1; dr++)
+          for (let dc = -1; dc <= 1; dc++)
+            if (dr || dc) {
+              const nr = r + dr,
+                nc = c + dc;
+              if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) a.push([nr, nc]);
+            }
+        return a;
+      }
+      function adjOk(brd, tr, tc, type) {
+        if (type === "P" || type === "K") return true;
+        for (const [r, c] of adj8(tr, tc)) {
+          const n = brd[r][c];
+          if (n && n[1] === type) return false;
+        }
+        return true;
+      }
+      function atkSet(brd, col) {
+        const s = new Set();
+        for (let r = 0; r < 8; r++)
+          for (let c = 0; c < 8; c++) {
+            const p = brd[r][c];
+            if (!p || p[0] !== col) continue;
+            const t = p[1];
+            if (t === "P") {
+              const d = col === "w" ? -1 : 1;
+              for (const dc of [-1, 1]) {
+                const nr = r + d,
+                  nc = c + dc;
+                if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) s.add(nr * 8 + nc);
+              }
+            } else if (t === "N") {
+              for (const [dr, dc] of [
+                [2, 1],
+                [2, -1],
+                [-2, 1],
+                [-2, -1],
+                [1, 2],
+                [1, -2],
+                [-1, 2],
+                [-1, -2],
+              ]) {
+                const nr = r + dr,
+                  nc = c + dc;
+                if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) s.add(nr * 8 + nc);
+              }
+            } else if (t === "K") {
+              for (const [nr, nc] of adj8(r, c)) s.add(nr * 8 + nc);
+            } else {
+              const D =
+                t === "B"
+                  ? [
+                      [1, 1],
+                      [1, -1],
+                      [-1, 1],
+                      [-1, -1],
+                    ]
+                  : t === "R"
+                    ? [
+                        [1, 0],
+                        [-1, 0],
+                        [0, 1],
+                        [0, -1],
+                      ]
+                    : [
+                        [1, 1],
+                        [1, -1],
+                        [-1, 1],
+                        [-1, -1],
+                        [1, 0],
+                        [-1, 0],
+                        [0, 1],
+                        [0, -1],
+                      ];
+              for (const [dr, dc] of D) {
+                let nr = r + dr,
+                  nc = c + dc;
+                while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+                  s.add(nr * 8 + nc);
+                  if (brd[nr][nc]) break;
+                  nr += dr;
+                  nc += dc;
+                }
+              }
+            }
+          }
+        return s;
+      }
+      function inCheck(brd, col) {
+        const a = atkSet(brd, opp(col));
+        for (let r = 0; r < 8; r++)
+          for (let c = 0; c < 8; c++)
+            if (brd[r][c] === col + "K" && a.has(r * 8 + c)) return true;
+        return false;
+      }
+      function reach(brd, ar, ac, tr, tc, type) {
+        if (type === "P") {
+          const d = brd[ar][ac][0] === "w" ? -1 : 1;
+          return tr === ar + d && Math.abs(tc - ac) === 1;
+        }
+        if (type === "N") {
+          const dr = Math.abs(tr - ar),
+            dc = Math.abs(tc - ac);
+          return (dr === 2 && dc === 1) || (dr === 1 && dc === 2);
+        }
+        if (type === "K")
+          return (
+            Math.abs(tr - ar) <= 1 &&
+            Math.abs(tc - ac) <= 1 &&
+            (tr !== ar || tc !== ac)
+          );
+        if (type === "B") {
+          if (Math.abs(tr - ar) !== Math.abs(tc - ac)) return false;
+          const dr = Math.sign(tr - ar),
+            dc = Math.sign(tc - ac);
+          let r = ar + dr,
+            c = ac + dc;
+          while (r !== tr || c !== tc) {
+            if (brd[r][c]) return false;
+            r += dr;
+            c += dc;
+          }
+          return true;
+        }
+        if (type === "R") {
+          if (tr !== ar && tc !== ac) return false;
+          const dr = Math.sign(tr - ar),
+            dc = Math.sign(tc - ac);
+          let r = ar + dr,
+            c = ac + dc;
+          while (r !== tr || c !== tc) {
+            if (brd[r][c]) return false;
+            r += dr;
+            c += dc;
+          }
+          return true;
+        }
+        if (type === "Q")
+          return (
+            reach(brd, ar, ac, tr, tc, "B") || reach(brd, ar, ac, tr, tc, "R")
+          );
+        return false;
+      }
+      function frozenBy(brd, atkCol, prevFrzAtk) {
+        // prevFrzAtk: Set of squares where atkCol pieces were frozen last turn — they can't freeze others
+        const def = opp(atkCol),
+          res = [];
+        for (let tr = 0; tr < 8; tr++)
+          for (let tc = 0; tc < 8; tc++) {
+            const tgt = brd[tr][tc];
+            if (!tgt || tgt[0] !== def || tgt[1] === "K" || tgt[1] === "P")
+              continue;
+            const tgtVal = VAL[tgt[1]] || 0;
+            let best = 0;
+            for (let ar = 0; ar < 8; ar++)
+              for (let ac = 0; ac < 8; ac++) {
+                const a = brd[ar][ac];
+                if (
+                  !a ||
+                  a[0] !== atkCol ||
+                  a[1] === tgt[1] ||
+                  a[1] === "P" ||
+                  a[1] === "K"
+                )
+                  continue;
+                if (prevFrzAtk && prevFrzAtk.has(ar * 8 + ac)) continue; // frozen attacker can't freeze
+                const av = VAL[a[1]] || 0;
+                if (
+                  av > tgtVal &&
+                  reach(brd, ar, ac, tr, tc, a[1]) &&
+                  av > best
+                )
+                  best = av;
+              }
+            if (best > 0) res.push(tr * 8 + tc);
+          }
+        return res;
+      }
+      function calcFrz(brd, prevFrz) {
+        // byW = white pieces that freeze black; use prevFrz.byW (white was frozen) to exclude them
+        const prevFrzW = prevFrz ? new Set(prevFrz.byW) : null;
+        const prevFrzB = prevFrz ? new Set(prevFrz.byB) : null;
+        const byW = frozenBy(brd, "w", prevFrzW);
+        const byB = frozenBy(brd, "b", prevFrzB);
+        return { byW, byB, all: [...new Set([...byW, ...byB])] };
+      }
+      function movesFrom(brd, r, c, castl, frozenArr) {
+        const p = brd[r][c];
+        if (!p) return [];
+        const col = p[0],
+          type = p[1],
+          en = opp(col);
+        if (type !== "P" && type !== "K" && frozenArr.includes(r * 8 + c))
+          return [];
+        const mvs = [];
+        function push(tr, tc, flag) {
+          if (tr < 0 || tr >= 8 || tc < 0 || tc >= 8) return;
+          const tgt = brd[tr][tc];
+          if (tgt && tgt[0] === col) return;
+          if (tgt && tgt[1] === type && type !== "P") return;
+          const nb = cp(brd);
+          nb[tr][tc] = p;
+          nb[r][c] = null;
+          if (flag === "cs") {
+            nb[tr][5] = col + "R";
+            nb[tr][7] = null;
+          }
+          if (flag === "cl") {
+            nb[tr][3] = col + "R";
+            nb[tr][0] = null;
+          }
+          if (!adjOk(nb, tr, tc, type)) return;
+          if (inCheck(nb, col)) return;
+          mvs.push({ fr: r, fc: c, tr, tc, flag: flag || null });
+        }
+        if (type === "P") {
+          const d = col === "w" ? -1 : 1,
+            sR = col === "w" ? 6 : 1;
+          if (r + d >= 0 && r + d < 8 && !brd[r + d][c]) {
+            push(r + d, c, null);
+            if (r === sR && !brd[r + 2 * d][c]) push(r + 2 * d, c, null);
+          }
+          for (const dc of [-1, 1]) {
+            const nr = r + d,
+              nc = c + dc;
+            if (
+              nr >= 0 &&
+              nr < 8 &&
+              nc >= 0 &&
+              nc < 8 &&
+              brd[nr][nc] &&
+              brd[nr][nc][0] === en
+            )
+              push(nr, nc, null);
+          }
+          return mvs;
+        }
+        if (type === "N") {
+          for (const [dr, dc] of [
+            [2, 1],
+            [2, -1],
+            [-2, 1],
+            [-2, -1],
+            [1, 2],
+            [1, -2],
+            [-1, 2],
+            [-1, -2],
+          ])
+            push(r + dr, c + dc, null);
+          return mvs;
+        }
+        if (type === "K") {
+          for (const [nr, nc] of adj8(r, c)) push(nr, nc, null);
+          const rk = col === "w" ? 7 : 0;
+          if (r === rk && c === 4 && !inCheck(brd, col)) {
+            const ea = atkSet(brd, en);
+            if (
+              castl[col + "K"] &&
+              !brd[rk][5] &&
+              !brd[rk][6] &&
+              !ea.has(rk * 8 + 5) &&
+              !ea.has(rk * 8 + 6) &&
+              !frozenArr.includes(rk * 8 + 7)
+            ) {
+              const nb = cp(brd);
+              nb[rk][6] = p;
+              nb[rk][5] = col + "R";
+              nb[rk][7] = null;
+              nb[rk][4] = null;
+              if (!inCheck(nb, col))
+                mvs.push({ fr: r, fc: 4, tr: rk, tc: 6, flag: "cs" });
+            }
+            if (
+              castl[col + "Q"] &&
+              !brd[rk][3] &&
+              !brd[rk][2] &&
+              !brd[rk][1] &&
+              !ea.has(rk * 8 + 3) &&
+              !ea.has(rk * 8 + 2) &&
+              !frozenArr.includes(rk * 8 + 0)
+            ) {
+              const nb = cp(brd);
+              nb[rk][2] = p;
+              nb[rk][3] = col + "R";
+              nb[rk][0] = null;
+              nb[rk][4] = null;
+              if (!inCheck(nb, col))
+                mvs.push({ fr: r, fc: 4, tr: rk, tc: 2, flag: "cl" });
+            }
+          }
+          return mvs;
+        }
+        const D =
+          type === "B"
+            ? [
+                [1, 1],
+                [1, -1],
+                [-1, 1],
+                [-1, -1],
+              ]
+            : type === "R"
+              ? [
+                  [1, 0],
+                  [-1, 0],
+                  [0, 1],
+                  [0, -1],
+                ]
+              : [
+                  [1, 1],
+                  [1, -1],
+                  [-1, 1],
+                  [-1, -1],
+                  [1, 0],
+                  [-1, 0],
+                  [0, 1],
+                  [0, -1],
+                ];
+        for (const [dr, dc] of D) {
+          let nr = r + dr,
+            nc = c + dc;
+          while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+            const tgt = brd[nr][nc];
+            if (tgt) {
+              if (tgt[0] === en && tgt[1] !== type) push(nr, nc, null);
+              break;
+            }
+            push(nr, nc, null);
+            nr += dr;
+            nc += dc;
+          }
+        }
+        return mvs;
+      }
+      function allMoves(brd, col, castl, frz) {
+        const ms = [];
+        for (let r = 0; r < 8; r++)
+          for (let c = 0; c < 8; c++)
+            if (brd[r][c] && brd[r][c][0] === col)
+              ms.push(...movesFrom(brd, r, c, castl, frz));
+        return ms;
+      }
+      function applyMv(brd, mv, col) {
+        const { fr, fc, tr, tc, flag } = mv,
+          p = brd[fr][fc];
+        brd[tr][tc] = p;
+        brd[fr][fc] = null;
+        if (flag === "cs") {
+          brd[tr][5] = col + "R";
+          brd[tr][7] = null;
+        }
+        if (flag === "cl") {
+          brd[tr][3] = col + "R";
+          brd[tr][0] = null;
+        }
+        if (p === col + "P" && (tr === 0 || tr === 7)) brd[tr][tc] = col + "Q";
+      }
+      function evalBoard(brd) {
+        let s = 0;
+        for (let r = 0; r < 8; r++)
+          for (let c = 0; c < 8; c++) {
+            const p = brd[r][c];
+            if (!p) continue;
+            const col = p[0],
+              t = p[1],
+              idx = col === "w" ? r * 8 + c : (7 - r) * 8 + c;
+            s += (col === "w" ? 1 : -1) * (VAL[t] + ((PST[t] || [])[idx] || 0));
+          }
+        return s;
+      }
+      let _abNodes = 0;
+      function ab(brd, depth, alpha, beta, col, castl, frz, ply) {
+        _abNodes++;
+        if (_abNodes > 60000)
+          return col === "w" ? evalBoard(brd) : -evalBoard(brd);
+        if (depth <= 0) return col === "w" ? evalBoard(brd) : -evalBoard(brd);
+        const ms = allMoves(brd, col, castl, frz);
+        if (!ms.length) return inCheck(brd, col) ? -19000 + ply : 0;
+        ms.sort(
+          (a, b) =>
+            (brd[b.tr][b.tc] ? VAL[brd[b.tr][b.tc][1]] || 0 : 0) -
+            (brd[a.tr][a.tc] ? VAL[brd[a.tr][a.tc][1]] || 0 : 0),
+        );
+        let best = -Infinity;
+        for (const mv of ms) {
+          const nb = cp(brd),
+            nc = { ...castl },
+            p = brd[mv.fr][mv.fc];
+          if (p === "wK") {
+            nc.wK = false;
+            nc.wQ = false;
+          }
+          if (p === "bK") {
+            nc.bK = false;
+            nc.bQ = false;
+          }
+          applyMv(nb, mv, col);
+          const nf = calcFrz(nb);
+          const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
+          const sc = -ab(
+            nb,
+            depth - 1,
+            -beta,
+            -alpha,
+            opp(col),
+            nc,
+            nfrz,
+            ply + 1,
+          );
+          if (sc > best) best = sc;
+          if (sc > alpha) alpha = sc;
+          if (alpha >= beta) break;
+        }
+        return best;
+      }
+
+      // ═══════════════════════════════════════
+      // GAME STATE
+      // ═══════════════════════════════════════
+      let G = {},
+        botLevel = 2,
+        flipped = false;
+      let promoOk = null;
+      let animH = [],
+        animC = [],
+        animOn = false;
+      const DR = {
+        on: false,
+        ghost: null,
+        fr: -1,
+        fc: -1,
+        poss: [],
+        sx: 0,
+        sy: 0,
+        moved: false,
+      };
+      let tTimer = null,
+        tXY = null,
+        tMoved = false;
+      let mDown = null,
+        mXY = null;
+
+      // Online state
+      let NET = {
+        mode: "bot", // 'bot' | 'host' | 'guest'
+        peer: null,
+        conn: null,
+        myCol: "w", // which color I play
+        myName: "Player",
+        oppName: "Bot",
+        showEval: true,
+        showRating: true,
+        timeCtrl: null, // {base:ms, inc:ms}
+        timers: { w: 0, b: 0 }, // remaining ms
+        timerInterval: null,
+        lastTimestamp: null,
+        gameStarted: false,
+        rematchTime: null, // time control for rematch
+      };
+
+      // Time controls list
+      const TIME_CTRLS = [
+        { l: "1+0", base: 60000, inc: 0 },
+        { l: "1+1", base: 60000, inc: 1000 },
+        { l: "2+1", base: 120000, inc: 1000 },
+        { l: "3+0", base: 180000, inc: 0 },
+        { l: "3+2", base: 180000, inc: 2000 },
+        { l: "5+0", base: 300000, inc: 0 },
+        { l: "5+3", base: 300000, inc: 3000 },
+        { l: "10+0", base: 600000, inc: 0 },
+        { l: "10+5", base: 600000, inc: 5000 },
+        { l: "15+10", base: 900000, inc: 10000 },
+        { l: "30+0", base: 1800000, inc: 0 },
+        { l: "60+0", base: 3600000, inc: 0 },
+      ];
+      let selectedTC = null; // index into TIME_CTRLS
+
+      function formatTime(ms) {
+        if (ms < 0) ms = 0;
+        const s = Math.ceil(ms / 1000);
+        const m = Math.floor(s / 60),
+          ss = s % 60;
+        if (m >= 10) return m + ":" + (ss < 10 ? "0" : "") + ss;
+        return m + ":" + (ss < 10 ? "0" : "") + ss;
+      }
+
+      // ═══════════════════════════════════════
+      // NEW GAME
+      // ═══════════════════════════════════════
+      function newGame(tcOverride) {
+        stopAnim();
+        const bk = ["R", "N", "B", "Q", "K", "B", "N", "R"];
+        const brd = Array.from({ length: 8 }, () => Array(8).fill(null));
+        for (let c = 0; c < 8; c++) {
+          brd[0][c] = "b" + bk[c];
+          brd[1][c] = "bP";
+          brd[6][c] = "wP";
+          brd[7][c] = "w" + bk[c];
+        }
+        G = {
+          brd,
+          turn: "w",
+          sel: null,
+          poss: [],
+          hist: [],
+          capW: [],
+          capB: [],
+          castl: { wK: true, wQ: true, bK: true, bQ: true },
+          frz: calcFrz(brd, null),
+          prevFrz: null,
+          over: false,
+          lastMv: null,
+          prevEval: 0,
+          halfMove: 0,
+          posHist: [],
+        };
+        document.getElementById("toast").classList.remove("on");
+        document.getElementById("movesEl").innerHTML = "";
+        document.getElementById("ratingEl").innerHTML =
+          '<span style="color:var(--dim);font-size:.7rem">— make a move —</span>';
+        document.getElementById("mRt").innerHTML = "";
+
+        // timers
+        stopTimers();
+        const tc = tcOverride || NET.timeCtrl;
+        if (tc) {
+          NET.timers = { w: tc.base, b: tc.base };
+          showTimers(true);
+          updateTimerDisplay();
+          if (NET.mode === "bot") startTurnTimer("w");
+          // in online mode, host sends start signal
+        } else {
+          showTimers(false);
+        }
+
+        setEval(0);
+        // eval/rating visibility
+        const showEv = NET.showEval;
+        const showRt = NET.showRating;
+        document.getElementById("evbar").style.display = showEv ? "" : "none";
+        const rCard = document.getElementById("bR");
+        if (rCard && rCard.parentElement)
+          rCard.parentElement.style.display = showRt ? "" : "none";
+
+        // Local mode always starts from white's perspective
+        if (NET.mode === "local") flipped = false;
+        render();
+        updStatus();
+        updCaps();
+      }
+
+      // ═══════════════════════════════════════
+      // TIMERS
+      // ═══════════════════════════════════════
+      function showTimers(on) {
+        const tt = document.getElementById("timerTop"),
+          tb = document.getElementById("timerBot");
+        if (tt) tt.style.display = on ? "block" : "none";
+        if (tb) tb.style.display = on ? "block" : "none";
+      }
+      function stopTimers() {
+        clearInterval(NET.timerInterval);
+        NET.timerInterval = null;
+        NET.lastTimestamp = null;
+      }
+      function startTurnTimer(col) {
+        stopTimers();
+        if (!NET.timeCtrl) return;
+        NET.lastTimestamp = Date.now();
+        NET.timerInterval = setInterval(() => tickTimer(col), 100);
+      }
+      function tickTimer(col) {
+        const now = Date.now(),
+          dt = now - NET.lastTimestamp;
+        NET.lastTimestamp = now;
+        NET.timers[col] = Math.max(0, NET.timers[col] - dt);
+        updateTimerDisplay();
+        if (NET.timers[col] <= 0) {
+          stopTimers();
+          endGame("timeout", opp(col));
+        }
+      }
+      function updateTimerDisplay() {
+        const myCol = NET.myCol || "w",
+          opCol = opp(myCol);
+        const tb = document.getElementById("timerBot"),
+          tt = document.getElementById("timerTop");
+        if (tb) {
+          tb.textContent = formatTime(NET.timers[myCol] || 0);
+          tb.classList.toggle("active", G.turn === myCol && !G.over);
+          tb.classList.toggle("low", (NET.timers[myCol] || 0) < 10000);
+        }
+        if (tt) {
+          tt.textContent = formatTime(NET.timers[opCol] || 0);
+          tt.classList.toggle("active", G.turn === opCol && !G.over);
+          tt.classList.toggle("low", (NET.timers[opCol] || 0) < 10000);
+        }
+        if (document.getElementById("mSt")) updMobile();
+      }
+
+      // ═══════════════════════════════════════
+      // PLAY MOVE
+      // ═══════════════════════════════════════
+      async function playMove(mv, isBot, fromNet) {
+        const { fr, fc, tr, tc, flag } = mv;
+        const piece = G.brd[fr][fc],
+          cap = G.brd[tr][tc],
+          oldEv = G.prevEval;
+        const note = buildNote(G.brd, mv, G.turn);
+
+        // Stop timer for this side, add increment
+        if (NET.timeCtrl) {
+          stopTimers();
+          if (NET.timeCtrl.inc)
+            NET.timers[G.turn] = Math.min(
+              NET.timers[G.turn] + NET.timeCtrl.inc,
+              NET.timeCtrl.base * 2,
+            );
+        }
+
+        if (piece === "wK") {
+          G.castl.wK = false;
+          G.castl.wQ = false;
+        }
+        if (piece === "bK") {
+          G.castl.bK = false;
+          G.castl.bQ = false;
+        }
+        if (fr === 7 && fc === 7) G.castl.wK = false;
+        if (fr === 7 && fc === 0) G.castl.wQ = false;
+        if (fr === 0 && fc === 7) G.castl.bK = false;
+        if (fr === 0 && fc === 0) G.castl.bQ = false;
+
+        G.brd[tr][tc] = piece;
+        G.brd[fr][fc] = null;
+        if (flag === "cs") {
+          G.brd[tr][5] = G.turn + "R";
+          G.brd[tr][7] = null;
+        }
+        if (flag === "cl") {
+          G.brd[tr][3] = G.turn + "R";
+          G.brd[tr][0] = null;
+        }
+        if (cap) (G.turn === "w" ? G.capW : G.capB).push(cap);
+
+        // Promotion
+        if (piece === "wP" && tr === 0) {
+          const q = isBot || fromNet ? "wQ" : await doPromo("w");
+          G.brd[tr][tc] = q;
+          if (NET.mode === "host" && !fromNet)
+            netSend({ type: "promo", piece: q });
+        }
+        if (piece === "bP" && tr === 7) {
+          const q = isBot || fromNet ? "bQ" : await doPromo("b");
+          G.brd[tr][tc] = q;
+          if (NET.mode === "guest" && !fromNet)
+            netSend({ type: "promo", piece: q });
+        }
+
+        G.lastMv = { fr, fc, tr, tc };
+        G.prevFrz = G.frz;
+        G.frz = calcFrz(G.brd, G.prevFrz);
+        const newEv = evalBoard(G.brd);
+        G.prevEval = newEv;
+
+        // Rating — always compute, show based on settings
+        const delta = G.turn === "w" ? newEv - oldEv : oldEv - newEv;
+        let ri = RTNG.length - 1;
+        for (let i = 0; i < RTNG.length; i++)
+          if (delta >= RTNG[i].mn) {
+            ri = i;
+            break;
+          }
+        const showRt = NET.showRating;
+        if (showRt) {
+          const R = RTNG[ri];
+          let html = `<span class="${R.c}">${R.s} ${R.l}</span>`;
+          if (inCheck(G.brd, opp(G.turn)))
+            html += ` <span class="ck">Check!</span>`;
+          // In online: show your rating at bottom, opponent at top
+          if (NET.mode !== "bot") {
+            const isMyMove = G.turn === NET.myCol;
+            // store both; show relevant
+            html = isMyMove ? `<b>You:</b> ${html}` : `<b>Opp:</b> ${html}`;
+          }
+          document.getElementById("ratingEl").innerHTML = html;
+          document.getElementById("mRt").innerHTML =
+            `<span class="${RTNG[ri].c}">${RTNG[ri].s}</span>`;
+        }
+
+        const showEv = NET.showEval;
+        if (showEv) setEval(newEv);
+
+        addNote(note, G.turn, G.hist.length, ri, showRt);
+        G.hist.push(mv);
+        G.turn = opp(G.turn);
+        // 50-move rule counter (reset on pawn move or capture)
+        const wasCapOrPawn = cap || piece[1] === "P";
+        G.halfMove = wasCapOrPawn ? 0 : G.halfMove + 1;
+
+        // Position hash for repetition detection
+        const posKey =
+          G.brd.map((r) => r.join(",")).join("|") +
+          ";" +
+          G.turn +
+          ";" +
+          JSON.stringify(G.castl);
+        G.posHist.push(posKey);
+        const repCount = G.posHist.filter((k) => k === posKey).length;
+
+        // Send move over network
+        if (!fromNet && NET.mode !== "bot" && NET.conn) {
+          netSend({ type: "move", mv, timers: NET.timers, castl: G.castl });
+        }
+
+        // Draw checks
+        if (G.halfMove >= 100) {
+          endGame("fifty", "");
+          return;
+        }
+        if (repCount >= 3) {
+          endGame("repetition", "");
+          return;
+        }
+        if (isInsufficientMaterial(G.brd)) {
+          endGame("insufficient", "");
+          return;
+        }
+
+        const nextFrz = G.turn === "w" ? G.frz.byB : G.frz.byW;
+        const nextMs = allMoves(G.brd, G.turn, G.castl, nextFrz);
+        if (!nextMs.length) {
+          endGame(
+            inCheck(G.brd, G.turn) ? "checkmate" : "stalemate",
+            opp(G.turn),
+          );
+          return;
+        }
+
+        // Local 2P: auto-flip board so current player always sees their side
+        if (NET.mode === "local" && !G.over) flipped = G.turn === "b";
+
+        // Play sound
+        {
+          const _cap2 = G.capW.length + G.capB.length;
+          const _prevCap = _cap2 - (cap ? 1 : 0);
+          const _isCastle = flag === "cs" || flag === "cl";
+          if (_isCastle) playSound("castle");
+          else if (cap) playSound("capture");
+          else playSound("move");
+          // check sound
+          const _nextFrz2 = G.turn === "w" ? G.frz.byB : G.frz.byW;
+          if (inCheck(G.brd, G.turn)) playSound("check");
+        }
+        render();
+        updStatus();
+        updCaps();
+
+        // Start opponent timer
+        if (NET.timeCtrl && !G.over) startTurnTimer(G.turn);
+
+        if (NET.mode === "bot" && G.turn === "b" && !G.over) {
+          document.getElementById("thkEl").classList.add("on");
+          document.getElementById("mThk").classList.add("on");
+          const delay = [300, 500, 700, 1000, 1400][botLevel - 1];
+          setTimeout(runBot, delay);
+        }
+      }
+
+      // ═══════════════════════════════════════
+      // PROMOTION
+      // ═══════════════════════════════════════
+      function doPromo(col) {
+        return new Promise((res) => {
+          promoOk = res;
+          const pcs =
+            col === "w" ? ["wQ", "wR", "wB", "wN"] : ["bQ", "bR", "bB", "bN"];
+          const box = document.getElementById("promoBox");
+          box.innerHTML = "";
+          pcs.forEach((pc) => {
+            const d = document.createElement("div");
+            d.className = "pp";
+            d.textContent = SYM[pc];
+            d.style.color = col === "w" ? "#fff" : "#1a0a00";
+            d.addEventListener("click", () => {
+              document.getElementById("promoModal").classList.remove("on");
+              if (promoOk) {
+                promoOk(pc);
+                promoOk = null;
+              }
+            });
+            box.appendChild(d);
+          });
+          document.getElementById("promoModal").classList.add("on");
+        });
+      }
+
+      // ═══════════════════════════════════════
+      // BOT — async via setTimeout chunks (no Worker needed, never blocks UI)
+      // ═══════════════════════════════════════
+      let _botAbort = false;
+
+      function runBot() {
+        document.getElementById("thkEl").classList.add("on");
+        document.getElementById("mThk").classList.add("on");
+        _botAbort = false;
+        const delay = [150, 250, 400, 600, 900][botLevel - 1] || 300;
+        setTimeout(() => _botAsync(G.brd, G.castl, G.frz.byW, botLevel), delay);
+      }
+
+      function _botAsync(brd, castl, frzW, level) {
+        if (_botAbort || G.over || G.turn !== "b" || NET.mode !== "bot") return;
+
+        const ms = allMoves(brd, "b", castl, frzW);
+        if (!ms.length) {
+          postBotMove(null);
+          return;
+        }
+
+        // Levels 1-2: instant random/greedy, no search needed
+        if (level === 1) {
+          const nc = ms.filter((m) => !brd[m.tr][m.tc]);
+          const pool = nc.length && Math.random() < 0.85 ? nc : ms;
+          postBotMove(pool[Math.floor(Math.random() * pool.length)]);
+          return;
+        }
+        if (level === 2) {
+          let best = ms[Math.floor(Math.random() * ms.length)];
+          if (Math.random() > 0.55) {
+            let bsc = -Infinity;
+            for (const mv of ms) {
+              const cap = brd[mv.tr][mv.tc];
+              const sc = cap ? VAL[cap[1]] || 0 : Math.random() * 30 - 15;
+              if (sc > bsc) {
+                bsc = sc;
+                best = mv;
+              }
+            }
+          }
+          postBotMove(best);
+          return;
+        }
+
+        // Levels 3-5: search using chunked async alpha-beta
+        const depth = [0, 0, 0, 1, 2, 3][level] || 1;
+        const noise = [0, 0, 0, 0.06, 0.02, 0][level] || 0;
+        const timeLimit = [0, 0, 0, 350, 700, 1200][level] || 500;
+        const deadline = Date.now() + timeLimit;
+
+        // Sort moves: captures first
+        ms.sort(
+          (a, b) =>
+            (brd[b.tr][b.tc] ? VAL[brd[b.tr][b.tc][1]] || 0 : 0) -
+            (brd[a.tr][a.tc] ? VAL[brd[a.tr][a.tc][1]] || 0 : 0),
+        );
+
+        let bestMove = ms[0],
+          bestScore = -Infinity,
+          idx = 0;
+
+        function step() {
+          if (_botAbort) return;
+          // Process a chunk of moves per frame
+          const chunkEnd = Math.min(idx + 3, ms.length);
+          while (idx < chunkEnd) {
+            const mv = ms[idx++];
+            const nb = cp(brd),
+              nc = { ...castl },
+              p = brd[mv.fr][mv.fc];
+            if (p === "bK") {
+              nc.bK = false;
+              nc.bQ = false;
+            }
+            applyMv(nb, mv, "b");
+            const nf = calcFrz(nb);
+            let sc = -_abSync(
+              nb,
+              depth - 1,
+              -Infinity,
+              Infinity,
+              "w",
+              nc,
+              nf.byW,
+              1,
+              deadline,
+            );
+            if (noise) sc += (Math.random() * 2 - 1) * noise * 500;
+            if (sc > bestScore) {
+              bestScore = sc;
+              bestMove = mv;
+            }
+          }
+          if (idx >= ms.length || Date.now() > deadline) {
+            postBotMove(bestMove);
+          } else {
+            setTimeout(step, 0); // yield to browser, then continue
+          }
+        }
+        step();
+      }
+
+      function _abSync(
+        brd,
+        depth,
+        alpha,
+        beta,
+        col,
+        castl,
+        frz,
+        ply,
+        deadline,
+      ) {
+        if (Date.now() > deadline)
+          return evalBoard(brd) * (col === "w" ? 1 : -1);
+        if (depth <= 0) return evalBoard(brd) * (col === "w" ? 1 : -1);
+        const ms = allMoves(brd, col, castl, frz);
+        if (!ms.length) return inCheck(brd, col) ? -19000 + ply : 0;
+        ms.sort(
+          (a, b) =>
+            (brd[b.tr][b.tc] ? VAL[brd[b.tr][b.tc][1]] || 0 : 0) -
+            (brd[a.tr][a.tc] ? VAL[brd[a.tr][a.tc][1]] || 0 : 0),
+        );
+        let best = -Infinity;
+        for (const mv of ms) {
+          const nb = cp(brd),
+            nc = { ...castl },
+            p = brd[mv.fr][mv.fc];
+          if (p === "wK") {
+            nc.wK = false;
+            nc.wQ = false;
+          }
+          if (p === "bK") {
+            nc.bK = false;
+            nc.bQ = false;
+          }
+          applyMv(nb, mv, col);
+          const nf = calcFrz(nb);
+          const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
+          const sc = -_abSync(
+            nb,
+            depth - 1,
+            -beta,
+            -alpha,
+            opp(col),
+            nc,
+            nfrz,
+            ply + 1,
+            deadline,
+          );
+          if (sc > best) best = sc;
+          if (sc > alpha) alpha = sc;
+          if (alpha >= beta) break;
+        }
+        return best;
+      }
+
+      function postBotMove(mv) {
+        document.getElementById("thkEl").classList.remove("on");
+        document.getElementById("mThk").classList.remove("on");
+        if (mv && !G.over && G.turn === "b" && NET.mode === "bot")
+          playMove(mv, true, false);
+      }
+
+      // ═══════════════════════════════════════
+      // RENDER
+      // ═══════════════════════════════════════
+      function buildLabels() {
+        ["labTop", "labBot"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.innerHTML = "";
+          for (let i = 0; i < 8; i++) {
+            const fi = flipped ? 7 - i : i;
+            const d = document.createElement("div");
+            d.className = "blbl f";
+            d.textContent = FILES[fi];
+            el.appendChild(d);
+          }
+        });
+        ["labLeft", "labRight"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.innerHTML = "";
+          for (let i = 0; i < 8; i++) {
+            const ri = flipped ? i : 7 - i;
+            const d = document.createElement("div");
+            d.className = "blbl r";
+            d.textContent = RANKS[ri];
+            el.appendChild(d);
+          }
+        });
+      }
+      // Track last rendered state to skip full rebuild when only highlights change
+      let _lastFlipped = null;
+
+      function render() {
+        const bwrapEl = document.getElementById("bwrap");
+
+        // Flip: only add/remove class, no DOM rebuild needed
+        if (bwrapEl) {
+          const wasFlipped = bwrapEl.classList.contains("flipped");
+          if (flipped !== wasFlipped) {
+            if (flipped) bwrapEl.classList.add("flipped");
+            else bwrapEl.classList.remove("flipped");
+            buildLabels(); // labels change when flip direction changes
+          }
+        }
+
+        const boardEl = document.getElementById("board");
+        const frzSet = new Set(G.frz.all);
+        const possSet = new Set(G.poss.map((m) => m.tr * 8 + m.tc));
+        let kchk = -1;
+        if (inCheck(G.brd, G.turn))
+          for (let r = 0; r < 8; r++)
+            for (let c = 0; c < 8; c++)
+              if (G.brd[r][c] === G.turn + "K") kchk = r * 8 + c;
+        const myTurn = myTurnNow();
+
+        // If board already has 64 squares, update in-place (no innerHTML reset)
+        const squares = boardEl.children;
+        if (squares.length === 64) {
+          for (let dr = 0; dr < 8; dr++)
+            for (let dc = 0; dc < 8; dc++) {
+              const r = dr,
+                c = dc;
+              const sq = squares[dr * 8 + dc];
+              const k = r * 8 + c;
+              const p = G.brd[r][c];
+              // Recompute classes
+              let cls = "sq " + ((r + c) % 2 === 0 ? "lt" : "dk");
+              if (
+                G.lastMv &&
+                (k === G.lastMv.fr * 8 + G.lastMv.fc ||
+                  k === G.lastMv.tr * 8 + G.lastMv.tc)
+              )
+                cls += " lm";
+              if (G.sel && r === G.sel.r && c === G.sel.c) cls += " sel";
+              if (k === kchk) cls += " chk";
+              else if (frzSet.has(k)) cls += " frz";
+              if (possSet.has(k)) cls += p ? " cring" : " dot";
+              if (sq.className !== cls) sq.className = cls;
+              // Update piece content only if changed
+              const existing = sq.querySelector(".pc");
+              if (p) {
+                const sym = SYM[p];
+                const pcls = "pc " + (p[0] === "w" ? "pw" : "pb");
+                if (existing) {
+                  if (existing.textContent !== sym) existing.textContent = sym;
+                  if (existing.className !== pcls) existing.className = pcls;
+                } else {
+                  sq.innerHTML = "";
+                  const pe = document.createElement("span");
+                  pe.className = pcls;
+                  pe.textContent = sym;
+                  sq.appendChild(pe);
+                }
+                // Freeze icon
+                const hasFriz = !!sq.querySelector(".friz");
+                if (frzSet.has(k) && !hasFriz) {
+                  const fi = document.createElement("span");
+                  fi.className = "friz";
+                  fi.textContent = "❄";
+                  sq.appendChild(fi);
+                } else if (!frzSet.has(k) && hasFriz) {
+                  sq.querySelector(".friz").remove();
+                }
+              } else {
+                if (sq.innerHTML !== "") sq.innerHTML = "";
+              }
+              // Re-wire click (use dataset to avoid stale closure)
+              sq.onclick = () => handleClick(r, c, myTurnNow());
+            }
+        } else {
+          // First render: build from scratch
+          boardEl.innerHTML = "";
+          buildLabels();
+          for (let dr = 0; dr < 8; dr++)
+            for (let dc = 0; dc < 8; dc++) {
+              const r = dr,
+                c = dc;
+              const sq = document.createElement("div");
+              sq.className = "sq " + ((r + c) % 2 === 0 ? "lt" : "dk");
+              sq.dataset.r = r;
+              sq.dataset.c = c;
+              const k = r * 8 + c;
+              if (
+                G.lastMv &&
+                (k === G.lastMv.fr * 8 + G.lastMv.fc ||
+                  k === G.lastMv.tr * 8 + G.lastMv.tc)
+              )
+                sq.classList.add("lm");
+              if (G.sel && r === G.sel.r && c === G.sel.c)
+                sq.classList.add("sel");
+              if (k === kchk) sq.classList.add("chk");
+              else if (frzSet.has(k)) sq.classList.add("frz");
+              const p = G.brd[r][c];
+              if (possSet.has(k)) sq.classList.add(p ? "cring" : "dot");
+              if (p) {
+                const pe = document.createElement("span");
+                pe.className = "pc " + (p[0] === "w" ? "pw" : "pb");
+                pe.textContent = SYM[p];
+                sq.appendChild(pe);
+                if (frzSet.has(k)) {
+                  const fi = document.createElement("span");
+                  fi.className = "friz";
+                  fi.textContent = "❄";
+                  sq.appendChild(fi);
+                }
+              }
+              sq.onclick = () => handleClick(r, c, myTurnNow());
+              boardEl.appendChild(sq);
+            }
+        }
+
+        // Player names
+        const myCol = NET.myCol || "w",
+          opCol = opp(myCol);
+        let topName, botName;
+        if (NET.mode === "local") {
+          const topCol = flipped ? "w" : "b",
+            botCol = flipped ? "b" : "w";
+          topName =
+            (topCol === "w" ? "White" : "Black") +
+            (topCol === "w" ? " ♔" : " ♚");
+          botName =
+            (botCol === "w" ? "White" : "Black") +
+            (botCol === "w" ? " ♔" : " ♚");
+        } else if (NET.mode === "bot") {
+          topName = "Bot (Black)";
+          botName = "You (White)";
+        } else {
+          topName = (NET.oppName || "Opponent") + (opCol === "w" ? " ♔" : " ♚");
+          botName = (NET.myName || "You") + (myCol === "w" ? " ♔" : " ♚");
+        }
+        const pTop = document.getElementById("pnmTop");
+        if (pTop) pTop.textContent = topName;
+        const pBot = document.getElementById("pnmBot");
+        if (pBot) pBot.textContent = botName;
+
+        updMobile();
+      }
+
+      // ═══════════════════════════════════════
+      // CLICK
+      // ═══════════════════════════════════════
+      function handleClick(r, c, myTurn) {
+        if (G.over || !myTurn) return;
+        const myCol =
+          NET.mode === "bot" || NET.mode === "local" ? G.turn : NET.myCol;
+        const p = G.brd[r][c];
+        if (G.sel) {
+          const mv = G.poss.find((m) => m.tr === r && m.tc === c);
+          if (mv) {
+            G.sel = null;
+            G.poss = [];
+            playMove(mv, false, false);
+            return;
+          }
+          if (p && p[0] === myCol) {
+            const frz = myCol === "w" ? G.frz.byB : G.frz.byW;
+            const isFrz =
+              p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
+            if (!isFrz) {
+              G.sel = { r, c };
+              G.poss = movesFrom(G.brd, r, c, G.castl, frz);
+              render();
+              return;
+            }
+          }
+          G.sel = null;
+          G.poss = [];
+          render();
+          return;
+        }
+        if (p && p[0] === myCol) {
+          const frz = myCol === "w" ? G.frz.byB : G.frz.byW;
+          const isFrz = p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
+          if (isFrz) return;
+          G.sel = { r, c };
+          G.poss = movesFrom(G.brd, r, c, G.castl, frz);
+          render();
+        }
+      }
+
+      // ═══════════════════════════════════════
+      // DRAG & DROP
+      // ═══════════════════════════════════════
+      function getXY(e) {
+        if (e.touches && e.touches.length)
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        if (e.changedTouches && e.changedTouches.length)
+          return {
+            x: e.changedTouches[0].clientX,
+            y: e.changedTouches[0].clientY,
+          };
+        return { x: e.clientX, y: e.clientY };
+      }
+      function brdSq(x, y) {
+        const rect = document.getElementById("board").getBoundingClientRect();
+        let dc = Math.floor((x - rect.left) / (rect.width / 8));
+        let dr = Math.floor((y - rect.top) / (rect.height / 8));
+        if (dc < 0 || dc >= 8 || dr < 0 || dr >= 8) return null;
+        // CSS rotate(180deg) inverts both axes for flipped board
+        if (flipped) {
+          dr = 7 - dr;
+          dc = 7 - dc;
+        }
+        return { r: dr, c: dc };
+      }
+      function myTurnNow() {
+        if (G.over) return false;
+        if (NET.mode === "local") return true; // both players can always move their pieces
+        return NET.mode === "bot" ? G.turn === "w" : G.turn === NET.myCol;
+      }
+      function startDrag(r, c, x, y) {
+        if (!myTurnNow()) return false;
+        const myCol =
+          NET.mode === "bot" || NET.mode === "local" ? G.turn : NET.myCol;
+        const p = G.brd[r][c];
+        if (!p || p[0] !== myCol) return false;
+        const frz = myCol === "w" ? G.frz.byB : G.frz.byW;
+        const isFrz = p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
+        if (isFrz) return false;
+        const poss = movesFrom(G.brd, r, c, G.castl, frz);
+        const gh = document.createElement("span");
+        gh.className = "ghost";
+        gh.textContent = SYM[p];
+        gh.style.fontSize = "calc(var(--sq) * .85)";
+        gh.style.color = p[0] === "w" ? "#fff" : "#1a0a00";
+        gh.style.filter =
+          p[0] === "w"
+            ? "drop-shadow(0 0 1px #000) drop-shadow(1px 1px 0 #000)"
+            : "drop-shadow(0 0 1px rgba(255,255,255,.8))";
+        gh.style.left = x + "px";
+        gh.style.top = y + "px";
+        document.body.appendChild(gh);
+        DR.on = true;
+        DR.ghost = gh;
+        DR.fr = r;
+        DR.fc = c;
+        DR.poss = poss;
+        DR.sx = x;
+        DR.sy = y;
+        DR.moved = false;
+        G.sel = { r, c };
+        G.poss = poss;
+        render();
+        const sqEl = document.querySelector(
+          `.sq[data-r="${r}"][data-c="${c}"]`,
+        );
+        if (sqEl) {
+          const pe = sqEl.querySelector(".pc");
+          if (pe) pe.classList.add("dim");
+        }
+        return true;
+      }
+      function moveDrag(x, y) {
+        if (!DR.on) return;
+        DR.ghost.style.left = x + "px";
+        DR.ghost.style.top = y + "px";
+        if (Math.abs(x - DR.sx) > 4 || Math.abs(y - DR.sy) > 4) DR.moved = true;
+      }
+      function endDrag(x, y) {
+        if (!DR.on) return;
+        DR.on = false;
+        DR.ghost.remove();
+        DR.ghost = null;
+        const sq = brdSq(x, y);
+        const mv = sq && DR.poss.find((m) => m.tr === sq.r && m.tc === sq.c);
+        if (mv) {
+          G.sel = null;
+          G.poss = [];
+          playMove(mv, false, false);
+        } else if (DR.moved) {
+          G.sel = null;
+          G.poss = [];
+          render();
+        }
+      }
+      const boardEl = document.getElementById("board");
+      boardEl.addEventListener(
+        "mousedown",
+        (e) => {
+          if (e.button !== 0) return;
+          const sq = e.target.closest(".sq");
+          if (!sq) return;
+          e.preventDefault();
+          mDown = { r: parseInt(sq.dataset.r), c: parseInt(sq.dataset.c) };
+          mXY = { x: e.clientX, y: e.clientY };
+        },
+        { passive: false },
+      );
+      document.addEventListener("mousemove", (e) => {
+        if (DR.on) {
+          moveDrag(e.clientX, e.clientY);
+          return;
+        }
+        if (!mDown) return;
+        if (
+          Math.abs(e.clientX - mXY.x) > 6 ||
+          Math.abs(e.clientY - mXY.y) > 6
+        ) {
+          startDrag(mDown.r, mDown.c, e.clientX, e.clientY);
+          mDown = null;
+        }
+      });
+      document.addEventListener("mouseup", (e) => {
+        mDown = null;
+        if (DR.on) endDrag(e.clientX, e.clientY);
+      });
+      boardEl.addEventListener(
+        "touchstart",
+        (e) => {
+          const sq = e.target.closest(".sq");
+          if (!sq) return;
+          const { x, y } = getXY(e);
+          tXY = { x, y };
+          tMoved = false;
+          tTimer = setTimeout(() => {
+            if (tMoved) return;
+            if (navigator.vibrate) navigator.vibrate(20);
+            startDrag(parseInt(sq.dataset.r), parseInt(sq.dataset.c), x, y);
+          }, 150);
+        },
+        { passive: true },
+      );
+      document.addEventListener(
+        "touchmove",
+        (e) => {
+          const { x, y } = getXY(e);
+          if (tXY && (Math.abs(x - tXY.x) > 9 || Math.abs(y - tXY.y) > 9)) {
+            tMoved = true;
+            if (!DR.on) {
+              clearTimeout(tTimer);
+              tTimer = null;
+              return;
+            }
+          }
+          if (!DR.on) return;
+          e.preventDefault();
+          moveDrag(x, y);
+        },
+        { passive: false },
+      );
+      document.addEventListener(
+        "touchend",
+        (e) => {
+          clearTimeout(tTimer);
+          tTimer = null;
+          if (DR.on) {
+            const { x, y } = getXY(e);
+            e.preventDefault();
+            endDrag(x, y);
+          }
+          tXY = null;
+        },
+        { passive: false },
+      );
+      document.addEventListener("touchcancel", () => {
+        clearTimeout(tTimer);
+        tTimer = null;
+        if (DR.on) {
+          DR.on = false;
+          DR.ghost && DR.ghost.remove();
+          DR.ghost = null;
+          G.sel = null;
+          G.poss = [];
+          render();
+        }
+      });
+
+      // ═══════════════════════════════════════
+      // STATUS / CAPS / EVAL
+      // ═══════════════════════════════════════
+      function updStatus() {
+        if (G.over) {
+          document.getElementById("statusEl").innerHTML =
+            '<span style="color:var(--gold)">Game Over</span>';
+          return;
+        }
+        const chk = inCheck(G.brd, G.turn),
+          fz = G.frz.all.length;
+        const isMyTurn = myTurnNow();
+        const turnLabel =
+          NET.mode === "local"
+            ? (G.turn === "w" ? "White" : "Black") + "'s turn"
+            : isMyTurn
+              ? "Your turn"
+              : NET.mode === "bot"
+                ? "Bot (Black)"
+                : NET.oppName + "'s turn";
+        const dot =
+          G.turn === "w"
+            ? '<span class="tdot" style="background:#eee;border:2px solid #aaa"></span>'
+            : '<span class="tdot" style="background:#222;border:2px solid #555"></span>';
+        let h = dot + turnLabel;
+        if (chk)
+          h += ` <span style="color:var(--red);font-weight:700">CHECK!</span>`;
+        if (fz) h += ` <span style="color:var(--acc)">❄${fz}</span>`;
+        document.getElementById("statusEl").innerHTML = h;
+      }
+      function updMobile() {
+        const chk = inCheck(G.brd, G.turn),
+          fz = G.frz.all.length;
+        const isMyTurn = myTurnNow();
+        let st = G.over
+          ? "Game Over"
+          : NET.mode === "local"
+            ? (G.turn === "w" ? "White" : "Black") + "'s turn"
+            : isMyTurn
+              ? "Your turn"
+              : NET.mode === "bot"
+                ? "Bot ♟"
+                : NET.oppName;
+        if (!G.over && chk) st += " ⚠";
+        if (!G.over && fz) st += " ❄" + fz;
+        document.getElementById("mSt").textContent = st;
+        const ev = G.prevEval;
+        document.getElementById("mEv").textContent =
+          Math.abs(ev) > 9000
+            ? "M"
+            : (ev >= 0 ? "+" : "") + (ev / 100).toFixed(1);
+      }
+      function updCaps() {
+        const S = (x) => x.map((p) => SYM[p] || "").join("");
+        document.getElementById("capW").textContent = S(G.capW);
+        document.getElementById("capB").textContent = S(G.capB);
+        const wv = G.capW.reduce((s, p) => s + (VAL[p[1]] || 0), 0);
+        const bv = G.capB.reduce((s, p) => s + (VAL[p[1]] || 0), 0);
+        document.getElementById("scW").textContent =
+          wv > bv ? "+" + (wv - bv) : "";
+        document.getElementById("scB").textContent =
+          bv > wv ? "+" + (bv - wv) : "";
+      }
+      function setEval(score) {
+        // Sync evtrack height to board height
+        const brd = document.getElementById("board");
+        const et = document.getElementById("evtrack");
+        if (brd && et && window.innerWidth > 700) {
+          const h = brd.getBoundingClientRect().height;
+          if (h > 0) et.style.height = h + "px";
+        }
+        // Chess.com style: white% from bottom, black% from top
+        // Clamp to reasonable range, center=50%
+        const clamp = Math.max(-1500, Math.min(1500, score));
+        const wp = Math.round(50 + (clamp / 1500) * 44); // 6% to 94%
+        const bp = 100 - wp;
+        const W = document.getElementById("evW"),
+          B = document.getElementById("evB");
+        const isMob = window.innerWidth <= 700;
+        if (isMob) {
+          // Horizontal: white from right, black from left
+          if (W) {
+            W.style.width = wp + "%";
+            W.style.height = "100%";
+          }
+          if (B) {
+            B.style.width = bp + "%";
+            B.style.height = "100%";
+          }
+        } else {
+          // Vertical: white from bottom, black from top
+          if (W) {
+            W.style.height = wp + "%";
+            W.style.width = "100%";
+          }
+          if (B) {
+            B.style.height = bp + "%";
+            B.style.width = "100%";
+          }
+        }
+        // Score text
+        const isMate = Math.abs(score) > 9000;
+        const txt = isMate
+          ? "M"
+          : (score >= 0 ? "+" : "") + (score / 100).toFixed(1);
+        const sc = document.getElementById("evSc");
+        if (sc) sc.textContent = txt;
+        // Labels inside bar (only show when advantage is significant)
+        const wAdv = score > 30,
+          bAdv = score < -30;
+        const lb = document.getElementById("evLblB"),
+          lw = document.getElementById("evLblW");
+        if (lb)
+          lb.textContent = bAdv
+            ? isMate
+              ? "M"
+              : (-score / 100).toFixed(1)
+            : "";
+        if (lw)
+          lw.textContent = wAdv
+            ? isMate
+              ? "M"
+              : (score / 100).toFixed(1)
+            : "";
+      }
+
+      // ═══════════════════════════════════════
+      // NOTATION + MOVE ICONS
+      // ═══════════════════════════════════════
+      function buildNote(brd, mv, col) {
+        const { fr, fc, tr, tc, flag } = mv;
+        if (flag === "cs") return "O-O";
+        if (flag === "cl") return "O-O-O";
+        const p = brd[fr][fc],
+          t = p[1],
+          cap = brd[tr][tc],
+          to = FILES[tc] + RANKS[tr];
+        if (t === "P") return cap ? FILES[fc] + "x" + to : to;
+        return t + (cap ? "x" : "") + to;
+      }
+      function addNote(n, col, idx, ri, showRt) {
+        const el = document.getElementById("movesEl"),
+          mn = Math.floor(idx / 2) + 1;
+        const s = document.createElement("span");
+        s.style.cssText = "white-space:nowrap;padding:1px 3px";
+        let icon = "";
+        if (showRt && ri !== null && ri !== undefined) {
+          const R = RTNG[ri];
+          icon = `<span class="${R.c}" style="font-size:.68rem;margin-left:1px" title="${R.l}">${R.s}</span>`;
+        }
+        s.innerHTML =
+          col === "w"
+            ? `<span class="mn">${mn}.</span><span class="mw"> ${n}</span>${icon}`
+            : `<span class="mb2"> ${n}</span>${icon}`;
+        el.appendChild(s);
+        el.scrollTop = el.scrollHeight;
+      }
+
+      // ═══════════════════════════════════════
+      // END GAME
+      // ═══════════════════════════════════════
+      function stopAnim() {
+        animH.forEach(clearTimeout);
+        animH = [];
+        animC.forEach((el) => {
+          try {
+            el.remove();
+          } catch (e) {}
+        });
+        animC = [];
+        animOn = false;
+        document.querySelectorAll(".cfti").forEach((e) => e.remove());
+      }
+      // ═══════════════════════════════════════
+      // DRAW DETECTION HELPERS
+      // ═══════════════════════════════════════
+      function isInsufficientMaterial(brd) {
+        const pieces = { w: [], b: [] };
+        for (let r = 0; r < 8; r++)
+          for (let c = 0; c < 8; c++) {
+            const p = brd[r][c];
+            if (!p) continue;
+            pieces[p[0]].push({ type: p[1], r, c });
+          }
+        const w = pieces.w,
+          b = pieces.b;
+        // K vs K
+        if (w.length === 1 && b.length === 1) return true;
+        // K+B vs K  or  K+N vs K
+        if (
+          w.length === 1 &&
+          b.length === 2 &&
+          (b[0].type === "B" ||
+            b[0].type === "N" ||
+            b[1].type === "B" ||
+            b[1].type === "N")
+        )
+          return true;
+        if (
+          b.length === 1 &&
+          w.length === 2 &&
+          (w[0].type === "B" ||
+            w[0].type === "N" ||
+            w[1].type === "B" ||
+            w[1].type === "N")
+        )
+          return true;
+        // K+B vs K+B (same color bishops)
+        if (w.length === 2 && b.length === 2) {
+          const wb = w.find((p) => p.type === "B"),
+            bb = b.find((p) => p.type === "B");
+          if (wb && bb && (wb.r + wb.c) % 2 === (bb.r + bb.c) % 2) return true;
+        }
+        return false;
+      }
+
+      function endGame(reason, winner) {
+        playSound("gameover");
+        G.over = true;
+        stopTimers();
+        render();
+        updStatus();
+        animOn = true;
+        const cfg = {
+          checkmate: {
+            ti: "♛ Checkmate!",
+            su: (winner === "w" ? "White" : "Black") + " wins!",
+            an: winner === NET.myCol ? "conf" : "fly",
+          },
+          stalemate: {
+            ti: "½ Stalemate",
+            su: "Draw — no legal moves",
+            an: "pulse",
+          },
+          resign: {
+            ti: "Resigned",
+            su: (winner === "w" ? "Black" : "White") + " resigned",
+            an: "fly",
+          },
+          draw: { ti: "½ Draw", su: "Draw by agreement", an: "pulse" },
+          timeout: {
+            ti: "⏰ Time Out",
+            su: (winner === "w" ? "White" : "Black") + " wins on time!",
+            an: winner === NET.myCol ? "conf" : "fly",
+          },
+          fifty: { ti: "½ Draw", su: "Draw — 50-move rule", an: "pulse" },
+          repetition: {
+            ti: "½ Draw",
+            su: "Draw — threefold repetition",
+            an: "pulse",
+          },
+          insufficient: {
+            ti: "½ Draw",
+            su: "Draw — insufficient material",
+            an: "pulse",
+          },
+        };
+        const cf = cfg[reason] || cfg.stalemate;
+        if (cf.an === "conf") {
+          const sym = "♔♕♖♗♘♙";
+          for (let i = 0; i < 18; i++) {
+            const h = setTimeout(() => {
+              const el = document.createElement("span");
+              el.className = "cfti";
+              el.textContent = sym[Math.floor(Math.random() * sym.length)];
+              el.style.left = Math.random() * 100 + "vw";
+              el.style.color = `hsl(${40 + Math.random() * 20},80%,65%)`;
+              el.style.animationDuration = 1.3 + Math.random() + "s";
+              document.body.appendChild(el);
+              animC.push(el);
+              const rh = setTimeout(() => {
+                try {
+                  el.remove();
+                } catch (e) {}
+              }, 2200);
+              animH.push(rh);
+            }, i * 55);
+            animH.push(h);
+          }
+          animH.push(
+            setTimeout(() => {
+              animOn = false;
+            }, 2200),
+          );
+        } else if (cf.an === "fly") {
+          const bd = document.getElementById("board");
+          [...bd.querySelectorAll(".pc")].forEach((pe, i) => {
+            const h = setTimeout(() => {
+              const cl = pe.cloneNode(true),
+                rect = pe.getBoundingClientRect();
+              cl.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;font-size:${rect.height * 0.7}px;z-index:700;pointer-events:none;animation:pfly ${0.7 + Math.random() * 0.5}s ease-out forwards`;
+              document.body.appendChild(cl);
+              animC.push(cl);
+              const rh = setTimeout(() => {
+                try {
+                  cl.remove();
+                } catch (e) {}
+              }, 1300);
+              animH.push(rh);
+            }, i * 22);
+            animH.push(h);
+          });
+          animH.push(
+            setTimeout(() => {
+              animOn = false;
+            }, 1600),
+          );
+        } else {
+          const bd = document.getElementById("board");
+          [0, 260, 520, 780].forEach((t) => {
+            const h = setTimeout(() => {
+              bd.style.boxShadow = bd.style.boxShadow.includes("60px")
+                ? "0 0 24px rgba(201,168,76,.15),0 8px 32px rgba(0,0,0,.8)"
+                : "0 0 60px rgba(201,168,76,.7)";
+            }, t);
+            animH.push(h);
+          });
+          animH.push(
+            setTimeout(() => {
+              animOn = false;
+            }, 850),
+          );
+        }
+        const showRematch = NET.mode !== "bot" && NET.timeCtrl;
+        animH.push(
+          setTimeout(
+            () => {
+              document.getElementById("tTi").textContent = cf.ti;
+              document.getElementById("tSu").textContent = cf.su;
+              const tr2 = document.getElementById("tRematch");
+              if (tr2) tr2.style.display = showRematch ? "" : "none";
+              document.getElementById("toast").classList.add("on");
+            },
+            cf.an === "fly" ? 450 : 300,
+          ),
+        );
+
+        // If online, notify opponent
+        if (!G._endSent && NET.mode !== "bot" && NET.conn) {
+          G._endSent = true;
+          netSend({ type: "gameover", reason, winner });
+        }
+      }
+
+      // ═══════════════════════════════════════
+      // CONFIRM / MSG
+      // ═══════════════════════════════════════
+      function showConfirm(ti, su, ok) {
+        document.getElementById("cfTi").textContent = ti;
+        document.getElementById("cfSu").textContent = su;
+        document.getElementById("confModal").classList.add("on");
+        document.getElementById("cfYes").onclick = () => {
+          document.getElementById("confModal").classList.remove("on");
+          ok();
+        };
+        document.getElementById("cfNo").onclick = () =>
+          document.getElementById("confModal").classList.remove("on");
+      }
+      function showMsg(ti, su) {
+        document.getElementById("tTi").textContent = ti;
+        document.getElementById("tSu").textContent = su;
+        const tr3 = document.getElementById("tRematch");
+        if (tr3) tr3.style.display = "none";
+        const t = document.getElementById("toast");
+        t.classList.add("on");
+        setTimeout(() => t.classList.remove("on"), 3200);
+      }
+
+      // ═══════════════════════════════════════
+      // COLLAPSIBLE
+      // ═══════════════════════════════════════
+      [
+        ["hS", "bS"],
+        ["hR", "bR"],
+        ["hM", "bM"],
+        ["hB", "bB"],
+        ["hV", "bV"],
+        ["hRu", "bRu"],
+      ].forEach(([hi, bi]) => {
+        const h = document.getElementById(hi),
+          b = document.getElementById(bi);
+        if (h && b)
+          h.addEventListener("click", () => {
+            const cl = b.classList.toggle("cl");
+            h.classList.toggle("cl", cl);
+          });
+      });
+
+      // ═══════════════════════════════════════
+      // LEVEL
+      // ═══════════════════════════════════════
+      function setLevel(n) {
+        botLevel = n;
+        document
+          .querySelectorAll(".lb,.mpl")
+          .forEach((b) =>
+            b.classList.toggle("on", parseInt(b.dataset.l) === n),
+          );
+        if (!G.over && NET.mode === "bot") newGame();
+      }
+      document
+        .querySelectorAll(".lb,.mpl")
+        .forEach((b) =>
+          b.addEventListener("click", () => setLevel(parseInt(b.dataset.l))),
+        );
+
+      // ═══════════════════════════════════════
+      // BOT ACTIONS
+      // ═══════════════════════════════════════
+      function doResign() {
+        if (G.over) return;
+        if (NET.mode !== "bot") {
+          showConfirm("Resign?", "Your opponent wins.", () => {
+            netSend({ type: "resign" });
+            endGame("resign", opp(NET.myCol));
+          });
+          return;
+        }
+        if (G.turn !== "w") return;
+        showConfirm("Resign?", "Are you sure?", () => endGame("resign", "b"));
+      }
+      function doDraw() {
+        if (G.over) return;
+        if (NET.mode !== "bot") {
+          netSend({ type: "draw_offer" });
+          showMsg("Draw Offered", "Waiting for opponent…");
+          return;
+        }
+        // Bot evaluates from its perspective (positive = bot ahead)
+        const ev = -evalBoard(G.brd); // bot plays black, so negate
+        const evStr = (ev / 100).toFixed(1);
+        // Bot accepts if: losing, equal, or slightly behind
+        // Bot declines if: clearly winning (ev > +2.0)
+        if (ev > 200) {
+          showMsg(
+            "Declined",
+            `Bot is winning (${evStr}) — won't accept a draw.`,
+          );
+        } else if (ev > 50) {
+          showMsg("Declined", `Bot has the edge (${evStr}) — declined.`);
+        } else {
+          showConfirm("Draw Offer", `Bot accepts (eval ${evStr}).`, () =>
+            endGame("draw", ""),
+          );
+        }
+      }
+
+      // ═══════════════════════════════════════
+      // DRAWING — arrows & circles (right-click drag)
+      // ═══════════════════════════════════════
+      const DRAW = { shapes: [], dragFrom: null, color: "#f6a623" }; // gold default
+      const DRAW_COLORS = ["#f6a623", "#4a9eff", "#e53935", "#4caf50"];
+      let _drawColorIdx = 0;
+
+      function sqCenter(r, c) {
+        // Returns center pixel of square (r,c) relative to SVG which overlays b-mid
+        // SVG covers the entire b-mid which includes labels
+        const board = document.getElementById("board");
+        const svg = document.getElementById("drawSvg");
+        if (!board || !svg) return { x: 0, y: 0 };
+        const bRect = board.getBoundingClientRect();
+        const sRect = svg.parentElement.getBoundingClientRect(); // b-mid rect
+        const sqW = bRect.width / 8,
+          sqH = bRect.height / 8;
+        // board offset inside b-mid
+        const bx = bRect.left - sRect.left;
+        const by = bRect.top - sRect.top;
+        // center of square
+        const cx = bx + (c + 0.5) * sqW;
+        const cy = by + (r + 0.5) * sqH;
+        return { x: cx, y: cy };
+      }
+
+      function sqFromBoardXY(clientX, clientY) {
+        const board = document.getElementById("board");
+        if (!board) return null;
+        const rect = board.getBoundingClientRect();
+        const c = Math.floor((clientX - rect.left) / (rect.width / 8));
+        const r = Math.floor((clientY - rect.top) / (rect.height / 8));
+        if (r < 0 || r >= 8 || c < 0 || c >= 8) return null;
+        return { r, c };
+      }
+
+      function drawArrow(svg, x1, y1, x2, y2, color) {
+        const dx = x2 - x1,
+          dy = y2 - y1;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 10) return;
+        const board = document.getElementById("board");
+        const sqW = board ? board.getBoundingClientRect().width / 8 : 60;
+        const hw = sqW * 0.17; // head width
+        const hl = sqW * 0.28; // head length
+        const sw = sqW * 0.085; // stroke width
+        const ux = dx / len,
+          uy = dy / len;
+        // Shorten end for arrowhead
+        const ex = x2 - ux * hl * 0.5,
+          ey = y2 - uy * hl * 0.5;
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("opacity", "0.82");
+        // shaft
+        const line = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "line",
+        );
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", ex);
+        line.setAttribute("y2", ey);
+        line.setAttribute("stroke", color);
+        line.setAttribute("stroke-width", sw);
+        line.setAttribute("stroke-linecap", "round");
+        g.appendChild(line);
+        // arrowhead polygon
+        const px = -uy * hw,
+          py = ux * hw;
+        const pts = `${x2},${y2} ${ex + px},${ey + py} ${ex - px},${ey - py}`;
+        const poly = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "polygon",
+        );
+        poly.setAttribute("points", pts);
+        poly.setAttribute("fill", color);
+        g.appendChild(poly);
+        svg.appendChild(g);
+      }
+
+      function drawCircle(svg, x, y, color) {
+        const board = document.getElementById("board");
+        const sqW = board ? board.getBoundingClientRect().width / 8 : 60;
+        const r = sqW * 0.42;
+        const sw = sqW * 0.075;
+        const c = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle",
+        );
+        c.setAttribute("cx", x);
+        c.setAttribute("cy", y);
+        c.setAttribute("r", r);
+        c.setAttribute("fill", "none");
+        c.setAttribute("stroke", color);
+        c.setAttribute("stroke-width", sw);
+        c.setAttribute("opacity", "0.82");
+        svg.appendChild(c);
+      }
+
+      function renderDrawings() {
+        const svg = document.getElementById("drawSvg");
+        if (!svg) return;
+        svg.innerHTML = "";
+        for (const s of DRAW.shapes) {
+          const from = sqCenter(s.r1, s.c1);
+          if (s.type === "circle") {
+            drawCircle(svg, from.x, from.y, s.color);
+          } else {
+            const to = sqCenter(s.r2, s.c2);
+            drawArrow(svg, from.x, from.y, to.x, to.y, s.color);
+          }
+        }
+        // draw in-progress arrow
+        if (DRAW.dragFrom && DRAW._curX !== undefined) {
+          const from = sqCenter(DRAW.dragFrom.r, DRAW.dragFrom.c);
+          drawArrow(
+            svg,
+            from.x,
+            from.y,
+            DRAW._curX,
+            DRAW._curY,
+            DRAW.color + "aa",
+          );
+        }
+      }
+
+      function clearDrawings() {
+        DRAW.shapes = [];
+        renderDrawings();
+      }
+
+      // Right-click = start draw; right-click release = finish
+      const boardEl2 = document.getElementById("board");
+      boardEl2.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+      });
+
+      boardEl2.addEventListener(
+        "mousedown",
+        (e) => {
+          if (e.button !== 2) return;
+          e.preventDefault();
+          const sq = sqFromBoardXY(e.clientX, e.clientY);
+          if (!sq) return;
+          DRAW.dragFrom = { ...sq };
+          DRAW._curX = undefined;
+        },
+        { passive: false },
+      );
+
+      document.addEventListener("mousemove", (e) => {
+        if (!DRAW.dragFrom) return;
+        // Convert to SVG coords
+        const svg = document.getElementById("drawSvg");
+        if (!svg) return;
+        const sRect = svg.parentElement.getBoundingClientRect();
+        DRAW._curX = e.clientX - sRect.left;
+        DRAW._curY = e.clientY - sRect.top;
+        renderDrawings();
+      });
+
+      document.addEventListener("mouseup", (e) => {
+        if (e.button !== 2) {
+          // Left click clears drawings
+          if (e.button === 0 && DRAW.shapes.length > 0 && !DR.on) {
+            // Only clear if no drag happened
+          }
+          return;
+        }
+        if (!DRAW.dragFrom) return;
+        const sq = sqFromBoardXY(e.clientX, e.clientY);
+        const from = DRAW.dragFrom;
+        DRAW.dragFrom = null;
+        DRAW._curX = undefined;
+        if (!sq) {
+          renderDrawings();
+          return;
+        }
+        const isSame = sq.r === from.r && sq.c === from.c;
+        if (isSame) {
+          // Circle on same square — toggle
+          const idx = DRAW.shapes.findIndex(
+            (s) =>
+              s.type === "circle" &&
+              s.r1 === sq.r &&
+              s.c1 === sq.c &&
+              s.color === DRAW.color,
+          );
+          if (idx >= 0) DRAW.shapes.splice(idx, 1);
+          else
+            DRAW.shapes.push({
+              type: "circle",
+              r1: sq.r,
+              c1: sq.c,
+              color: DRAW.color,
+            });
+        } else {
+          // Arrow — toggle
+          const idx = DRAW.shapes.findIndex(
+            (s) =>
+              s.type === "arrow" &&
+              s.r1 === from.r &&
+              s.c1 === from.c &&
+              s.r2 === sq.r &&
+              s.c2 === sq.c &&
+              s.color === DRAW.color,
+          );
+          if (idx >= 0) DRAW.shapes.splice(idx, 1);
+          else
+            DRAW.shapes.push({
+              type: "arrow",
+              r1: from.r,
+              c1: from.c,
+              r2: sq.r,
+              c2: sq.c,
+              color: DRAW.color,
+            });
+        }
+        renderDrawings();
+      });
+
+      // Clear drawings on left click (when not dragging a piece)
+      boardEl2.addEventListener("click", (e) => {
+        if (DRAW.shapes.length > 0 && !DR.on) clearDrawings();
+      });
+
+      // Long-press on mobile to draw circle
+      let _mDrawTimer = null,
+        _mDrawSq = null;
+      boardEl2.addEventListener(
+        "touchstart",
+        (e) => {
+          if (e.touches.length !== 2) {
+            return;
+          }
+          e.preventDefault();
+          // Two-finger tap = clear drawings
+          clearDrawings();
+        },
+        { passive: false },
+      );
+
+      // Color picker: Escape = cycle colors
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          clearDrawings();
+        }
+        if (e.key === "ArrowRight") {
+          _drawColorIdx = (_drawColorIdx + 1) % DRAW_COLORS.length;
+          DRAW.color = DRAW_COLORS[_drawColorIdx];
+        }
+      });
+
+      // ═══════════════════════════════════════
+      // BUTTON WIRING
+      // ═══════════════════════════════════════
+
+      // Game buttons
+      document.getElementById("newBtn").addEventListener("click", () => {
+        if (!animOn && NET.mode === "bot") newGame();
+      });
+      document.getElementById("flipBtn").addEventListener("click", () => {
+        flipped = !flipped;
+        render();
+      });
+      document.getElementById("resignBtn").addEventListener("click", doResign);
+      document.getElementById("drawBtn").addEventListener("click", doDraw);
+
+      // Mobile buttons
+      document.getElementById("mFlip").addEventListener("click", () => {
+        flipped = !flipped;
+        render();
+      });
+      document.getElementById("mNew").addEventListener("click", () => {
+        if (!animOn && NET.mode === "bot") newGame();
+      });
+      document.getElementById("mRes").addEventListener("click", doResign);
+      document.getElementById("mDrw").addEventListener("click", doDraw);
+
+      // Toast buttons
+      document.getElementById("tNew").addEventListener("click", () => {
+        document.getElementById("toast").classList.remove("on");
+        if (!animOn && NET.mode === "bot") newGame();
+      });
+      document.getElementById("tRematch").addEventListener("click", () => {
+        document.getElementById("toast").classList.remove("on");
+        if (NET.mode !== "bot" && P.conn) {
+          netSend({ type: "rematch_offer" });
+          showMsg("Rematch", "Waiting for opponent…");
+        }
+      });
+
+      // View options
+      document
+        .getElementById("togEval")
+        .addEventListener("change", function () {
+          NET.showEval = this.checked;
+          document.getElementById("evbar").style.display = this.checked
+            ? ""
+            : "none";
+          const mev = document.getElementById("mEv");
+          if (mev) mev.style.display = this.checked ? "" : "none";
+        });
+      document
+        .getElementById("togRating")
+        .addEventListener("change", function () {
+          NET.showRating = this.checked;
+          const rCard = document.getElementById("bR");
+          if (rCard && rCard.parentElement)
+            rCard.parentElement.style.display = this.checked ? "" : "none";
+        });
+      document
+        .getElementById("togLocal")
+        .addEventListener("change", function () {
+          if (NET.mode === "host" || NET.mode === "guest") {
+            this.checked = false;
+            return;
+          }
+          NET.mode = this.checked ? "local" : "bot";
+          NET.myCol = "w";
+          flipped = false;
+          _botAbort = true;
+          const bc = document.getElementById("hB");
+          if (bc && bc.parentElement)
+            bc.parentElement.style.display = this.checked ? "none" : "";
+          const mpls = document.getElementById("mBotLvls");
+          if (mpls) mpls.style.display = this.checked ? "none" : "flex";
+          const ml = document.getElementById("mLocal");
+          if (ml) ml.classList.toggle("on", this.checked);
+          newGame();
+        });
+
+      // Mobile mode buttons
+      document.getElementById("mOnline2").addEventListener("click", openLobby);
+      document.getElementById("mLocal").addEventListener("click", () => {
+        if (NET.mode === "host" || NET.mode === "guest") return;
+        const tog = document.getElementById("togLocal");
+        tog.checked = !tog.checked;
+        tog.dispatchEvent(new Event("change"));
+      });
+
+      // ═══════════════════════════════════════════════════════════
+      // ONLINE — WebRTC P2P with Firebase RTDB free tier signaling
+      // No account needed — uses anonymous REST API
+      // ═══════════════════════════════════════════════════════════
+      let P = { peer: null, conn: null, role: "", roomId: "" };
+      let lobbyRole = "",
+        guestJoined = false,
+        guestName = "";
+
+      function genId(n = 8) {
+        let s = "";
+        while (s.length < n) s += Math.random().toString(36).substr(2);
+        return s.substr(0, n).toUpperCase();
+      }
+      function lstat(t) {
+        const e = document.getElementById("lCStat");
+        if (e) e.textContent = t;
+      }
+      function lmsg(t) {
+        const e = document.getElementById("lMsg");
+        if (e) e.textContent = t;
+      }
+      function netSend(d) {
+        try {
+          if (P.conn && P.conn.open) P.conn.send(d);
+        } catch (e) {}
+      }
+
+      function closePeer() {
+        try {
+          P.conn && P.conn.close();
+        } catch (e) {}
+        try {
+          P.peer && P.peer.destroy();
+        } catch (e) {}
+        P = { peer: null, conn: null, role: P.role, roomId: "" };
+      }
+
+      function loadPeerJS(cb) {
+        if (window.Peer) {
+          cb();
+          return;
+        }
+        const s = document.createElement("script");
+        s.src = "https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js";
+        s.onload = cb;
+        s.onerror = () =>
+          lstat("Failed to load PeerJS. Check internet connection.");
+        document.head.appendChild(s);
+      }
+
+      function hostFlow(roomId) {
+        P.role = "host";
+        P.roomId = roomId;
+        lstat("Setting up room...");
+        loadPeerJS(() => {
+          P.peer = new Peer(roomId, { debug: 0 });
+          P.peer.on("error", (err) => {
+            if (err.type === "unavailable-id") {
+              hostFlow(genId(8));
+            } else {
+              lstat("Error: " + err.type);
+            }
+          });
+          P.peer.on("open", (id) => {
+            lstat("Waiting for guest...");
+            const url = location.href.split("?")[0] + "?room=" + id;
+            document.getElementById("lLinkLabel").textContent =
+              "🔗 Invite link — click to copy:";
+            document.getElementById("lobbyLink").textContent = url;
+            document.getElementById("lLinkSec").style.display = "";
+          });
+          P.peer.on("connection", (conn) => {
+            P.conn = conn;
+            setupDC(conn, "host");
+          });
+        });
+      }
+
+      function guestFlow(roomId) {
+        P.role = "guest";
+        P.roomId = roomId;
+        lstat("Connecting to host...");
+        loadPeerJS(() => {
+          P.peer = new Peer(undefined, { debug: 0 });
+          P.peer.on("error", (err) =>
+            lstat("Error: " + err.type + ". Check the link or try again."),
+          );
+          P.peer.on("open", () => {
+            lstat("Reaching host...");
+            const conn = P.peer.connect(roomId, {
+              reliable: true,
+              label: "chess",
+            });
+            P.conn = conn;
+            setupDC(conn, "guest");
+          });
+        });
+      }
+
+      function setupDC(conn, role) {
+        conn.on("open", () => {
+          lstat("Connected!");
+          lmsg("");
+          conn.send({ type: "hello", name: getMyName() });
+          if (role === "host") {
+            guestJoined = true;
+            document.getElementById("lpGuestSt").textContent = "Connected!";
+            document.getElementById("lpGuest").classList.add("joined");
+            document.getElementById("lKick").style.display = "";
+            document.getElementById("lTimeSec").style.display = "";
+            lmsg("Guest connected! Choose time control, then start.");
+            if (selectedTC !== null)
+              document.getElementById("lStart").style.display = "";
+          } else {
+            lstat("Connected! Waiting for host to start...");
+          }
+        });
+        conn.on("data", (d) => {
+          if (!NET.gameStarted) handleLobbyMsg(d, role);
+          else handleGameMsg(d);
+        });
+        conn.on("close", () => {
+          if (!NET.gameStarted) lstat("Connection closed.");
+        });
+        conn.on("error", () => {
+          if (!NET.gameStarted) lstat("Connection error.");
+        });
+      }
+
+      function handleLobbyMsg(d, myRole) {
+        if (d.type === "hello") {
+          if (myRole === "host") {
+            guestName = d.name;
+            document.getElementById("lpGuestNm").textContent = d.name;
+          } else document.getElementById("lpHostNm").textContent = d.name;
+        }
+        if (d.type === "kick") {
+          lmsg("You were kicked.");
+          closePeer();
+          document.getElementById("lobby").classList.remove("on");
+        }
+        if (d.type === "start_game") {
+          startOnlineGame(d, myRole);
+        }
+      }
+
+      function getMyName() {
+        return document.getElementById("lobbyName").value.trim() || "Player";
+      }
+      function resolveNames(h, g) {
+        let hn = h || "Player",
+          gn = g || "Player";
+        if (hn === gn) {
+          hn = "Player 1";
+          gn = "Player 2";
+        }
+        return { h: hn, g: gn };
+      }
+
+      function buildTimePicker() {
+        const el = document.getElementById("tPicker");
+        el.innerHTML = "";
+        TIME_CTRLS.forEach((tc, i) => {
+          const b = document.createElement("button");
+          b.className = "tpill" + (selectedTC === i ? " on" : "");
+          b.textContent = tc.l;
+          b.addEventListener("click", () => {
+            selectedTC = i;
+            document
+              .querySelectorAll(".tpill")
+              .forEach((p, j) => p.classList.toggle("on", j === i));
+            if (guestJoined)
+              document.getElementById("lStart").style.display = "";
+          });
+          el.appendChild(b);
+        });
+      }
+
+      function openLobby() {
+        document.getElementById("lobby").classList.add("on");
+        lstat("");
+        lmsg("");
+        ["lLinkSec", "lTimeSec", "lStart"].forEach((id) => {
+          const e = document.getElementById(id);
+          if (e) e.style.display = "none";
+        });
+        document.getElementById("lpGuestNm").textContent = "Waiting…";
+        document.getElementById("lpGuestSt").textContent = "No one yet";
+        document.getElementById("lpGuest").classList.remove("joined");
+        document.getElementById("lKick").style.display = "none";
+        guestJoined = false;
+        closePeer();
+
+        const room = new URLSearchParams(location.search).get("room");
+        if (room) {
+          lobbyRole = "guest";
+          document.getElementById("lpGuestNm").textContent = getMyName();
+          document.getElementById("lpGuest").classList.add("joined");
+          document.getElementById("lpGuestSt").textContent = "You";
+          document.getElementById("lpHostNm").textContent = "Host";
+          const os = document.getElementById("lOptsSec");
+          if (os) os.style.display = "none";
+          guestFlow(room);
+        } else {
+          lobbyRole = "host";
+          document.getElementById("lpHostNm").textContent = getMyName();
+          buildTimePicker();
+          hostFlow(genId(8));
+        }
+      }
+
+      function startOnlineGame(cfg, myRole) {
+        document.getElementById("lobby").classList.remove("on");
+        try {
+          history.replaceState({}, "", location.pathname);
+        } catch (e) {}
+        const nm = resolveNames(cfg.hostName, cfg.guestName);
+        NET.mode = myRole;
+        NET.myCol = myRole === "host" ? "w" : "b";
+        NET.myName = myRole === "host" ? nm.h : nm.g;
+        NET.oppName = myRole === "host" ? nm.g : nm.h;
+        NET.showEval = cfg.showEval;
+        NET.showRating = cfg.showRating;
+        NET.timeCtrl = cfg.timeCtrl || null;
+        NET.rematchTime = cfg.timeCtrl || null;
+        NET.conn = P.conn;
+        NET.gameStarted = true;
+        const te = document.getElementById("togEval");
+        if (te) te.checked = cfg.showEval;
+        const tr = document.getElementById("togRating");
+        if (tr) tr.checked = cfg.showRating;
+        flipped = myRole === "guest";
+        const bc = document.getElementById("hB");
+        if (bc && bc.parentElement) bc.parentElement.style.display = "none";
+        document.getElementById("newBtn").style.display = "none";
+        newGame(cfg.timeCtrl);
+        if (cfg.timeCtrl && myRole === "host") startTurnTimer("w");
+      }
+
+      function handleGameMsg(d) {
+        if (d.type === "move") {
+          if (d.timers) NET.timers = d.timers;
+          if (d.castl) G.castl = { ...d.castl };
+          playMove(d.mv, false, true);
+        }
+        if (d.type === "promo") {
+          G.brd[G.lastMv.tr][G.lastMv.tc] = d.piece;
+          render();
+        }
+        if (d.type === "gameover") {
+          if (!G.over) endGame(d.reason, d.winner);
+        }
+        if (d.type === "resign") {
+          endGame("resign", NET.myCol);
+        }
+        if (d.type === "draw_offer") {
+          showConfirm("Draw Offered", NET.oppName + " offers a draw.", () => {
+            netSend({ type: "draw_accept" });
+            endGame("draw", "");
+          });
+        }
+        if (d.type === "draw_accept") {
+          endGame("draw", "");
+        }
+        if (d.type === "rematch_offer") {
+          showConfirm("Rematch?", NET.oppName + " wants a rematch.", () => {
+            netSend({ type: "rematch_accept" });
+            doRematch();
+          });
+        }
+        if (d.type === "rematch_accept") {
+          doRematch();
+        }
+      }
+
+      function doRematch() {
+        document.getElementById("toast").classList.remove("on");
+        // Keep same colors: host always white, guest always black (no swap)
+        flipped = NET.myCol === "b";
+        newGame(NET.rematchTime);
+        if (NET.rematchTime && NET.myCol === "w") startTurnTimer("w");
+      }
+
+      document.getElementById("lKick").addEventListener("click", () => {
+        netSend({ type: "kick" });
+        guestJoined = false;
+        document.getElementById("lpGuestNm").textContent = "Waiting…";
+        document.getElementById("lpGuestSt").textContent = "No one yet";
+        document.getElementById("lpGuest").classList.remove("joined");
+        ["lKick", "lTimeSec", "lStart"].forEach(
+          (id) => (document.getElementById(id).style.display = "none"),
+        );
+        lmsg("Guest kicked.");
+      });
+      document.getElementById("lStart").addEventListener("click", () => {
+        if (!guestJoined) {
+          lmsg("Wait for guest to join!");
+          return;
+        }
+        if (selectedTC === null) {
+          lmsg("Choose a time control!");
+          return;
+        }
+        const cfg = {
+          type: "start_game",
+          hostName: getMyName(),
+          guestName,
+          showEval: document.getElementById("optEval").checked,
+          showRating: document.getElementById("optRating").checked,
+          timeCtrl: TIME_CTRLS[selectedTC],
+        };
+        netSend(cfg);
+        startOnlineGame(cfg, "host");
+      });
+      document.getElementById("lClose").addEventListener("click", () => {
+        document.getElementById("lobby").classList.remove("on");
+        try {
+          history.replaceState({}, "", location.pathname);
+        } catch (e) {}
+        if (!NET.gameStarted) closePeer();
+      });
+      document.getElementById("onlineBtn").addEventListener("click", openLobby);
+      document
+        .getElementById("mOnlineBtn")
+        .addEventListener("click", openLobby);
+      document.getElementById("lobbyLink").addEventListener("click", () => {
+        const txt = document.getElementById("lobbyLink").textContent;
+        navigator.clipboard
+          .writeText(txt)
+          .then(() => {
+            const e = document.getElementById("lCopyMsg");
+            if (e) {
+              e.textContent = "✓ Skopiowano!";
+              e.style.color = "var(--grn)";
+              setTimeout(() => (e.textContent = ""), 2500);
+            }
+          })
+          .catch(() => {
+            const r = document.createRange();
+            r.selectNode(document.getElementById("lobbyLink"));
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(r);
+          });
+      });
+      document.getElementById("lobbyName").addEventListener("input", () => {
+        const el = document.getElementById(
+          lobbyRole === "host" ? "lpHostNm" : "lpGuestNm",
+        );
+        if (el) el.textContent = getMyName() || "Player";
+      });
+      if (new URLSearchParams(location.search).get("room")) openLobby();
+
+      // ═══════════════════════════════════════
+      // SOUNDS (Web Audio API — no files needed)
+      // ═══════════════════════════════════════
+      const _AC = new (window.AudioContext || window.webkitAudioContext)();
+      function _resume() {
+        if (_AC.state === "suspended") _AC.resume();
+      }
+
+      function playSound(type) {
+        _resume();
+        const t = _AC.currentTime;
+        const o = _AC.createOscillator();
+        const g = _AC.createGain();
+        o.connect(g);
+        g.connect(_AC.destination);
+        if (type === "move") {
+          o.type = "sine";
+          o.frequency.setValueAtTime(520, t);
+          o.frequency.exponentialRampToValueAtTime(440, t + 0.06);
+          g.gain.setValueAtTime(0.18, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+          o.start(t);
+          o.stop(t + 0.12);
+        } else if (type === "capture") {
+          o.type = "sawtooth";
+          o.frequency.setValueAtTime(300, t);
+          o.frequency.exponentialRampToValueAtTime(120, t + 0.18);
+          g.gain.setValueAtTime(0.22, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+          o.start(t);
+          o.stop(t + 0.18);
+        } else if (type === "check") {
+          // two-tone alert
+          const o2 = _AC.createOscillator(),
+            g2 = _AC.createGain();
+          o2.connect(g2);
+          g2.connect(_AC.destination);
+          o.type = "square";
+          o.frequency.setValueAtTime(880, t);
+          g.gain.setValueAtTime(0.15, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+          o.start(t);
+          o.stop(t + 0.1);
+          o2.type = "square";
+          o2.frequency.setValueAtTime(660, t + 0.12);
+          g2.gain.setValueAtTime(0.15, t + 0.12);
+          g2.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+          o2.start(t + 0.12);
+          o2.stop(t + 0.22);
+        } else if (type === "castle") {
+          o.type = "sine";
+          o.frequency.setValueAtTime(440, t);
+          o.frequency.exponentialRampToValueAtTime(660, t + 0.08);
+          o.frequency.exponentialRampToValueAtTime(550, t + 0.16);
+          g.gain.setValueAtTime(0.2, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+          o.start(t);
+          o.stop(t + 0.2);
+        } else if (type === "gameover") {
+          o.type = "sine";
+          o.frequency.setValueAtTime(440, t);
+          o.frequency.exponentialRampToValueAtTime(220, t + 0.5);
+          g.gain.setValueAtTime(0.25, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+          o.start(t);
+          o.stop(t + 0.5);
+        }
+      }
+
+      // ═══════════════════════════════════════
+      // INIT
+      // ═══════════════════════════════════════
+      newGame();
+    </script>
+  </body>
+</html>
