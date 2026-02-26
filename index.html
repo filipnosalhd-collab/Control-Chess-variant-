@@ -4747,7 +4747,8 @@
       let P = { peer: null, conn: null, role: "", roomId: "" };
       let lobbyRole = "",
         guestJoined = false,
-        guestName = "";
+        guestName = "",
+        guestElo = 500;
       function genId(n = 8) {
         let s = "";
         while (s.length < n) s += Math.random().toString(36).substr(2);
@@ -4834,7 +4835,7 @@
         conn.on("open", () => {
           lstat("Connected!");
           lmsg("");
-          conn.send({ type: "hello", name: getMyName() });
+          conn.send({ type: "hello", name: getMyName(), elo: eloGet() });
           if (role === "host") {
             guestJoined = true;
             document.getElementById("lpGuestSt").textContent = "Connected!";
@@ -4861,8 +4862,11 @@
         if (d.type === "hello") {
           if (myRole === "host") {
             guestName = d.name;
+            guestElo = d.elo || 500;
             document.getElementById("lpGuestNm").textContent = d.name;
-          } else document.getElementById("lpHostNm").textContent = d.name;
+          } else {
+            document.getElementById("lpHostNm").textContent = d.name;
+          }
         }
         if (d.type === "kick") {
           lmsg("You were kicked.");
@@ -4942,6 +4946,9 @@
         NET.myCol = myRole === "host" ? "w" : "b";
         NET.myName = myRole === "host" ? nm.h : nm.g;
         NET.oppName = myRole === "host" ? nm.g : nm.h;
+        NET.myElo = eloGet();
+        NET.oppElo =
+          myRole === "host" ? cfg.guestElo || 500 : cfg.hostElo || 500;
         NET.showEval = cfg.showEval;
         NET.showRating = cfg.showRating;
         NET.timeCtrl = cfg.timeCtrl || null;
@@ -5067,6 +5074,8 @@
           type: "start_game",
           hostName: getMyName(),
           guestName,
+          hostElo: eloGet(),
+          guestElo,
           showEval: document.getElementById("optEval").checked,
           showRating: document.getElementById("optRating").checked,
           timeCtrl: TIME_CTRLS[selectedTC],
@@ -5385,18 +5394,15 @@
       }
 
       function eloShowOnlinePinfo() {
-        // Show ELO under names only in online mode
         if (NET.mode !== "host" && NET.mode !== "guest") return;
-        const myElo = eloGet();
         const botEl = document.getElementById("eloBot");
         const topEl = document.getElementById("eloTop");
         if (botEl) {
-          botEl.textContent = `ELO: ${myElo}`;
+          botEl.textContent = `ELO: ${eloGet()}`;
           botEl.style.display = "block";
         }
-        // Opponent ELO unknown online — show placeholder
         if (topEl) {
-          topEl.textContent = `ELO: ?`;
+          topEl.textContent = `ELO: ${NET.oppElo || "?"}`;
           topEl.style.display = "block";
         }
       }
