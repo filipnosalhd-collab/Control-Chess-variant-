@@ -53,8 +53,6 @@
         display: flex;
         flex-direction: column;
       }
-
-      /* ── HEADER ── */
       header {
         flex-shrink: 0;
         display: flex;
@@ -130,23 +128,18 @@
           opacity: 0.4;
         }
       }
-
-      /* ── MAIN ── */
       .wrap {
         flex: 1;
         display: flex;
         min-height: 0;
         overflow: hidden;
       }
-
-      /* ── EVAL BAR — chess.com style, glued to board ── */
       .evbar {
         display: flex;
         flex-direction: column;
         align-items: stretch;
         width: 14px;
         flex-shrink: 0;
-        /* height matches board exactly via JS, or use align-self stretch */
         align-self: center;
         background: transparent;
         border: none;
@@ -155,7 +148,6 @@
         margin-right: 2px;
       }
       .evtrack {
-        /* Height set by JS to match board pixel height */
         width: 100%;
         position: relative;
         overflow: hidden;
@@ -238,8 +230,6 @@
         z-index: 3;
         pointer-events: none;
       }
-
-      /* ── CENTER ── */
       .center {
         flex: 1;
         display: flex;
@@ -251,8 +241,6 @@
         min-width: 0;
         overflow: hidden;
       }
-
-      /* ── PLAYER INFO ── */
       .pinfo {
         display: flex;
         align-items: center;
@@ -290,7 +278,7 @@
         font-weight: 900;
         color: var(--gold);
         letter-spacing: 0.04em;
-        min-width: 52px;
+        min-width: 60px;
         text-align: right;
         display: none;
       }
@@ -310,8 +298,10 @@
       .timer.active {
         color: var(--gold);
       }
-
-      /* ── BOARD WRAPPER (labels outside) ── */
+      .timer.critical {
+        color: var(--red) !important;
+        font-size: 1.1rem;
+      }
       .bwrap {
         display: flex;
         flex-direction: column;
@@ -333,6 +323,30 @@
       }
       .bwrap.flipped .dot::after {
         transform: rotate(180deg);
+      }
+      /* Pre-move highlight — chess.com style */
+      .pre {
+        background: rgba(255, 200, 0, 0.35) !important;
+      }
+      .pre.lt {
+        background: rgba(255, 200, 0, 0.4) !important;
+      }
+      .pre.dk {
+        background: rgba(255, 200, 0, 0.3) !important;
+      }
+      /* premove-from: darker orange overlay on source */
+      .premove-from.lt {
+        background: #f6a623cc !important;
+      }
+      .premove-from.dk {
+        background: #d4870099 !important;
+      }
+      /* premove-to: bright yellow-orange on destination */
+      .premove-to.lt {
+        background: #f6d022cc !important;
+      }
+      .premove-to.dk {
+        background: #e6b800aa !important;
       }
       .b-top,
       .b-bot {
@@ -368,8 +382,6 @@
         width: var(--lbl);
         height: var(--sq);
       }
-
-      /* ── BOARD ── */
       .board {
         display: grid;
         grid-template-columns: repeat(8, var(--sq));
@@ -429,6 +441,24 @@
         border: 3px solid rgba(0, 0, 0, 0.22);
         pointer-events: none;
       }
+      /* Premove possible squares — orange dots/rings like chess.com */
+      .pre-dot::after {
+        content: "";
+        position: absolute;
+        width: 33%;
+        height: 33%;
+        border-radius: 50%;
+        background: rgba(240, 120, 0, 0.55);
+        pointer-events: none;
+      }
+      .pre-cring::after {
+        content: "";
+        position: absolute;
+        inset: 5%;
+        border-radius: 50%;
+        border: 3px solid rgba(240, 120, 0, 0.55);
+        pointer-events: none;
+      }
       .pc {
         font-size: calc(var(--sq) * 0.72);
         line-height: 1;
@@ -455,8 +485,6 @@
       .pc.dim {
         opacity: 0.15;
       }
-
-      /* ── RIGHT PANEL ── */
       .rpanel {
         width: 220px;
         flex-shrink: 0;
@@ -670,7 +698,6 @@
         border-color: var(--gold);
         color: var(--gold);
       }
-
       /* move rating colors */
       .br {
         color: #00e5ff;
@@ -705,8 +732,6 @@
       .ck {
         color: var(--red);
       }
-
-      /* ── MOBILE BAR ── */
       #mbar {
         display: none;
         flex-shrink: 0;
@@ -797,8 +822,6 @@
         color: var(--gold);
         background: rgba(201, 168, 76, 0.15);
       }
-
-      /* ── MODALS ── */
       .modal {
         display: none;
         position: fixed;
@@ -876,8 +899,6 @@
       .pp:hover {
         background: rgba(201, 168, 76, 0.2);
       }
-
-      /* ── TOAST ── */
       .toast {
         position: fixed;
         bottom: 20px;
@@ -941,8 +962,6 @@
         border-color: var(--gold);
         color: var(--gold);
       }
-
-      /* ── LOBBY ── */
       .lobby {
         display: none;
         position: fixed;
@@ -1129,8 +1148,6 @@
         text-align: center;
         min-height: 16px;
       }
-
-      /* ── ANIMS ── */
       @keyframes pfly {
         0% {
           opacity: 1;
@@ -1159,8 +1176,6 @@
         pointer-events: none;
         animation: cfall 2s ease-in forwards;
       }
-
-      /* ── DRAG GHOST ── */
       .ghost {
         position: fixed;
         pointer-events: none;
@@ -1171,16 +1186,13 @@
         user-select: none;
         -webkit-user-select: none;
       }
-
-      /* ── MOBILE ── */
+      /* premove source/dest handled above */
       @media (max-width: 700px) {
         html,
         body {
           height: 100dvh;
           overflow: hidden;
         }
-
-        /* header slim */
         header {
           padding: 3px 8px;
           min-height: 0;
@@ -1197,155 +1209,10 @@
         #mOnlineBtn {
           display: block;
         }
-
-        /* main layout: column */
         .wrap {
           flex-direction: column;
           align-items: center;
         }
-
-        /* eval bar: horizontal strip on top, slim */
-        /* Eval bar: slim vertical strip next to board on mobile too */
-        .evbar {
-          width: 10px;
-          margin-right: 1px;
-        }
-        .evtrack {
-          border-radius: 2px;
-        }
-        .evlbl-w,
-        .evlbl-b {
-          display: none;
-        }
-        .evsc {
-          left: 13px;
-          font-size: 0.5rem;
-        }
-
-        /* hide right panel entirely on mobile */
-        .rpanel {
-          display: none;
-        }
-
-        /* center: fill all space between evbar and mbar */
-        .center {
-          flex: 1;
-          min-height: 0;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 2px 0;
-          gap: 1px;
-          overflow: hidden;
-          width: 100%;
-        }
-
-        /* board size: fill width, but leave room for pinfos + mbar */
-        /* header≈32px evbar≈18px pinfo×2≈28px gaps≈6px mbar≈52px = ~136px overhead */
-        :root {
-          --lbl: 14px;
-        }
-        .board {
-          --bsize: min(100vw, calc(100dvh - 138px));
-          --sq: calc((var(--bsize) - var(--lbl) * 2 - 4px) / 8);
-          border-width: 1px;
-          box-shadow: none;
-        }
-
-        /* player info: match board width */
-        .pinfo {
-          width: calc(var(--sq) * 8 + var(--lbl) * 2 + 4px);
-          max-width: calc(100vw - 4px);
-          padding: 1px 5px;
-          flex-shrink: 0;
-        }
-        .pnm {
-          font-size: 0.52rem;
-        }
-        .caps {
-          font-size: 0.58rem;
-          max-width: 100px;
-        }
-        .psc {
-          font-size: 0.5rem;
-        }
-        .timer {
-          font-size: 0.72rem;
-          min-width: 34px;
-        }
-        .blbl {
-          font-size: 0.52rem;
-        }
-
-        /* mobile bottom bar */
-        #mbar {
-          display: flex;
-          flex-shrink: 0;
-        }
-
-        /* toast: centered */
-        .toast {
-          bottom: auto;
-          top: 50%;
-          right: 50%;
-          min-width: 160px;
-          transform: translate(50%, -50%) translateY(14px);
-        }
-        .toast.on {
-          transform: translate(50%, -50%) translateY(0);
-        }
-
-        /* lobby fits small screens */
-        .lbox {
-          padding: 14px 12px;
-          gap: 8px;
-          width: min(400px, 95vw);
-        }
-        .lplayer {
-          min-width: 70px;
-          padding: 6px 8px;
-        }
-      }
-
-      @media (max-width: 380px) {
-        :root {
-          --lbl: 12px;
-        }
-      }
-      /* ── MOBILE ── */
-      @media (max-width: 700px) {
-        html,
-        body {
-          height: 100dvh;
-          overflow: hidden;
-        }
-
-        /* header slim */
-        header {
-          padding: 3px 8px;
-          min-height: 0;
-        }
-        .logo {
-          font-size: 0.75rem;
-        }
-        .htip {
-          display: none;
-        }
-        .hbtn:not(#mOnlineBtn) {
-          display: none;
-        }
-        #mOnlineBtn {
-          display: block;
-        }
-
-        /* main layout: column */
-        .wrap {
-          flex-direction: column;
-          align-items: center;
-        }
-
-        /* eval bar: horizontal strip on top, slim */
         .evbar {
           flex-direction: row;
           width: 100%;
@@ -1399,21 +1266,19 @@
           width: 1px;
           height: auto;
         }
-        .evlbl {
-          font-size: 0.42rem;
+        .evlbl-w,
+        .evlbl-b {
+          display: none;
         }
         .evsc {
           font-size: 0.5rem;
           min-width: 22px;
           text-align: center;
+          left: 13px;
         }
-
-        /* hide right panel entirely on mobile */
         .rpanel {
           display: none;
         }
-
-        /* center: fill all space between evbar and mbar */
         .center {
           flex: 1;
           min-height: 0;
@@ -1426,9 +1291,6 @@
           overflow: hidden;
           width: 100%;
         }
-
-        /* board size: fill width, but leave room for pinfos + mbar */
-        /* header≈32px evbar≈18px pinfo×2≈28px gaps≈6px mbar≈52px = ~136px overhead */
         :root {
           --lbl: 14px;
         }
@@ -1438,8 +1300,6 @@
           border-width: 1px;
           box-shadow: none;
         }
-
-        /* player info: match board width */
         .pinfo {
           width: calc(var(--sq) * 8 + var(--lbl) * 2 + 4px);
           max-width: calc(100vw - 4px);
@@ -1458,19 +1318,15 @@
         }
         .timer {
           font-size: 0.72rem;
-          min-width: 34px;
+          min-width: 44px;
         }
         .blbl {
           font-size: 0.52rem;
         }
-
-        /* mobile bottom bar */
         #mbar {
           display: flex;
           flex-shrink: 0;
         }
-
-        /* toast: centered */
         .toast {
           bottom: auto;
           top: 50%;
@@ -1481,8 +1337,6 @@
         .toast.on {
           transform: translate(50%, -50%) translateY(0);
         }
-
-        /* lobby fits small screens */
         .lbox {
           padding: 14px 12px;
           gap: 8px;
@@ -1493,114 +1347,9 @@
           padding: 6px 8px;
         }
       }
-
       @media (max-width: 380px) {
         :root {
           --lbl: 12px;
-        }
-      }
-      /* ── LOADING SCREEN ── */
-      #loader {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        background: #0d0d0f;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        transition:
-          opacity 0.5s ease,
-          visibility 0.5s ease;
-      }
-      #loader.hidden {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-      }
-
-      .ld-icon {
-        position: relative;
-        width: 72px;
-        height: 72px;
-        background: linear-gradient(145deg, #1e1e24, #141416);
-        border-radius: 16px;
-        border: 1px solid #2a2a32;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow:
-          0 0 40px rgba(201, 168, 76, 0.25),
-          0 8px 32px rgba(0, 0, 0, 0.8);
-        animation: ld-pulse 1.8s ease-in-out infinite;
-      }
-      .ld-icon::before {
-        content: "♛";
-        font-size: 44px;
-        color: #c9a84c;
-        filter: drop-shadow(0 0 8px rgba(201, 168, 76, 0.6));
-        line-height: 1;
-      }
-      @keyframes ld-pulse {
-        0%,
-        100% {
-          box-shadow:
-            0 0 30px rgba(201, 168, 76, 0.2),
-            0 8px 32px rgba(0, 0, 0, 0.8);
-          transform: translateY(0);
-        }
-        50% {
-          box-shadow:
-            0 0 55px rgba(201, 168, 76, 0.45),
-            0 12px 40px rgba(0, 0, 0, 0.8);
-          transform: translateY(-3px);
-        }
-      }
-
-      .ld-title {
-        font-family: "Cinzel", serif;
-        font-size: 1.1rem;
-        font-weight: 900;
-        color: #c9a84c;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-      }
-      .ld-sub {
-        font-family: "Crimson Pro", serif;
-        font-size: 0.72rem;
-        color: #7a7060;
-        letter-spacing: 0.08em;
-        margin-top: -14px;
-      }
-
-      .ld-bar {
-        width: 160px;
-        height: 2px;
-        background: #1a1a1e;
-        border-radius: 1px;
-        overflow: hidden;
-        border: 1px solid #2a2a32;
-      }
-      .ld-fill {
-        height: 100%;
-        width: 0%;
-        background: linear-gradient(to right, #7a5c1e, #c9a84c, #f0d080);
-        border-radius: 1px;
-        animation: ld-load 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-      }
-      @keyframes ld-load {
-        0% {
-          width: 0%;
-        }
-        60% {
-          width: 75%;
-        }
-        85% {
-          width: 92%;
-        }
-        100% {
-          width: 100%;
         }
       }
     </style>
@@ -1609,17 +1358,16 @@
     <header>
       <div class="logo">Control Chess <em>variant</em></div>
       <div class="hright">
-        <span class="htip">❄ freeze · 🚫 no same-adj · ⚔ no same-capture</span>
+        <span class="htip"
+          >❄ freeze · 🚫 no same-adj · ⚔ no same-capture · ⚡ pre-move</span
+        >
         <button class="hbtn" id="mOnlineBtn" style="display: none">
           🌐 Online
         </button>
         <button class="hbtn gold" id="onlineBtn">🌐 Play Online</button>
       </div>
     </header>
-
     <div class="wrap">
-      <!-- EVAL BAR -->
-      <!-- CENTER -->
       <div class="center">
         <div class="pinfo" id="pinfoTop">
           <div style="display: flex; align-items: center; gap: 5px">
@@ -1634,7 +1382,6 @@
             <div class="psc" id="scB"></div>
           </div>
         </div>
-
         <div style="display: flex; align-items: center; gap: 0; flex-shrink: 0">
           <div class="evbar" id="evbar">
             <div class="evtrack" id="evtrack">
@@ -1668,8 +1415,6 @@
             <div class="b-bot" id="labBot"></div>
           </div>
         </div>
-        <!-- end board+evbar row -->
-
         <div class="pinfo" id="pinfoBot">
           <div style="display: flex; align-items: center; gap: 5px">
             <span>♙</span>
@@ -1684,8 +1429,6 @@
           </div>
         </div>
       </div>
-
-      <!-- RIGHT PANEL -->
       <div class="rpanel">
         <div class="card">
           <div class="chdr" id="hS">⚔ Status <i class="arr">▼</i></div>
@@ -1735,10 +1478,9 @@
                 <span class="ri">❄</span
                 ><span
                   ><b>Freeze:</b> After your move, enemy pieces attacked by a
-                  higher-value piece of yours are frozen next turn. Kings &amp;
+                  higher-value piece of yours are frozen next turn. Kings &
                   pawns never freeze.
-                  <b>A frozen piece loses its own freezing power</b> until it is
-                  unfrozen.</span
+                  <b>A frozen piece loses its own freezing power</b>.</span
                 >
               </div>
               <div class="rl">
@@ -1751,10 +1493,8 @@
               <div class="rl">
                 <span class="ri">½</span
                 ><span
-                  ><b>Draws:</b> Pat (brak ruchów), zgoda obu graczy, reguła 50
-                  ruchów (bez bicia/ruchu pionka), trzykrotne powtórzenie
-                  pozycji, niewystarczający materiał (np. K vs K, K+G vs K, K+S
-                  vs K).</span
+                  ><b>Draws:</b> Stalemate, agreement, 50-move rule, threefold
+                  repetition, insufficient material.</span
                 >
               </div>
               <div class="rl">
@@ -1765,8 +1505,16 @@
                 >
               </div>
               <div class="rl">
+                <span class="ri">⚡</span
+                ><span
+                  ><b>Pre-move:</b> During opponent's turn, click your piece to
+                  queue a move. It executes instantly when your turn
+                  comes.</span
+                >
+              </div>
+              <div class="rl">
                 <span class="ri">✓</span
-                ><span>Castling &amp; promotion OK. No en passant.</span>
+                ><span>Castling & promotion OK. No en passant.</span>
               </div>
             </div>
           </div>
@@ -1778,15 +1526,15 @@
               class="dwrap"
               style="flex-direction: column; gap: 4px; padding: 4px 0"
             >
-              <label class="ltoggle" style="font-size: 0.72rem"
+              <label class="ltoggle"
                 ><input type="checkbox" id="togEval" checked /> 📊 Eval
                 bar</label
               >
-              <label class="ltoggle" style="font-size: 0.72rem"
+              <label class="ltoggle"
                 ><input type="checkbox" id="togRating" checked /> ★ Move
                 ratings</label
               >
-              <label class="ltoggle" style="font-size: 0.72rem"
+              <label class="ltoggle"
                 ><input type="checkbox" id="togLocal" /> 👥 Local 2-player (same
                 screen)</label
               >
@@ -1803,16 +1551,12 @@
         </div>
       </div>
     </div>
-
-    <!-- MOBILE BAR -->
     <div id="mbar">
-      <!-- Row 1: status + eval -->
       <div class="mr">
         <span class="mst" id="mSt">Your turn</span>
         <span class="mrt" id="mRt"></span>
         <span class="mev" id="mEv">0.0</span>
       </div>
-      <!-- Row 2: mode buttons + game actions -->
       <div class="mr">
         <button class="mbtn mgold" id="mOnline2">🌐</button>
         <button class="mbtn" id="mLocal" title="Local 2-player">👥</button>
@@ -1834,7 +1578,6 @@
         <button class="mbtn" id="mDrw">Draw?</button>
       </div>
     </div>
-
     <!-- PROMO -->
     <div class="modal" id="promoModal">
       <div class="mbox">
@@ -1842,19 +1585,17 @@
         <div style="display: flex; gap: 10px" id="promoBox"></div>
       </div>
     </div>
-
     <!-- CONFIRM -->
     <div class="modal" id="confModal">
       <div class="mbox">
         <div class="mbt" id="cfTi"></div>
         <div class="mbs" id="cfSu"></div>
         <div class="mbbs">
-          <button class="mbb y" id="cfYes">Yes</button>
-          <button class="mbb n" id="cfNo">No</button>
+          <button class="mbb y" id="cfYes">Yes</button
+          ><button class="mbb n" id="cfNo">No</button>
         </div>
       </div>
     </div>
-
     <!-- TOAST -->
     <div class="toast" id="toast">
       <div class="tti" id="tTi"></div>
@@ -1866,12 +1607,10 @@
         </button>
       </div>
     </div>
-
     <!-- LOBBY -->
     <div class="lobby" id="lobby">
       <div class="lbox">
         <div class="ltitle">🌐 Play Online</div>
-
         <div class="lsec">
           <div class="llabel">Your Name</div>
           <input
@@ -1881,7 +1620,6 @@
             maxlength="20"
           />
         </div>
-
         <div class="lsec" id="lOptsSec">
           <div class="llabel">Visibility options (host decides)</div>
           <div class="lopts" style="margin-top: 4px">
@@ -1894,7 +1632,6 @@
             >
           </div>
         </div>
-
         <div class="lplayers">
           <div class="lplayer joined" id="lpHost">
             <div class="lpnm" id="lpHostNm">You</div>
@@ -1909,7 +1646,6 @@
             </button>
           </div>
         </div>
-
         <div class="lsec" id="lLinkSec" style="display: none">
           <div class="llabel" id="lLinkLabel">
             🔗 Invite link — click to copy & send to friend
@@ -1920,14 +1656,11 @@
             id="lCopyMsg"
           ></div>
         </div>
-
         <div class="lsec" id="lTimeSec" style="display: none">
           <div class="llabel" style="text-align: center">⏱ Time Control</div>
           <div class="tpicker" id="tPicker"></div>
         </div>
-
         <div class="lmsg" id="lMsg"></div>
-
         <div class="lbtnrow">
           <button class="btn bgd" id="lStart" style="display: none; flex: 1">
             ▶ Start Game
@@ -1935,6 +1668,23 @@
           <button class="btn bsc" id="lClose" style="flex: 1">✕ Close</button>
         </div>
         <div class="lcstat" id="lCStat"></div>
+      </div>
+    </div>
+
+    <!-- LOCAL TIME PICKER MODAL -->
+    <div class="modal" id="localTimeModal">
+      <div class="mbox" style="gap: 14px; min-width: 280px">
+        <div class="mbt">⏱ Local Game Time Control</div>
+        <div
+          class="tpicker"
+          id="localTPicker"
+          style="justify-content: center; max-width: 320px"
+        ></div>
+        <div style="display: flex; gap: 8px; margin-top: 4px">
+          <button class="mbb y" id="localTimeOk">▶ Start</button>
+          <button class="mbb n" id="localTimeNoTimer">No Timer</button>
+          <button class="mbb n" id="localTimeCancel">Cancel</button>
+        </div>
       </div>
     </div>
 
@@ -1997,18 +1747,25 @@
       };
       const FILES = "abcdefgh",
         RANKS = "87654321";
+
+      // Enhanced move ratings — 14 categories
       const RTNG = [
-        { l: "Brilliant!!", s: "!!", c: "br", mn: 200 },
-        { l: "Great!", s: "!", c: "gr", mn: 80 },
-        { l: "Best", s: "★", c: "be", mn: 30 },
-        { l: "Excellent", s: "✓", c: "ex", mn: 10 },
-        { l: "Good", s: "·", c: "go", mn: 0 },
-        { l: "Okay", s: "○", c: "ok", mn: -15 },
-        { l: "Inaccuracy", s: "?!", c: "in", mn: -40 },
-        { l: "Mistake", s: "?", c: "mi", mn: -100 },
-        { l: "Blunder", s: "??", c: "bl", mn: -200 },
-        { l: "Catastrophe", s: "???", c: "ct", mn: -9999 },
+        { l: "Brilliant!!", s: "!!", c: "br", mn: 300 },
+        { l: "Genius!!!", s: "!!!", c: "br", mn: 500 }, // ultra-brilliant
+        { l: "Great!", s: "!", c: "gr", mn: 100 },
+        { l: "Best", s: "★", c: "be", mn: 40 },
+        { l: "Excellent", s: "✓", c: "ex", mn: 15 },
+        { l: "Good", s: "·", c: "go", mn: 3 },
+        { l: "Book", s: "=", c: "ok", mn: -3 }, // equal/book move
+        { l: "Okay", s: "○", c: "ok", mn: -20 },
+        { l: "Inaccuracy", s: "?!", c: "in", mn: -50 },
+        { l: "Mistake", s: "?", c: "mi", mn: -120 },
+        { l: "Blunder", s: "??", c: "bl", mn: -250 },
+        { l: "Catastrophe", s: "???", c: "ct", mn: -500 },
+        { l: "Losing", s: "✗", c: "ct", mn: -9999 },
       ];
+      // Sort by mn descending so first match wins
+      RTNG.sort((a, b) => b.mn - a.mn);
 
       const cp = (b) => b.map((r) => [...r]);
       const opp = (c) => (c === "w" ? "b" : "w");
@@ -2159,7 +1916,6 @@
         return false;
       }
       function frozenBy(brd, atkCol, prevFrzAtk) {
-        // prevFrzAtk: Set of squares where atkCol pieces were frozen last turn — they can't freeze others
         const def = opp(atkCol),
           res = [];
         for (let tr = 0; tr < 8; tr++)
@@ -2180,7 +1936,7 @@
                   a[1] === "K"
                 )
                   continue;
-                if (prevFrzAtk && prevFrzAtk.has(ar * 8 + ac)) continue; // frozen attacker can't freeze
+                if (prevFrzAtk && prevFrzAtk.has(ar * 8 + ac)) continue;
                 const av = VAL[a[1]] || 0;
                 if (
                   av > tgtVal &&
@@ -2194,7 +1950,6 @@
         return res;
       }
       function calcFrz(brd, prevFrz) {
-        // byW = white pieces that freeze black; use prevFrz.byW (white was frozen) to exclude them
         const prevFrzW = prevFrz ? new Set(prevFrz.byW) : null;
         const prevFrzB = prevFrz ? new Set(prevFrz.byB) : null;
         const byW = frozenBy(brd, "w", prevFrzW);
@@ -2373,6 +2128,7 @@
       }
       function evalBoard(brd) {
         let s = 0;
+        // Material + PST
         for (let r = 0; r < 8; r++)
           for (let c = 0; c < 8; c++) {
             const p = brd[r][c];
@@ -2382,14 +2138,66 @@
               idx = col === "w" ? r * 8 + c : (7 - r) * 8 + c;
             s += (col === "w" ? 1 : -1) * (VAL[t] + ((PST[t] || [])[idx] || 0));
           }
+        // Control Chess: freeze penalty — frozen pieces lose their value contribution
+        const frz = calcFrz(brd, null);
+        for (const k of frz.byW) {
+          const r = Math.floor(k / 8),
+            c2 = k % 8;
+          const p = brd[r][c2];
+          if (p && p[0] === "w") s -= VAL[p[1]] * 0.35;
+        }
+        for (const k of frz.byB) {
+          const r = Math.floor(k / 8),
+            c2 = k % 8;
+          const p = brd[r][c2];
+          if (p && p[0] === "b") s += VAL[p[1]] * 0.35;
+        }
         return s;
       }
-      let _abNodes = 0;
-      function ab(brd, depth, alpha, beta, col, castl, frz, ply) {
-        _abNodes++;
-        if (_abNodes > 60000)
-          return col === "w" ? evalBoard(brd) : -evalBoard(brd);
-        if (depth <= 0) return col === "w" ? evalBoard(brd) : -evalBoard(brd);
+
+      // ─── Deep eval: quiescence search + deeper alpha-beta ───
+      function quiesce(brd, alpha, beta, col, depth) {
+        const stand = col === "w" ? evalBoard(brd) : -evalBoard(brd);
+        if (depth <= 0) return stand;
+        if (stand >= beta) return beta;
+        if (stand > alpha) alpha = stand;
+        // Only captures
+        const ms = [];
+        for (let r = 0; r < 8; r++)
+          for (let c = 0; c < 8; c++) {
+            const p = brd[r][c];
+            if (!p || p[0] !== col) continue;
+            for (let tr = 0; tr < 8; tr++)
+              for (let tc = 0; tc < 8; tc++) {
+                if (!brd[tr][tc] || brd[tr][tc][0] === col) continue;
+                const mv = { fr: r, fc: c, tr, tc, flag: null };
+                // Quick legality via movesFrom subset check - use reach
+                if (p[1] === "P") {
+                  const d = p[0] === "w" ? -1 : 1;
+                  if (tr !== r + d || Math.abs(tc - c) !== 1) continue;
+                } else if (!reach(brd, r, c, tr, tc, p[1])) continue;
+                if (brd[tr][tc][1] === p[1] && p[1] !== "P") continue;
+                ms.push(mv);
+              }
+          }
+        ms.sort(
+          (a, b) =>
+            (VAL[brd[b.tr][b.tc][1]] || 0) - (VAL[brd[a.tr][a.tc][1]] || 0),
+        );
+        for (const mv of ms) {
+          const nb = cp(brd);
+          applyMv(nb, mv, col);
+          const sc = -quiesce(nb, -beta, -alpha, opp(col), depth - 1);
+          if (sc >= beta) return beta;
+          if (sc > alpha) alpha = sc;
+        }
+        return alpha;
+      }
+
+      function abDeep(brd, depth, alpha, beta, col, castl, frz, ply, deadline) {
+        if (deadline && Date.now() > deadline)
+          return evalBoard(brd) * (col === "w" ? 1 : -1);
+        if (depth <= 0) return quiesce(brd, alpha, beta, col, 3);
         const ms = allMoves(brd, col, castl, frz);
         if (!ms.length) return inCheck(brd, col) ? -19000 + ply : 0;
         ms.sort(
@@ -2413,7 +2221,7 @@
           applyMv(nb, mv, col);
           const nf = calcFrz(nb);
           const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
-          const sc = -ab(
+          const sc = -abDeep(
             nb,
             depth - 1,
             -beta,
@@ -2422,10 +2230,49 @@
             nc,
             nfrz,
             ply + 1,
+            deadline,
           );
           if (sc > best) best = sc;
           if (sc > alpha) alpha = sc;
           if (alpha >= beta) break;
+        }
+        return best;
+      }
+
+      // Deep eval for move rating — returns best possible score for side to move
+      function deepEvalForSide(brd, col, castl, frz, depth) {
+        const ms = allMoves(brd, col, castl, frz);
+        if (!ms.length) return inCheck(brd, col) ? -19000 : 0;
+        const deadline = Date.now() + 800; // 800ms budget
+        let best = -Infinity;
+        for (const mv of ms) {
+          const nb = cp(brd),
+            nc = { ...castl },
+            p = brd[mv.fr][mv.fc];
+          if (p === "wK") {
+            nc.wK = false;
+            nc.wQ = false;
+          }
+          if (p === "bK") {
+            nc.bK = false;
+            nc.bQ = false;
+          }
+          applyMv(nb, mv, col);
+          const nf = calcFrz(nb);
+          const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
+          const sc = -abDeep(
+            nb,
+            depth - 1,
+            -Infinity,
+            Infinity,
+            opp(col),
+            nc,
+            nfrz,
+            1,
+            deadline,
+          );
+          if (sc > best) best = sc;
+          if (Date.now() > deadline) break;
         }
         return best;
       }
@@ -2456,25 +2303,27 @@
       let mDown = null,
         mXY = null;
 
+      // Pre-move state
+      let PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1 };
+
       // Online state
       let NET = {
-        mode: "bot", // 'bot' | 'host' | 'guest'
+        mode: "bot",
         peer: null,
         conn: null,
-        myCol: "w", // which color I play
+        myCol: "w",
         myName: "Player",
         oppName: "Bot",
         showEval: true,
         showRating: true,
-        timeCtrl: null, // {base:ms, inc:ms}
-        timers: { w: 0, b: 0 }, // remaining ms
+        timeCtrl: null,
+        timers: { w: 0, b: 0 },
         timerInterval: null,
         lastTimestamp: null,
         gameStarted: false,
-        rematchTime: null, // time control for rematch
+        rematchTime: null,
       };
 
-      // Time controls list
       const TIME_CTRLS = [
         { l: "1+0", base: 60000, inc: 0 },
         { l: "1+1", base: 60000, inc: 1000 },
@@ -2489,14 +2338,20 @@
         { l: "30+0", base: 1800000, inc: 0 },
         { l: "60+0", base: 3600000, inc: 0 },
       ];
-      let selectedTC = null; // index into TIME_CTRLS
+      let selectedTC = null,
+        localSelectedTC = null;
 
-      function formatTime(ms) {
+      function formatTime(ms, showMs) {
         if (ms < 0) ms = 0;
+        if (showMs) {
+          // Show seconds.tenths
+          const s = Math.floor(ms / 1000),
+            tenth = Math.floor((ms % 1000) / 100);
+          return s + "." + tenth;
+        }
         const s = Math.ceil(ms / 1000);
         const m = Math.floor(s / 60),
           ss = s % 60;
-        if (m >= 10) return m + ":" + (ss < 10 ? "0" : "") + ss;
         return m + ":" + (ss < 10 ? "0" : "") + ss;
       }
 
@@ -2505,6 +2360,9 @@
       // ═══════════════════════════════════════
       function newGame(tcOverride) {
         stopAnim();
+        PMQUEUE = [];
+        PMSEL = null;
+        PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1, poss: [] };
         const bk = ["R", "N", "B", "Q", "K", "B", "N", "R"];
         const brd = Array.from({ length: 8 }, () => Array(8).fill(null));
         for (let c = 0; c < 8; c++) {
@@ -2529,14 +2387,13 @@
           prevEval: 0,
           halfMove: 0,
           posHist: [],
+          bestEvalCache: null, // cache best move eval for rating
         };
         document.getElementById("toast").classList.remove("on");
         document.getElementById("movesEl").innerHTML = "";
         document.getElementById("ratingEl").innerHTML =
           '<span style="color:var(--dim);font-size:.7rem">— make a move —</span>';
         document.getElementById("mRt").innerHTML = "";
-
-        // timers
         stopTimers();
         const tc = tcOverride || NET.timeCtrl;
         if (tc) {
@@ -2544,21 +2401,15 @@
           showTimers(true);
           updateTimerDisplay();
           if (NET.mode === "bot") startTurnTimer("w");
-          // in online mode, host sends start signal
         } else {
           showTimers(false);
         }
-
         setEval(0);
-        // eval/rating visibility
         const showEv = NET.showEval;
-        const showRt = NET.showRating;
         document.getElementById("evbar").style.display = showEv ? "" : "none";
         const rCard = document.getElementById("bR");
         if (rCard && rCard.parentElement)
-          rCard.parentElement.style.display = showRt ? "" : "none";
-
-        // Local mode always starts from white's perspective
+          rCard.parentElement.style.display = NET.showRating ? "" : "none";
         if (NET.mode === "local") flipped = false;
         render();
         updStatus();
@@ -2583,7 +2434,7 @@
         stopTimers();
         if (!NET.timeCtrl) return;
         NET.lastTimestamp = Date.now();
-        NET.timerInterval = setInterval(() => tickTimer(col), 100);
+        NET.timerInterval = setInterval(() => tickTimer(col), 50); // 50ms precision
       }
       function tickTimer(col) {
         const now = Date.now(),
@@ -2591,25 +2442,48 @@
         NET.lastTimestamp = now;
         NET.timers[col] = Math.max(0, NET.timers[col] - dt);
         updateTimerDisplay();
-        if (NET.timers[col] <= 0) {
+        // Warning ticks at low time
+        const t = NET.timers[col];
+        if (t <= 10000 && t > 0) {
+          const prev = t + dt;
+          // Every second boundary while < 10s: play tick
+          if (Math.floor(prev / 1000) > Math.floor(t / 1000)) {
+            playLowTimeTick();
+          }
+        }
+        if (t <= 0) {
           stopTimers();
           endGame("timeout", opp(col));
         }
       }
       function updateTimerDisplay() {
-        const myCol = NET.myCol || "w",
-          opCol = opp(myCol);
+        // Determine which colour is shown at bottom (my side)
+        const botCol =
+          NET.mode === "bot"
+            ? "w"
+            : NET.mode === "local"
+              ? flipped
+                ? "b"
+                : "w"
+              : NET.myCol || "w";
+        const topCol = opp(botCol);
         const tb = document.getElementById("timerBot"),
           tt = document.getElementById("timerTop");
+        const btMs = (NET.timers && NET.timers[botCol]) || 0;
+        const topMs = (NET.timers && NET.timers[topCol]) || 0;
+        const btLow = btMs < 10000 && btMs > 0,
+          topLow = topMs < 10000 && topMs > 0;
         if (tb) {
-          tb.textContent = formatTime(NET.timers[myCol] || 0);
-          tb.classList.toggle("active", G.turn === myCol && !G.over);
-          tb.classList.toggle("low", (NET.timers[myCol] || 0) < 10000);
+          tb.textContent = formatTime(btMs, btLow);
+          tb.classList.toggle("active", G.turn === botCol && !G.over);
+          tb.classList.toggle("low", btLow);
+          tb.classList.toggle("critical", btLow);
         }
         if (tt) {
-          tt.textContent = formatTime(NET.timers[opCol] || 0);
-          tt.classList.toggle("active", G.turn === opCol && !G.over);
-          tt.classList.toggle("low", (NET.timers[opCol] || 0) < 10000);
+          tt.textContent = formatTime(topMs, topLow);
+          tt.classList.toggle("active", G.turn === topCol && !G.over);
+          tt.classList.toggle("low", topLow);
+          tt.classList.toggle("critical", topLow);
         }
         if (document.getElementById("mSt")) updMobile();
       }
@@ -2620,11 +2494,14 @@
       async function playMove(mv, isBot, fromNet) {
         const { fr, fc, tr, tc, flag } = mv;
         const piece = G.brd[fr][fc],
-          cap = G.brd[tr][tc],
-          oldEv = G.prevEval;
-        const note = buildNote(G.brd, mv, G.turn);
+          cap = G.brd[tr][tc];
 
-        // Stop timer for this side, add increment
+        // Deep eval BEFORE move for rating comparison
+        let preEval = G.prevEval;
+        // Also compute what the best move would have scored (async, non-blocking for bot)
+        let bestEval = G.bestEvalCache;
+
+        const note = buildNote(G.brd, mv, G.turn);
         if (NET.timeCtrl) {
           stopTimers();
           if (NET.timeCtrl.inc)
@@ -2633,7 +2510,6 @@
               NET.timeCtrl.base * 2,
             );
         }
-
         if (piece === "wK") {
           G.castl.wK = false;
           G.castl.wQ = false;
@@ -2646,7 +2522,6 @@
         if (fr === 7 && fc === 0) G.castl.wQ = false;
         if (fr === 0 && fc === 7) G.castl.bK = false;
         if (fr === 0 && fc === 0) G.castl.bQ = false;
-
         G.brd[tr][tc] = piece;
         G.brd[fr][fc] = null;
         if (flag === "cs") {
@@ -2658,63 +2533,225 @@
           G.brd[tr][0] = null;
         }
         if (cap) (G.turn === "w" ? G.capW : G.capB).push(cap);
-
-        // Promotion
         if (piece === "wP" && tr === 0) {
-          const q = isBot || fromNet ? "wQ" : await doPromo("w");
+          let q;
+          if (fromNet)
+            q = mv.promo || "wQ"; // use promo from network packet
+          else if (isBot) q = "wQ";
+          else q = await doPromo("w");
           G.brd[tr][tc] = q;
-          if (NET.mode === "host" && !fromNet)
-            netSend({ type: "promo", piece: q });
+          mv.promo = q; // store in mv so netSend includes it
         }
         if (piece === "bP" && tr === 7) {
-          const q = isBot || fromNet ? "bQ" : await doPromo("b");
+          let q;
+          if (fromNet) q = mv.promo || "bQ";
+          else if (isBot) q = "bQ";
+          else q = await doPromo("b");
           G.brd[tr][tc] = q;
-          if (NET.mode === "guest" && !fromNet)
-            netSend({ type: "promo", piece: q });
+          mv.promo = q;
         }
-
         G.lastMv = { fr, fc, tr, tc };
         G.prevFrz = G.frz;
         G.frz = calcFrz(G.brd, G.prevFrz);
         const newEv = evalBoard(G.brd);
         G.prevEval = newEv;
 
-        // Rating — always compute, show based on settings
-        const delta = G.turn === "w" ? newEv - oldEv : oldEv - newEv;
-        let ri = RTNG.length - 1;
-        for (let i = 0; i < RTNG.length; i++)
-          if (delta >= RTNG[i].mn) {
-            ri = i;
-            break;
+        // ── Move rating ─────────────────────────────────────────────────────────
+        const movingCol = G.turn;
+        const oppCol = opp(movingCol);
+
+        // Helper: negamax eval from col's perspective, depth-limited, hard deadline
+        function negaMax(brd, col, castl, frz, depth, alpha, beta, dl) {
+          if (Date.now() > dl) return evalBoard(brd) * (col === "w" ? 1 : -1);
+          if (depth <= 0) return evalBoard(brd) * (col === "w" ? 1 : -1);
+          const ms = allMoves(brd, col, castl, frz);
+          if (!ms.length) return inCheck(brd, col) ? -18000 + depth : 0;
+          let best = -Infinity;
+          for (const m of ms) {
+            if (Date.now() > dl) break;
+            const nb = cp(brd),
+              nc = { ...castl },
+              pp = brd[m.fr][m.fc];
+            if (pp === "wK") {
+              nc.wK = false;
+              nc.wQ = false;
+            }
+            if (pp === "bK") {
+              nc.bK = false;
+              nc.bQ = false;
+            }
+            applyMv(nb, m, col);
+            const nf = calcFrz(nb),
+              nfrz = opp(col) === "w" ? nf.byB : nf.byW;
+            const sc = -negaMax(
+              nb,
+              opp(col),
+              nc,
+              nfrz,
+              depth - 1,
+              -beta,
+              -alpha,
+              dl,
+            );
+            if (sc > best) best = sc;
+            if (sc > alpha) alpha = sc;
+            if (alpha >= beta) break;
           }
+          return best;
+        }
+
+        const nextFrzNow = oppCol === "w" ? G.frz.byB : G.frz.byW;
+        const oppMoves = allMoves(G.brd, oppCol, G.castl, nextFrzNow);
+        const isCheckmate = oppMoves.length === 0 && inCheck(G.brd, oppCol);
+
+        let ri;
+        if (isCheckmate) {
+          ri = 0; // Mat → zawsze najlepsza ocena
+        } else {
+          // scoreActual: jak dobra jest pozycja dla movingCol po TYM ruchu
+          // = negamax na aktualnej planszy z perspektywy oppCol, zanegowany
+          const dl1 = Date.now() + 200;
+          const scoreActual = -negaMax(
+            G.brd,
+            oppCol,
+            G.castl,
+            nextFrzNow,
+            2,
+            -Infinity,
+            Infinity,
+            dl1,
+          );
+
+          // scoreBest: jak dobra byłaby pozycja gdyby movingCol zagrał NAJLEPSZY ruch
+          // Mamy to w bestEvalCache z poprzedniego ruchu (obliczone synchronicznie poniżej)
+          // Jeśli null (pierwszy ruch) → eval materialny przed ruchem
+          let scoreBest;
+          if (bestEval !== null && bestEval !== undefined) {
+            // bestEval jest w jednostkach white-positive; konwertuj na movingCol-positive
+            scoreBest = bestEval * (movingCol === "w" ? 1 : -1);
+          } else {
+            // Pierwszy ruch: oblicz synchronicznie best możliwy wynik
+            const myFrzNow = movingCol === "w" ? G.frz.byB : G.frz.byW; // stan PRZED ruchem (już zastąpiony)
+            // Brak poprzednich danych — użyj prostego materiału
+            scoreBest = evalBoard(G.brd) * (movingCol === "w" ? 1 : -1);
+          }
+
+          const delta = scoreActual - scoreBest; // > 0: lepiej niż best → podejrzane; < 0: gorzej
+          // Normalize: jeśli gracz zagrał dokładnie najlepszy ruch, delta ≈ 0
+          ri = RTNG.length - 1;
+          for (let i = 0; i < RTNG.length; i++)
+            if (delta >= RTNG[i].mn) {
+              ri = i;
+              break;
+            }
+        }
+
+        // Eval bar: shallow najpierw
+        if (NET.showEval) setEval(evalBoard(G.brd));
+
+        // Oblicz SYNCHRONICZNIE bestEvalCache dla NASTĘPNEGO ruchu (dla oceny następnego gracza)
+        // Robimy to synchronicznie żeby było dostępne gdy gracz zagra ruch
+        // Max 300ms żeby nie lagować
+        {
+          const _col = oppCol,
+            _frz = nextFrzNow,
+            _castl = { ...G.castl },
+            _brd = G.brd;
+          const ms2 = allMoves(_brd, _col, _castl, _frz);
+          if (ms2.length) {
+            const dl2 = Date.now() + 300;
+            let best2 = -Infinity;
+            for (const m of ms2) {
+              if (Date.now() > dl2) break;
+              const nb = cp(_brd),
+                nc = { ..._castl },
+                pp = _brd[m.fr][m.fc];
+              if (pp === "wK") {
+                nc.wK = false;
+                nc.wQ = false;
+              }
+              if (pp === "bK") {
+                nc.bK = false;
+                nc.bQ = false;
+              }
+              applyMv(nb, m, _col);
+              const nf = calcFrz(nb),
+                nfrz = opp(_col) === "w" ? nf.byB : nf.byW;
+              const sc = -negaMax(
+                nb,
+                opp(_col),
+                nc,
+                nfrz,
+                1,
+                -Infinity,
+                Infinity,
+                dl2,
+              );
+              if (sc > best2) best2 = sc;
+            }
+            // Zapisz w white-positive
+            G.bestEvalCache = _col === "w" ? best2 : -best2;
+            // Refined eval bar async
+            setTimeout(() => {
+              if (G.over) return;
+              const dl3 = Date.now() + 500;
+              let best3 = -Infinity;
+              for (const m of ms2) {
+                if (Date.now() > dl3) break;
+                const nb = cp(_brd),
+                  nc = { ..._castl },
+                  pp = _brd[m.fr][m.fc];
+                if (pp === "wK") {
+                  nc.wK = false;
+                  nc.wQ = false;
+                }
+                if (pp === "bK") {
+                  nc.bK = false;
+                  nc.bQ = false;
+                }
+                applyMv(nb, m, _col);
+                const nf = calcFrz(nb),
+                  nfrz = opp(_col) === "w" ? nf.byB : nf.byW;
+                const sc = -negaMax(
+                  nb,
+                  opp(_col),
+                  nc,
+                  nfrz,
+                  3,
+                  -Infinity,
+                  Infinity,
+                  dl3,
+                );
+                if (sc > best3) best3 = sc;
+              }
+              G.bestEvalCache = _col === "w" ? best3 : -best3;
+              if (NET.showEval) setEval(G.bestEvalCache);
+            }, 0);
+          } else {
+            G.bestEvalCache = null;
+          }
+        }
+
         const showRt = NET.showRating;
         if (showRt) {
           const R = RTNG[ri];
           let html = `<span class="${R.c}">${R.s} ${R.l}</span>`;
           if (inCheck(G.brd, opp(G.turn)))
             html += ` <span class="ck">Check!</span>`;
-          // In online: show your rating at bottom, opponent at top
           if (NET.mode !== "bot") {
-            const isMyMove = G.turn === NET.myCol;
-            // store both; show relevant
+            const isMyMove = movingCol === NET.myCol;
             html = isMyMove ? `<b>You:</b> ${html}` : `<b>Opp:</b> ${html}`;
           }
           document.getElementById("ratingEl").innerHTML = html;
           document.getElementById("mRt").innerHTML =
             `<span class="${RTNG[ri].c}">${RTNG[ri].s}</span>`;
         }
-
-        const showEv = NET.showEval;
-        if (showEv) setEval(newEv);
-
-        addNote(note, G.turn, G.hist.length, ri, showRt);
+        if (NET.showEval) setEval(newEv);
+        addNote(note, movingCol, G.hist.length, ri, showRt);
         G.hist.push(mv);
-        G.turn = opp(G.turn);
-        // 50-move rule counter (reset on pawn move or capture)
+        G.turn = opp(movingCol);
         const wasCapOrPawn = cap || piece[1] === "P";
         G.halfMove = wasCapOrPawn ? 0 : G.halfMove + 1;
-
-        // Position hash for repetition detection
         const posKey =
           G.brd.map((r) => r.join(",")).join("|") +
           ";" +
@@ -2723,13 +2760,18 @@
           JSON.stringify(G.castl);
         G.posHist.push(posKey);
         const repCount = G.posHist.filter((k) => k === posKey).length;
-
-        // Send move over network
         if (!fromNet && NET.mode !== "bot" && NET.conn) {
-          netSend({ type: "move", mv, timers: NET.timers, castl: G.castl });
+          // mv.promo is set above if promotion occurred — receiver uses it directly
+          netSend({
+            type: "move",
+            mv,
+            timers: NET.timers,
+            castl: G.castl,
+            eval: newEv,
+            ri,
+            showRt: NET.showRating,
+          });
         }
-
-        // Draw checks
         if (G.halfMove >= 100) {
           endGame("fifty", "");
           return;
@@ -2742,7 +2784,6 @@
           endGame("insufficient", "");
           return;
         }
-
         const nextFrz = G.turn === "w" ? G.frz.byB : G.frz.byW;
         const nextMs = allMoves(G.brd, G.turn, G.castl, nextFrz);
         if (!nextMs.length) {
@@ -2752,28 +2793,56 @@
           );
           return;
         }
-
-        // Local 2P: auto-flip board so current player always sees their side
         if (NET.mode === "local" && !G.over) flipped = G.turn === "b";
 
-        // Play sound
-        {
-          const _cap2 = G.capW.length + G.capB.length;
-          const _prevCap = _cap2 - (cap ? 1 : 0);
-          const _isCastle = flag === "cs" || flag === "cl";
-          if (_isCastle) playSound("castle");
-          else if (cap) playSound("capture");
-          else playSound("move");
-          // check sound
-          const _nextFrz2 = G.turn === "w" ? G.frz.byB : G.frz.byW;
-          if (inCheck(G.brd, G.turn)) playSound("check");
-        }
+        // Sounds
+        if (flag === "cs" || flag === "cl") playSound("castle");
+        else if (cap) playSound("capture");
+        else playSound("move");
+        if (inCheck(G.brd, G.turn)) playSound("check");
+
         render();
         updStatus();
         updCaps();
-
-        // Start opponent timer
         if (NET.timeCtrl && !G.over) startTurnTimer(G.turn);
+
+        // ── Execute pre-move chain ─────────────────────────────────────────────────
+        // myCol = kolor gracza (nie bota) który ustawił pre-move
+        if (PMQUEUE.length > 0 && !G.over) {
+          const pmCol =
+            NET.mode === "bot" ? "w" : NET.mode === "local" ? null : NET.myCol;
+          // W trybie local pre-move nie ma sensu (zawsze moja tura)
+          if (pmCol && G.turn === pmCol) {
+            const pm = PMQUEUE.shift();
+            PMSEL = null;
+            pmSync();
+            const myFrz = G.turn === "w" ? G.frz.byB : G.frz.byW;
+            const piece = G.brd[pm.fr][pm.fc];
+            // Figura musi należeć do mnie i stać na spodziewanym polu
+            if (piece && piece[0] === G.turn) {
+              const validMoves = movesFrom(G.brd, pm.fr, pm.fc, G.castl, myFrz);
+              // Szukaj ruchu na docelowe pole — nieważne czy tam stoi figura czy nie
+              // (sytuacja mogła się zmienić — bicie zniknęło, ale ruch pusty jest legalny)
+              const pmv = validMoves.find(
+                (m) => m.tr === pm.tr && m.tc === pm.tc,
+              );
+              if (pmv) {
+                G.sel = null;
+                G.poss = [];
+                // Small delay ensures render completes, then execute premove
+                setTimeout(() => {
+                  if (!G.over && G.turn === pmCol) playMove(pmv, false, false);
+                }, 50);
+                return;
+              }
+            }
+            // Ten krok nielegalny → cały łańcuch odpada
+            PMQUEUE = [];
+            PMSEL = null;
+            pmSync();
+            render();
+          }
+        }
 
         if (NET.mode === "bot" && G.turn === "b" && !G.over) {
           document.getElementById("thkEl").classList.add("on");
@@ -2812,10 +2881,9 @@
       }
 
       // ═══════════════════════════════════════
-      // BOT — async via setTimeout chunks (no Worker needed, never blocks UI)
+      // BOT
       // ═══════════════════════════════════════
       let _botAbort = false;
-
       function runBot() {
         document.getElementById("thkEl").classList.add("on");
         document.getElementById("mThk").classList.add("on");
@@ -2823,17 +2891,13 @@
         const delay = [150, 250, 400, 600, 900][botLevel - 1] || 300;
         setTimeout(() => _botAsync(G.brd, G.castl, G.frz.byW, botLevel), delay);
       }
-
       function _botAsync(brd, castl, frzW, level) {
         if (_botAbort || G.over || G.turn !== "b" || NET.mode !== "bot") return;
-
         const ms = allMoves(brd, "b", castl, frzW);
         if (!ms.length) {
           postBotMove(null);
           return;
         }
-
-        // Levels 1-2: instant random/greedy, no search needed
         if (level === 1) {
           const nc = ms.filter((m) => !brd[m.tr][m.tc]);
           const pool = nc.length && Math.random() < 0.85 ? nc : ms;
@@ -2856,27 +2920,20 @@
           postBotMove(best);
           return;
         }
-
-        // Levels 3-5: search using chunked async alpha-beta
-        const depth = [0, 0, 0, 1, 2, 3][level] || 1;
+        const depth = [0, 0, 0, 2, 3, 4][level] || 2; // deeper search levels
         const noise = [0, 0, 0, 0.06, 0.02, 0][level] || 0;
-        const timeLimit = [0, 0, 0, 350, 700, 1200][level] || 500;
+        const timeLimit = [0, 0, 0, 500, 1000, 2000][level] || 700;
         const deadline = Date.now() + timeLimit;
-
-        // Sort moves: captures first
         ms.sort(
           (a, b) =>
             (brd[b.tr][b.tc] ? VAL[brd[b.tr][b.tc][1]] || 0 : 0) -
             (brd[a.tr][a.tc] ? VAL[brd[a.tr][a.tc][1]] || 0 : 0),
         );
-
         let bestMove = ms[0],
           bestScore = -Infinity,
           idx = 0;
-
         function step() {
           if (_botAbort) return;
-          // Process a chunk of moves per frame
           const chunkEnd = Math.min(idx + 3, ms.length);
           while (idx < chunkEnd) {
             const mv = ms[idx++];
@@ -2889,7 +2946,7 @@
             }
             applyMv(nb, mv, "b");
             const nf = calcFrz(nb);
-            let sc = -_abSync(
+            let sc = -abDeep(
               nb,
               depth - 1,
               -Infinity,
@@ -2906,70 +2963,11 @@
               bestMove = mv;
             }
           }
-          if (idx >= ms.length || Date.now() > deadline) {
-            postBotMove(bestMove);
-          } else {
-            setTimeout(step, 0); // yield to browser, then continue
-          }
+          if (idx >= ms.length || Date.now() > deadline) postBotMove(bestMove);
+          else setTimeout(step, 0);
         }
         step();
       }
-
-      function _abSync(
-        brd,
-        depth,
-        alpha,
-        beta,
-        col,
-        castl,
-        frz,
-        ply,
-        deadline,
-      ) {
-        if (Date.now() > deadline)
-          return evalBoard(brd) * (col === "w" ? 1 : -1);
-        if (depth <= 0) return evalBoard(brd) * (col === "w" ? 1 : -1);
-        const ms = allMoves(brd, col, castl, frz);
-        if (!ms.length) return inCheck(brd, col) ? -19000 + ply : 0;
-        ms.sort(
-          (a, b) =>
-            (brd[b.tr][b.tc] ? VAL[brd[b.tr][b.tc][1]] || 0 : 0) -
-            (brd[a.tr][a.tc] ? VAL[brd[a.tr][a.tc][1]] || 0 : 0),
-        );
-        let best = -Infinity;
-        for (const mv of ms) {
-          const nb = cp(brd),
-            nc = { ...castl },
-            p = brd[mv.fr][mv.fc];
-          if (p === "wK") {
-            nc.wK = false;
-            nc.wQ = false;
-          }
-          if (p === "bK") {
-            nc.bK = false;
-            nc.bQ = false;
-          }
-          applyMv(nb, mv, col);
-          const nf = calcFrz(nb);
-          const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
-          const sc = -_abSync(
-            nb,
-            depth - 1,
-            -beta,
-            -alpha,
-            opp(col),
-            nc,
-            nfrz,
-            ply + 1,
-            deadline,
-          );
-          if (sc > best) best = sc;
-          if (sc > alpha) alpha = sc;
-          if (alpha >= beta) break;
-        }
-        return best;
-      }
-
       function postBotMove(mv) {
         document.getElementById("thkEl").classList.remove("on");
         document.getElementById("mThk").classList.remove("on");
@@ -2978,71 +2976,314 @@
       }
 
       // ═══════════════════════════════════════
+      // PRE-MOVE — all pieces, all modes, chess.com style
+      // ═══════════════════════════════════════
+      // ── Pre-move chain helpers ────────────────────────────────────────────────────
+      // PMQUEUE = [{fr,fc,tr,tc}, ...] — chain of moves to execute in order
+      // PMSEL   = {fr,fc,poss:[]} | null — currently highlighted source (picking next step)
+      // PREMOVE = legacy compat alias (first item in queue, or empty)
+
+      function pmClear() {
+        PMQUEUE = [];
+        PMSEL = null;
+        PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1, poss: [] };
+        render();
+      }
+      function pmSync() {
+        // Keep PREMOVE in sync with first queued item (legacy code still uses PREMOVE)
+        if (PMQUEUE.length > 0) {
+          const q = PMQUEUE[0];
+          PREMOVE = {
+            active: true,
+            fr: q.fr,
+            fc: q.fc,
+            tr: q.tr,
+            tc: q.tc,
+            poss: [],
+          };
+        } else {
+          PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1, poss: [] };
+        }
+      }
+      // Called when user picks a destination during pre-move setup
+      // Adds to queue, then starts picking next step from that destination
+      function pmAddStep(fr, fc, tr, tc, brdState, col) {
+        const simBrd = brdSim(brdState, fr, fc, tr, tc);
+        // Store simulated board state WITH this step so later steps can build on it
+        PMQUEUE.push({ fr, fc, tr, tc, brd: simBrd });
+        pmSync();
+        // Auto-select the piece at its new position for next step
+        const piece = brdState[fr][fc];
+        if (piece) {
+          const nextPoss = premovePoss(tr, tc, simBrd, col);
+          PMSEL = { fr: tr, fc: tc, poss: nextPoss, brd: simBrd };
+        } else {
+          PMSEL = null;
+        }
+        render();
+      }
+      // Simulate one move on a board without modifying it (lightweight, no copy for queens/sliders)
+      function brdSim(brd, fr, fc, tr, tc) {
+        // Fast shallow copy of 2D array
+        const b = brd.map((r) => r.slice());
+        const p = b[fr][fc];
+        b[tr][tc] = p;
+        b[fr][fc] = null;
+        // Handle castling geometry
+        if (p && p[1] === "K") {
+          const rk = p[0] === "w" ? 7 : 0;
+          if (fr === rk && fc === 4 && tc === 6) {
+            b[rk][5] = p[0] + "R";
+            b[rk][7] = null;
+          }
+          if (fr === rk && fc === 4 && tc === 2) {
+            b[rk][3] = p[0] + "R";
+            b[rk][0] = null;
+          }
+        }
+        // Pawn promotion → queen for simulation purposes
+        if (p && p[1] === "P" && (tr === 0 || tr === 7)) b[tr][tc] = p[0] + "Q";
+        return b;
+      }
+      // Legacy alias
+      function setPremove(fr, fc, tr, tc) {
+        const b = brdSim(G.brd, fr, fc, tr, tc);
+        PMQUEUE = [{ fr, fc, tr, tc, brd: b }];
+        PMSEL = null;
+        pmSync();
+        render();
+      }
+      function clearPremove() {
+        pmClear();
+      }
+      // Fast premove squares — pure geometry, no board copy, no check validation
+      // brd = board to use (current or hypothetical), col = moving color
+      function premovePoss(fr, fc, brd, col) {
+        if (!brd) brd = G.brd;
+        const p = brd[fr][fc];
+        if (!p) return [];
+        if (!col) col = p[0];
+        const type = p[1];
+        const sq = [];
+        function ok(tr, tc) {
+          if (tr < 0 || tr >= 8 || tc < 0 || tc >= 8) return false;
+          const t = brd[tr][tc];
+          if (t && t[0] === col) return false; // own piece
+          if (t && t[1] === type && type !== "P") return false; // same-type capture banned
+          return true;
+        }
+        function add(tr, tc) {
+          if (ok(tr, tc)) sq.push({ tr, tc });
+        }
+        if (type === "P") {
+          const d = col === "w" ? -1 : 1,
+            sR = col === "w" ? 6 : 1;
+          const nr = fr + d;
+          if (nr >= 0 && nr < 8) {
+            if (!brd[nr][fc]) {
+              add(nr, fc);
+              if (fr === sR && !brd[fr + 2 * d][fc]) add(fr + 2 * d, fc);
+            }
+            for (const dc of [-1, 1]) {
+              const nc = fc + dc;
+              if (nc >= 0 && nc < 8 && brd[nr][nc] && brd[nr][nc][0] !== col)
+                add(nr, nc);
+            }
+          }
+        } else if (type === "N") {
+          for (const [dr, dc] of [
+            [2, 1],
+            [2, -1],
+            [-2, 1],
+            [-2, -1],
+            [1, 2],
+            [1, -2],
+            [-1, 2],
+            [-1, -2],
+          ])
+            add(fr + dr, fc + dc);
+        } else if (type === "K") {
+          for (const [dr, dc] of [
+            [-1, -1],
+            [-1, 0],
+            [-1, 1],
+            [0, -1],
+            [0, 1],
+            [1, -1],
+            [1, 0],
+            [1, 1],
+          ])
+            add(fr + dr, fc + dc);
+          const rk = col === "w" ? 7 : 0;
+          if (fr === rk && fc === 4) {
+            if (!brd[rk][5] && !brd[rk][6]) sq.push({ tr: rk, tc: 6 });
+            if (!brd[rk][3] && !brd[rk][2] && !brd[rk][1])
+              sq.push({ tr: rk, tc: 2 });
+          }
+        } else {
+          const D =
+            type === "B"
+              ? [
+                  [1, 1],
+                  [1, -1],
+                  [-1, 1],
+                  [-1, -1],
+                ]
+              : type === "R"
+                ? [
+                    [1, 0],
+                    [-1, 0],
+                    [0, 1],
+                    [0, -1],
+                  ]
+                : [
+                    [1, 1],
+                    [1, -1],
+                    [-1, 1],
+                    [-1, -1],
+                    [1, 0],
+                    [-1, 0],
+                    [0, 1],
+                    [0, -1],
+                  ];
+          for (const [dr, dc] of D) {
+            let nr = fr + dr,
+              nc = fc + dc;
+            while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+              const t = brd[nr][nc];
+              if (t) {
+                if (t[0] !== col && t[1] !== type) sq.push({ tr: nr, tc: nc });
+                break;
+              }
+              sq.push({ tr: nr, tc: nc });
+              nr += dr;
+              nc += dc;
+            }
+          }
+        }
+        return sq;
+      }
+      // Who is "me" for premove purposes
+      function myColor() {
+        if (NET.mode === "local") return G.turn; // local: always current player
+        if (NET.mode === "bot") return "w"; // vs bot: always white
+        return NET.myCol; // online: my assigned color
+      }
+      // Is it currently my turn to move?
+      function isMyTurn() {
+        if (G.over) return false;
+        if (NET.mode === "local") return true;
+        if (NET.mode === "bot") return G.turn === "w";
+        return G.turn === NET.myCol;
+      }
+
+      // ═══════════════════════════════════════
       // RENDER
       // ═══════════════════════════════════════
       function buildLabels() {
-        ["labTop", "labBot"].forEach((id) => {
-          const el = document.getElementById(id);
-          if (!el) return;
-          el.innerHTML = "";
-          for (let i = 0; i < 8; i++) {
-            const fi = flipped ? 7 - i : i;
-            const d = document.createElement("div");
-            d.className = "blbl f";
-            d.textContent = FILES[fi];
-            el.appendChild(d);
-          }
+        const labLeft = document.getElementById("labLeft");
+        const labRight = document.getElementById("labRight");
+        const labTop = document.getElementById("labTop");
+        const labBot = document.getElementById("labBot");
+        [labLeft, labRight, labTop, labBot].forEach((el) => {
+          if (el) el.innerHTML = "";
         });
-        ["labLeft", "labRight"].forEach((id) => {
-          const el = document.getElementById(id);
-          if (!el) return;
-          el.innerHTML = "";
-          for (let i = 0; i < 8; i++) {
-            const ri = flipped ? i : 7 - i;
-            const d = document.createElement("div");
-            d.className = "blbl r";
-            d.textContent = RANKS[ri];
-            el.appendChild(d);
-          }
-        });
+
+        // Rangi (1-8) — zawsze po lewej stronie wizualnej
+        // !flipped: labLeft jest fizycznie po lewej. i=0(góra)→8, i=7(dół)→1
+        // flipped: cały wrapper obrócony 180°, więc labLeft jest po prawej wizualnie
+        //   → wpisz do labRight; rotacja odwróci kolejność DOM:
+        //   chcemy 8 na górze wizualnie → w DOM i=0→1, i=7→8 (rotacja: 8 na górze ✓)
+        if (!flipped) {
+          if (labLeft)
+            for (let i = 0; i < 8; i++) {
+              const d = document.createElement("div");
+              d.className = "blbl r";
+              d.textContent = 8 - i;
+              labLeft.appendChild(d);
+            }
+        } else {
+          if (labRight)
+            for (let i = 0; i < 8; i++) {
+              const d = document.createElement("div");
+              d.className = "blbl r";
+              d.textContent = 8 - i;
+              labRight.appendChild(d);
+            }
+        }
+
+        // Pliki (a-h) — zawsze na dole wizualnym
+        // !flipped: labBot fizycznie na dole. i=0→a, i=7→h
+        // flipped: labTop staje się dołem po rotacji; rotacja odwróci kolejność
+        //   chcemy a po lewej wizualnie → w DOM i=0→h, i=7→a (rotacja: a po lewej ✓)
+        if (!flipped) {
+          if (labBot)
+            for (let i = 0; i < 8; i++) {
+              const d = document.createElement("div");
+              d.className = "blbl f";
+              d.textContent = FILES[i];
+              labBot.appendChild(d);
+            }
+        } else {
+          if (labTop)
+            for (let i = 0; i < 8; i++) {
+              const d = document.createElement("div");
+              d.className = "blbl f";
+              d.textContent = FILES[i];
+              labTop.appendChild(d);
+            }
+        }
+
+        // b-top i b-bot mają margin-left:var(--lbl) (dla labLeft gdy !flipped)
+        // gdy flipped labLeft jest pusty → usuń ten margin
+        const bTopEl = document.querySelector(".b-top");
+        const bBotEl = document.querySelector(".b-bot");
+        if (bTopEl) bTopEl.style.marginLeft = flipped ? "0" : "";
+        if (bBotEl) bBotEl.style.marginLeft = flipped ? "0" : "";
       }
-      // Track last rendered state to skip full rebuild when only highlights change
-      let _lastFlipped = null;
 
       function render() {
         const bwrapEl = document.getElementById("bwrap");
-
-        // Flip: only add/remove class, no DOM rebuild needed
         if (bwrapEl) {
           const wasFlipped = bwrapEl.classList.contains("flipped");
-          if (flipped !== wasFlipped) {
-            if (flipped) bwrapEl.classList.add("flipped");
-            else bwrapEl.classList.remove("flipped");
-            buildLabels(); // labels change when flip direction changes
+          if (flipped) bwrapEl.classList.add("flipped");
+          else bwrapEl.classList.remove("flipped");
+          if (
+            flipped !== wasFlipped ||
+            !document.getElementById("labLeft").children.length
+          ) {
+            buildLabels();
           }
         }
-
         const boardEl = document.getElementById("board");
         const frzSet = new Set(G.frz.all);
         const possSet = new Set(G.poss.map((m) => m.tr * 8 + m.tc));
+        // Pre-move chain: collect all squares involved
+        // All queued from/to squares
+        const pmFromSet = new Set(PMQUEUE.map((s) => s.fr * 8 + s.fc));
+        const pmToSet = new Set(PMQUEUE.map((s) => s.tr * 8 + s.tc));
+        // Poss dots for currently active PMSEL
+        const prePossSet = new Set(
+          PMSEL && PMSEL.poss ? PMSEL.poss.map((m) => m.tr * 8 + m.tc) : [],
+        );
+        // All destinations in queue shown as premove-to (brighter orange)
+        const pmDestSet = new Set(PMQUEUE.map((s) => s.tr * 8 + s.tc));
+        // Last destination per piece — for "continue journey" highlight
+        const pmSelSrc = PMSEL ? PMSEL.fr * 8 + PMSEL.fc : -1;
         let kchk = -1;
         if (inCheck(G.brd, G.turn))
           for (let r = 0; r < 8; r++)
             for (let c = 0; c < 8; c++)
               if (G.brd[r][c] === G.turn + "K") kchk = r * 8 + c;
-        const myTurn = myTurnNow();
-
-        // If board already has 64 squares, update in-place (no innerHTML reset)
         const squares = boardEl.children;
         if (squares.length === 64) {
           for (let dr = 0; dr < 8; dr++)
             for (let dc = 0; dc < 8; dc++) {
               const r = dr,
-                c = dc;
-              const sq = squares[dr * 8 + dc];
-              const k = r * 8 + c;
-              const p = G.brd[r][c];
-              // Recompute classes
+                c = dc,
+                sq = squares[dr * 8 + dc],
+                k = r * 8 + c,
+                p = G.brd[r][c];
               let cls = "sq " + ((r + c) % 2 === 0 ? "lt" : "dk");
               if (
                 G.lastMv &&
@@ -3054,12 +3295,17 @@
               if (k === kchk) cls += " chk";
               else if (frzSet.has(k)) cls += " frz";
               if (possSet.has(k)) cls += p ? " cring" : " dot";
+              // Pre-move chain highlights
+              if (pmFromSet.has(k)) cls += " premove-from"; // sources
+              if (pmDestSet.has(k)) cls += " premove-to"; // all destinations (bright orange)
+              if (k === pmSelSrc) cls += " premove-from"; // active selection source
+              if (prePossSet.has(k) && !pmDestSet.has(k))
+                cls += p ? " pre-cring" : " pre-dot"; // next step dots
               if (sq.className !== cls) sq.className = cls;
-              // Update piece content only if changed
               const existing = sq.querySelector(".pc");
               if (p) {
-                const sym = SYM[p];
-                const pcls = "pc " + (p[0] === "w" ? "pw" : "pb");
+                const sym = SYM[p],
+                  pcls = "pc " + (p[0] === "w" ? "pw" : "pb");
                 if (existing) {
                   if (existing.textContent !== sym) existing.textContent = sym;
                   if (existing.className !== pcls) existing.className = pcls;
@@ -3070,31 +3316,27 @@
                   pe.textContent = sym;
                   sq.appendChild(pe);
                 }
-                // Freeze icon
                 const hasFriz = !!sq.querySelector(".friz");
                 if (frzSet.has(k) && !hasFriz) {
                   const fi = document.createElement("span");
                   fi.className = "friz";
                   fi.textContent = "❄";
                   sq.appendChild(fi);
-                } else if (!frzSet.has(k) && hasFriz) {
+                } else if (!frzSet.has(k) && hasFriz)
                   sq.querySelector(".friz").remove();
-                }
               } else {
                 if (sq.innerHTML !== "") sq.innerHTML = "";
               }
-              // Re-wire click (use dataset to avoid stale closure)
-              sq.onclick = () => handleClick(r, c, myTurnNow());
+              sq.onclick = () => handleClick(r, c);
             }
         } else {
-          // First render: build from scratch
           boardEl.innerHTML = "";
           buildLabels();
           for (let dr = 0; dr < 8; dr++)
             for (let dc = 0; dc < 8; dc++) {
               const r = dr,
-                c = dc;
-              const sq = document.createElement("div");
+                c = dc,
+                sq = document.createElement("div");
               sq.className = "sq " + ((r + c) % 2 === 0 ? "lt" : "dk");
               sq.dataset.r = r;
               sq.dataset.c = c;
@@ -3111,6 +3353,11 @@
               else if (frzSet.has(k)) sq.classList.add("frz");
               const p = G.brd[r][c];
               if (possSet.has(k)) sq.classList.add(p ? "cring" : "dot");
+              if (pmFromSet.has(k) || k === pmSelSrc)
+                sq.classList.add("premove-from");
+              if (pmDestSet.has(k)) sq.classList.add("premove-to");
+              if (prePossSet.has(k) && !pmDestSet.has(k))
+                sq.classList.add(p ? "pre-cring" : "pre-dot");
               if (p) {
                 const pe = document.createElement("span");
                 pe.className = "pc " + (p[0] === "w" ? "pw" : "pb");
@@ -3123,12 +3370,10 @@
                   sq.appendChild(fi);
                 }
               }
-              sq.onclick = () => handleClick(r, c, myTurnNow());
+              sq.onclick = () => handleClick(r, c);
               boardEl.appendChild(sq);
             }
         }
-
-        // Player names
         const myCol = NET.myCol || "w",
           opCol = opp(myCol);
         let topName, botName;
@@ -3152,54 +3397,161 @@
         if (pTop) pTop.textContent = topName;
         const pBot = document.getElementById("pnmBot");
         if (pBot) pBot.textContent = botName;
-
         updMobile();
       }
 
+      // ── Pre-move queue helpers (top-level) ───────────────────────────────────────
+      function pmLastStepEndingAt(r, c) {
+        for (let i = PMQUEUE.length - 1; i >= 0; i--)
+          if (PMQUEUE[i].tr === r && PMQUEUE[i].tc === c) return i;
+        return -1;
+      }
+      function pmLastStepFrom(r, c) {
+        for (let i = PMQUEUE.length - 1; i >= 0; i--)
+          if (PMQUEUE[i].fr === r && PMQUEUE[i].fc === c) return i;
+        return -1;
+      }
+      function pmQueueBrd() {
+        return PMQUEUE.length > 0 ? PMQUEUE[PMQUEUE.length - 1].brd : G.brd;
+      }
+
       // ═══════════════════════════════════════
-      // CLICK
+      // CLICK — premove chain (chess.com style, all pieces/modes)
       // ═══════════════════════════════════════
-      function handleClick(r, c, myTurn) {
-        if (G.over || !myTurn) return;
-        const myCol =
-          NET.mode === "bot" || NET.mode === "local" ? G.turn : NET.myCol;
+      function handleClick(r, c) {
+        if (G.over) return;
+        const mc = myColor();
         const p = G.brd[r][c];
-        if (G.sel) {
-          const mv = G.poss.find((m) => m.tr === r && m.tc === c);
-          if (mv) {
-            G.sel = null;
-            G.poss = [];
-            playMove(mv, false, false);
-            return;
-          }
-          if (p && p[0] === myCol) {
-            const frz = myCol === "w" ? G.frz.byB : G.frz.byW;
-            const isFrz =
-              p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
-            if (!isFrz) {
-              G.sel = { r, c };
-              G.poss = movesFrom(G.brd, r, c, G.castl, frz);
-              render();
+        const myTurn = isMyTurn();
+
+        // ── MY TURN ──────────────────────────────────────────────
+        if (myTurn) {
+          pmClear(); // cancel any queued premoves when I actually interact
+          const frz = mc === "w" ? G.frz.byB : G.frz.byW;
+          if (G.sel) {
+            const mv = G.poss.find((m) => m.tr === r && m.tc === c);
+            if (mv) {
+              G.sel = null;
+              G.poss = [];
+              playMove(mv, false, false);
               return;
             }
+            if (p && p[0] === mc) {
+              const isFrz =
+                p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
+              if (!isFrz) {
+                G.sel = { r, c };
+                G.poss = movesFrom(G.brd, r, c, G.castl, frz);
+                render();
+                return;
+              }
+            }
+            G.sel = null;
+            G.poss = [];
+            render();
+            return;
           }
-          G.sel = null;
-          G.poss = [];
-          render();
+          if (p && p[0] === mc) {
+            const isFrz =
+              p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
+            if (isFrz) return;
+            G.sel = { r, c };
+            G.poss = movesFrom(G.brd, r, c, G.castl, frz);
+            render();
+          }
           return;
         }
-        if (p && p[0] === myCol) {
-          const frz = myCol === "w" ? G.frz.byB : G.frz.byW;
-          const isFrz = p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
-          if (isFrz) return;
-          G.sel = { r, c };
-          G.poss = movesFrom(G.brd, r, c, G.castl, frz);
+
+        // ── NOT MY TURN → PRE-MOVE CHAIN ────────────────────────
+        if (NET.mode === "local") return;
+
+        if (PMSEL) {
+          const simBrd = PMSEL.brd || G.brd;
+
+          // 1. Klik na tę samą figurę którą masz zaznaczoną → odznacz (już jesteś na jej ostatniej pozycji)
+          if (r === PMSEL.fr && c === PMSEL.fc) {
+            PMSEL = null;
+            render();
+            return;
+          }
+
+          // 2. Klik na pomarańczowe pole (ostatni krok innej figury) → kontynuuj tę figurę
+          const endIdx = pmLastStepEndingAt(r, c);
+          if (endIdx !== -1) {
+            const brdThere = PMQUEUE[endIdx].brd;
+            const poss = premovePoss(r, c, brdThere, mc);
+            PMSEL = { fr: r, fc: c, poss, brd: brdThere };
+            render();
+            return;
+          }
+
+          // 3. Klik na własną figurę (na symulowanej planszy) → przełącz zaznaczenie
+          const simP = simBrd[r] && simBrd[r][c];
+          if (simP && simP[0] === mc) {
+            const poss = premovePoss(r, c, simBrd, mc);
+            PMSEL = { fr: r, fc: c, poss, brd: simBrd };
+            render();
+            return;
+          }
+
+          // 4. Klik na pole w zasięgu figury (w prePossSet) → dodaj krok
+          const inPoss =
+            PMSEL.poss && PMSEL.poss.some((m) => m.tr === r && m.tc === c);
+          if (inPoss) {
+            pmAddStep(PMSEL.fr, PMSEL.fc, r, c, PMSEL.brd || G.brd, mc);
+            return;
+          }
+
+          // 5. Klik poza zasięgiem, puste pole lub figura wroga → NIC (dots zostają)
+          return;
+        }
+
+        // Brak aktywnego zaznaczenia — klik na własną figurę startuje pre-move
+        if (p && p[0] === mc) {
+          // Śledź gdzie ta figura wylądowała po wszystkich krokach w kolejce
+          // Figura na (r,c) mogła zrobić: r→A→B→C — teleportuj do C
+          let endR = r,
+            endC = c,
+            lastIdx = -1;
+          let changed = true;
+          while (changed) {
+            changed = false;
+            for (let i = 0; i < PMQUEUE.length; i++) {
+              if (PMQUEUE[i].fr === endR && PMQUEUE[i].fc === endC) {
+                endR = PMQUEUE[i].tr;
+                endC = PMQUEUE[i].tc;
+                lastIdx = i;
+                changed = true;
+                break;
+              }
+            }
+          }
+          if (lastIdx !== -1) {
+            // Figura ma kroki — teleportuj do ostatniej zakolejkowanej pozycji
+            const lastStep = PMQUEUE[lastIdx];
+            const poss = premovePoss(
+              lastStep.tr,
+              lastStep.tc,
+              lastStep.brd,
+              mc,
+            );
+            PMSEL = {
+              fr: lastStep.tr,
+              fc: lastStep.tc,
+              poss,
+              brd: lastStep.brd,
+            };
+          } else {
+            // Figura nie ma kroków — normalny start
+            const poss = premovePoss(r, c, G.brd, mc);
+            PMSEL = { fr: r, fc: c, poss, brd: G.brd };
+          }
           render();
         }
       }
 
       // ═══════════════════════════════════════
-      // DRAG & DROP
+      // DRAG & DROP — premove for ALL pieces/modes
       // ═══════════════════════════════════════
       function getXY(e) {
         if (e.touches && e.touches.length)
@@ -3213,10 +3565,9 @@
       }
       function brdSq(x, y) {
         const rect = document.getElementById("board").getBoundingClientRect();
-        let dc = Math.floor((x - rect.left) / (rect.width / 8));
-        let dr = Math.floor((y - rect.top) / (rect.height / 8));
+        let dc = Math.floor((x - rect.left) / (rect.width / 8)),
+          dr = Math.floor((y - rect.top) / (rect.height / 8));
         if (dc < 0 || dc >= 8 || dr < 0 || dr >= 8) return null;
-        // CSS rotate(180deg) inverts both axes for flipped board
         if (flipped) {
           dr = 7 - dr;
           dc = 7 - dc;
@@ -3224,24 +3575,29 @@
         return { r: dr, c: dc };
       }
       function myTurnNow() {
-        if (G.over) return false;
-        if (NET.mode === "local") return true; // both players can always move their pieces
-        return NET.mode === "bot" ? G.turn === "w" : G.turn === NET.myCol;
+        return isMyTurn();
       }
+
       function startDrag(r, c, x, y) {
-        if (!myTurnNow()) return false;
-        const myCol =
-          NET.mode === "bot" || NET.mode === "local" ? G.turn : NET.myCol;
         const p = G.brd[r][c];
-        if (!p || p[0] !== myCol) return false;
-        const frz = myCol === "w" ? G.frz.byB : G.frz.byW;
+        if (!p) return false;
+        const mc = myColor();
+        const myTurn = isMyTurn();
+
+        // Pre-move: only via click, not drag — so ignore drag when not my turn
+        if (!myTurn) return false;
+
+        // NORMAL drag — my turn
+        if (!myTurn) return false;
+        if (p[0] !== mc) return false;
+        const frz = mc === "w" ? G.frz.byB : G.frz.byW;
         const isFrz = p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
         if (isFrz) return false;
         const poss = movesFrom(G.brd, r, c, G.castl, frz);
         const gh = document.createElement("span");
         gh.className = "ghost";
         gh.textContent = SYM[p];
-        gh.style.fontSize = "calc(var(--sq) * .85)";
+        gh.style.fontSize = "calc(var(--sq)*.85)";
         gh.style.color = p[0] === "w" ? "#fff" : "#1a0a00";
         gh.style.filter =
           p[0] === "w"
@@ -3258,6 +3614,7 @@
         DR.sx = x;
         DR.sy = y;
         DR.moved = false;
+        DR.isPremove = false;
         G.sel = { r, c };
         G.poss = poss;
         render();
@@ -3282,6 +3639,11 @@
         DR.ghost.remove();
         DR.ghost = null;
         const sq = brdSq(x, y);
+        if (DR.isPremove) {
+          pmClear();
+          render();
+          return;
+        } // premove only via click
         const mv = sq && DR.poss.find((m) => m.tr === sq.r && m.tc === sq.c);
         if (mv) {
           G.sel = null;
@@ -3293,6 +3655,7 @@
           render();
         }
       }
+
       const boardEl = document.getElementById("board");
       boardEl.addEventListener(
         "mousedown",
@@ -3413,6 +3776,8 @@
         if (chk)
           h += ` <span style="color:var(--red);font-weight:700">CHECK!</span>`;
         if (fz) h += ` <span style="color:var(--acc)">❄${fz}</span>`;
+        if (PREMOVE.active)
+          h += ` <span style="color:#ffd700;font-size:.7rem">⚡pre-move</span>`;
         document.getElementById("statusEl").innerHTML = h;
       }
       function updMobile() {
@@ -3430,6 +3795,7 @@
                 : NET.oppName;
         if (!G.over && chk) st += " ⚠";
         if (!G.over && fz) st += " ❄" + fz;
+        if (PREMOVE.active) st += " ⚡";
         document.getElementById("mSt").textContent = st;
         const ev = G.prevEval;
         document.getElementById("mEv").textContent =
@@ -3441,31 +3807,33 @@
         const S = (x) => x.map((p) => SYM[p] || "").join("");
         document.getElementById("capW").textContent = S(G.capW);
         document.getElementById("capB").textContent = S(G.capB);
-        const wv = G.capW.reduce((s, p) => s + (VAL[p[1]] || 0), 0);
-        const bv = G.capB.reduce((s, p) => s + (VAL[p[1]] || 0), 0);
+        const wv = G.capW.reduce((s, p) => s + (VAL[p[1]] || 0), 0),
+          bv = G.capB.reduce((s, p) => s + (VAL[p[1]] || 0), 0);
         document.getElementById("scW").textContent =
           wv > bv ? "+" + (wv - bv) : "";
         document.getElementById("scB").textContent =
           bv > wv ? "+" + (bv - wv) : "";
       }
       function setEval(score) {
-        // Sync evtrack height to board height
-        const brd = document.getElementById("board");
-        const et = document.getElementById("evtrack");
+        const brd = document.getElementById("board"),
+          et = document.getElementById("evtrack");
         if (brd && et && window.innerWidth > 700) {
           const h = brd.getBoundingClientRect().height;
           if (h > 0) et.style.height = h + "px";
         }
-        // Chess.com style: white% from bottom, black% from top
-        // Clamp to reasonable range, center=50%
-        const clamp = Math.max(-1500, Math.min(1500, score));
-        const wp = Math.round(50 + (clamp / 1500) * 44); // 6% to 94%
+        // Mate scores (±19000) → show full bar
+        const isMate = Math.abs(score) > 9000;
+        const clamp = isMate
+          ? score > 0
+            ? 2000
+            : -2000
+          : Math.max(-2000, Math.min(2000, score));
+        const wp = Math.round(50 + (clamp / 2000) * 46);
         const bp = 100 - wp;
         const W = document.getElementById("evW"),
           B = document.getElementById("evB");
         const isMob = window.innerWidth <= 700;
         if (isMob) {
-          // Horizontal: white from right, black from left
           if (W) {
             W.style.width = wp + "%";
             W.style.height = "100%";
@@ -3475,7 +3843,6 @@
             B.style.height = "100%";
           }
         } else {
-          // Vertical: white from bottom, black from top
           if (W) {
             W.style.height = wp + "%";
             W.style.width = "100%";
@@ -3485,14 +3852,11 @@
             B.style.width = "100%";
           }
         }
-        // Score text
-        const isMate = Math.abs(score) > 9000;
         const txt = isMate
           ? "M"
           : (score >= 0 ? "+" : "") + (score / 100).toFixed(1);
         const sc = document.getElementById("evSc");
         if (sc) sc.textContent = txt;
-        // Labels inside bar (only show when advantage is significant)
         const wAdv = score > 30,
           bAdv = score < -30;
         const lb = document.getElementById("evLblB"),
@@ -3512,7 +3876,7 @@
       }
 
       // ═══════════════════════════════════════
-      // NOTATION + MOVE ICONS
+      // NOTATION
       // ═══════════════════════════════════════
       function buildNote(brd, mv, col) {
         const { fr, fc, tr, tc, flag } = mv;
@@ -3558,9 +3922,6 @@
         animOn = false;
         document.querySelectorAll(".cfti").forEach((e) => e.remove());
       }
-      // ═══════════════════════════════════════
-      // DRAW DETECTION HELPERS
-      // ═══════════════════════════════════════
       function isInsufficientMaterial(brd) {
         const pieces = { w: [], b: [] };
         for (let r = 0; r < 8; r++)
@@ -3571,9 +3932,7 @@
           }
         const w = pieces.w,
           b = pieces.b;
-        // K vs K
         if (w.length === 1 && b.length === 1) return true;
-        // K+B vs K  or  K+N vs K
         if (
           w.length === 1 &&
           b.length === 2 &&
@@ -3592,7 +3951,6 @@
             w[1].type === "N")
         )
           return true;
-        // K+B vs K+B (same color bishops)
         if (w.length === 2 && b.length === 2) {
           const wb = w.find((p) => p.type === "B"),
             bb = b.find((p) => p.type === "B");
@@ -3600,11 +3958,13 @@
         }
         return false;
       }
-
       function endGame(reason, winner) {
         playSound("gameover");
         G.over = true;
         stopTimers();
+        PMQUEUE = [];
+        PMSEL = null;
+        PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1, poss: [] };
         render();
         updStatus();
         animOn = true;
@@ -3721,8 +4081,6 @@
             cf.an === "fly" ? 450 : 300,
           ),
         );
-
-        // If online, notify opponent
         if (!G._endSent && NET.mode !== "bot" && NET.conn) {
           G._endSent = true;
           netSend({ type: "gameover", reason, winner });
@@ -3792,7 +4150,7 @@
         );
 
       // ═══════════════════════════════════════
-      // BOT ACTIONS
+      // GAME ACTIONS
       // ═══════════════════════════════════════
       function doResign() {
         if (G.over) return;
@@ -3813,79 +4171,97 @@
           showMsg("Draw Offered", "Waiting for opponent…");
           return;
         }
-        // Bot evaluates from its perspective (positive = bot ahead)
-        const ev = -evalBoard(G.brd); // bot plays black, so negate
+        const ev = -evalBoard(G.brd);
         const evStr = (ev / 100).toFixed(1);
-        // Bot accepts if: losing, equal, or slightly behind
-        // Bot declines if: clearly winning (ev > +2.0)
-        if (ev > 200) {
-          showMsg(
-            "Declined",
-            `Bot is winning (${evStr}) — won't accept a draw.`,
-          );
-        } else if (ev > 50) {
+        if (ev > 200)
+          showMsg("Declined", `Bot is winning (${evStr}) — won't accept.`);
+        else if (ev > 50)
           showMsg("Declined", `Bot has the edge (${evStr}) — declined.`);
-        } else {
+        else
           showConfirm("Draw Offer", `Bot accepts (eval ${evStr}).`, () =>
             endGame("draw", ""),
           );
-        }
       }
 
       // ═══════════════════════════════════════
-      // DRAWING — arrows & circles (right-click drag)
+      // LOCAL TIME MODAL
       // ═══════════════════════════════════════
-      const DRAW = { shapes: [], dragFrom: null, color: "#f6a623" }; // gold default
+      function buildLocalTimePicker() {
+        const el = document.getElementById("localTPicker");
+        el.innerHTML = "";
+        TIME_CTRLS.forEach((tc, i) => {
+          const b = document.createElement("button");
+          b.className = "tpill" + (localSelectedTC === i ? " on" : "");
+          b.textContent = tc.l;
+          b.addEventListener("click", () => {
+            localSelectedTC = i;
+            document
+              .querySelectorAll("#localTPicker .tpill")
+              .forEach((p, j) => p.classList.toggle("on", j === i));
+          });
+          el.appendChild(b);
+        });
+      }
+      function openLocalTimeModal(cb) {
+        buildLocalTimePicker();
+        document.getElementById("localTimeModal").classList.add("on");
+        document.getElementById("localTimeOk").onclick = () => {
+          document.getElementById("localTimeModal").classList.remove("on");
+          if (localSelectedTC !== null) cb(TIME_CTRLS[localSelectedTC]);
+          else cb(null);
+        };
+        document.getElementById("localTimeNoTimer").onclick = () => {
+          document.getElementById("localTimeModal").classList.remove("on");
+          cb(null);
+        };
+        document.getElementById("localTimeCancel").onclick = () => {
+          document.getElementById("localTimeModal").classList.remove("on");
+        };
+      }
+
+      // ═══════════════════════════════════════
+      // DRAWINGS
+      // ═══════════════════════════════════════
+      const DRAW = { shapes: [], dragFrom: null, color: "#f6a623" };
       const DRAW_COLORS = ["#f6a623", "#4a9eff", "#e53935", "#4caf50"];
       let _drawColorIdx = 0;
-
       function sqCenter(r, c) {
-        // Returns center pixel of square (r,c) relative to SVG which overlays b-mid
-        // SVG covers the entire b-mid which includes labels
-        const board = document.getElementById("board");
-        const svg = document.getElementById("drawSvg");
+        const board = document.getElementById("board"),
+          svg = document.getElementById("drawSvg");
         if (!board || !svg) return { x: 0, y: 0 };
-        const bRect = board.getBoundingClientRect();
-        const sRect = svg.parentElement.getBoundingClientRect(); // b-mid rect
+        const bRect = board.getBoundingClientRect(),
+          sRect = svg.parentElement.getBoundingClientRect();
         const sqW = bRect.width / 8,
           sqH = bRect.height / 8;
-        // board offset inside b-mid
-        const bx = bRect.left - sRect.left;
-        const by = bRect.top - sRect.top;
-        // center of square
-        const cx = bx + (c + 0.5) * sqW;
-        const cy = by + (r + 0.5) * sqH;
-        return { x: cx, y: cy };
+        const bx = bRect.left - sRect.left,
+          by = bRect.top - sRect.top;
+        return { x: bx + (c + 0.5) * sqW, y: by + (r + 0.5) * sqH };
       }
-
-      function sqFromBoardXY(clientX, clientY) {
+      function sqFromBoardXY(cx, cy) {
         const board = document.getElementById("board");
         if (!board) return null;
         const rect = board.getBoundingClientRect();
-        const c = Math.floor((clientX - rect.left) / (rect.width / 8));
-        const r = Math.floor((clientY - rect.top) / (rect.height / 8));
+        const c = Math.floor((cx - rect.left) / (rect.width / 8)),
+          r = Math.floor((cy - rect.top) / (rect.height / 8));
         if (r < 0 || r >= 8 || c < 0 || c >= 8) return null;
         return { r, c };
       }
-
       function drawArrow(svg, x1, y1, x2, y2, color) {
         const dx = x2 - x1,
-          dy = y2 - y1;
-        const len = Math.sqrt(dx * dx + dy * dy);
+          dy = y2 - y1,
+          len = Math.sqrt(dx * dx + dy * dy);
         if (len < 10) return;
-        const board = document.getElementById("board");
-        const sqW = board ? board.getBoundingClientRect().width / 8 : 60;
-        const hw = sqW * 0.17; // head width
-        const hl = sqW * 0.28; // head length
-        const sw = sqW * 0.085; // stroke width
-        const ux = dx / len,
+        const board = document.getElementById("board"),
+          sqW = board ? board.getBoundingClientRect().width / 8 : 60;
+        const hw = sqW * 0.17,
+          hl = sqW * 0.28,
+          sw = sqW * 0.085,
+          ux = dx / len,
           uy = dy / len;
-        // Shorten end for arrowhead
         const ex = x2 - ux * hl * 0.5,
           ey = y2 - uy * hl * 0.5;
         const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
         g.setAttribute("opacity", "0.82");
-        // shaft
         const line = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "line",
@@ -3898,10 +4274,9 @@
         line.setAttribute("stroke-width", sw);
         line.setAttribute("stroke-linecap", "round");
         g.appendChild(line);
-        // arrowhead polygon
         const px = -uy * hw,
-          py = ux * hw;
-        const pts = `${x2},${y2} ${ex + px},${ey + py} ${ex - px},${ey - py}`;
+          py = ux * hw,
+          pts = `${x2},${y2} ${ex + px},${ey + py} ${ex - px},${ey - py}`;
         const poly = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "polygon",
@@ -3911,12 +4286,11 @@
         g.appendChild(poly);
         svg.appendChild(g);
       }
-
       function drawCircle(svg, x, y, color) {
-        const board = document.getElementById("board");
-        const sqW = board ? board.getBoundingClientRect().width / 8 : 60;
-        const r = sqW * 0.42;
-        const sw = sqW * 0.075;
+        const board = document.getElementById("board"),
+          sqW = board ? board.getBoundingClientRect().width / 8 : 60;
+        const r = sqW * 0.42,
+          sw = sqW * 0.075;
         const c = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "circle",
@@ -3930,21 +4304,18 @@
         c.setAttribute("opacity", "0.82");
         svg.appendChild(c);
       }
-
       function renderDrawings() {
         const svg = document.getElementById("drawSvg");
         if (!svg) return;
         svg.innerHTML = "";
         for (const s of DRAW.shapes) {
           const from = sqCenter(s.r1, s.c1);
-          if (s.type === "circle") {
-            drawCircle(svg, from.x, from.y, s.color);
-          } else {
+          if (s.type === "circle") drawCircle(svg, from.x, from.y, s.color);
+          else {
             const to = sqCenter(s.r2, s.c2);
             drawArrow(svg, from.x, from.y, to.x, to.y, s.color);
           }
         }
-        // draw in-progress arrow
         if (DRAW.dragFrom && DRAW._curX !== undefined) {
           const from = sqCenter(DRAW.dragFrom.r, DRAW.dragFrom.c);
           drawArrow(
@@ -3957,18 +4328,25 @@
           );
         }
       }
-
       function clearDrawings() {
         DRAW.shapes = [];
         renderDrawings();
       }
-
-      // Right-click = start draw; right-click release = finish
       const boardEl2 = document.getElementById("board");
       boardEl2.addEventListener("contextmenu", (e) => {
         e.preventDefault();
       });
-
+      // Right-click cancels premove (chess.com behaviour)
+      boardEl2.addEventListener(
+        "mousedown",
+        (e) => {
+          if (e.button !== 2) return;
+          if (PMQUEUE.length || PMSEL) {
+            pmClear();
+          }
+        },
+        { passive: true },
+      );
       boardEl2.addEventListener(
         "mousedown",
         (e) => {
@@ -3981,10 +4359,8 @@
         },
         { passive: false },
       );
-
       document.addEventListener("mousemove", (e) => {
         if (!DRAW.dragFrom) return;
-        // Convert to SVG coords
         const svg = document.getElementById("drawSvg");
         if (!svg) return;
         const sRect = svg.parentElement.getBoundingClientRect();
@@ -3992,18 +4368,11 @@
         DRAW._curY = e.clientY - sRect.top;
         renderDrawings();
       });
-
       document.addEventListener("mouseup", (e) => {
-        if (e.button !== 2) {
-          // Left click clears drawings
-          if (e.button === 0 && DRAW.shapes.length > 0 && !DR.on) {
-            // Only clear if no drag happened
-          }
-          return;
-        }
+        if (e.button !== 2) return;
         if (!DRAW.dragFrom) return;
-        const sq = sqFromBoardXY(e.clientX, e.clientY);
-        const from = DRAW.dragFrom;
+        const sq = sqFromBoardXY(e.clientX, e.clientY),
+          from = DRAW.dragFrom;
         DRAW.dragFrom = null;
         DRAW._curX = undefined;
         if (!sq) {
@@ -4012,7 +4381,6 @@
         }
         const isSame = sq.r === from.r && sq.c === from.c;
         if (isSame) {
-          // Circle on same square — toggle
           const idx = DRAW.shapes.findIndex(
             (s) =>
               s.type === "circle" &&
@@ -4029,7 +4397,6 @@
               color: DRAW.color,
             });
         } else {
-          // Arrow — toggle
           const idx = DRAW.shapes.findIndex(
             (s) =>
               s.type === "arrow" &&
@@ -4052,44 +4419,50 @@
         }
         renderDrawings();
       });
-
-      // Clear drawings on left click (when not dragging a piece)
       boardEl2.addEventListener("click", (e) => {
         if (DRAW.shapes.length > 0 && !DR.on) clearDrawings();
       });
-
-      // Long-press on mobile to draw circle
-      let _mDrawTimer = null,
-        _mDrawSq = null;
       boardEl2.addEventListener(
         "touchstart",
         (e) => {
-          if (e.touches.length !== 2) {
-            return;
-          }
+          if (e.touches.length !== 2) return;
           e.preventDefault();
-          // Two-finger tap = clear drawings
           clearDrawings();
         },
         { passive: false },
       );
-
-      // Color picker: Escape = cycle colors
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          clearDrawings();
-        }
+        if (e.key === "Escape") clearDrawings();
         if (e.key === "ArrowRight") {
           _drawColorIdx = (_drawColorIdx + 1) % DRAW_COLORS.length;
           DRAW.color = DRAW_COLORS[_drawColorIdx];
+        }
+        // Backspace: usuń ostatni krok pre-move
+        if (e.key === "Backspace" && !isMyTurn() && (PMQUEUE.length || PMSEL)) {
+          e.preventDefault();
+          if (PMSEL) {
+            PMSEL = null;
+            render();
+            return;
+          }
+          PMQUEUE.pop();
+          pmSync();
+          if (PMQUEUE.length) {
+            const last = PMQUEUE[PMQUEUE.length - 1];
+            PMSEL = {
+              fr: last.tr,
+              fc: last.tc,
+              poss: premovePoss(last.tr, last.tc, last.brd, myColor()),
+              brd: last.brd,
+            };
+          }
+          render();
         }
       });
 
       // ═══════════════════════════════════════
       // BUTTON WIRING
       // ═══════════════════════════════════════
-
-      // Game buttons
       document.getElementById("newBtn").addEventListener("click", () => {
         if (!animOn && NET.mode === "bot") newGame();
       });
@@ -4099,22 +4472,30 @@
       });
       document.getElementById("resignBtn").addEventListener("click", doResign);
       document.getElementById("drawBtn").addEventListener("click", doDraw);
-
-      // Mobile buttons
       document.getElementById("mFlip").addEventListener("click", () => {
         flipped = !flipped;
         render();
       });
       document.getElementById("mNew").addEventListener("click", () => {
-        if (!animOn && NET.mode === "bot") newGame();
+        if (NET.mode === "bot") {
+          newGame();
+        } else if (NET.mode === "local") {
+          openLocalTimeModal((tc) => {
+            NET.timeCtrl = tc || null;
+            newGame(tc);
+          });
+        }
       });
       document.getElementById("mRes").addEventListener("click", doResign);
       document.getElementById("mDrw").addEventListener("click", doDraw);
-
-      // Toast buttons
       document.getElementById("tNew").addEventListener("click", () => {
         document.getElementById("toast").classList.remove("on");
-        if (!animOn && NET.mode === "bot") newGame();
+        if (NET.mode === "bot") newGame();
+        else if (NET.mode === "local")
+          openLocalTimeModal((tc) => {
+            NET.timeCtrl = tc || null;
+            newGame(tc);
+          });
       });
       document.getElementById("tRematch").addEventListener("click", () => {
         document.getElementById("toast").classList.remove("on");
@@ -4123,8 +4504,14 @@
           showMsg("Rematch", "Waiting for opponent…");
         }
       });
-
-      // View options
+      document.getElementById("newBtn").addEventListener("click", () => {
+        if (NET.mode === "local")
+          openLocalTimeModal((tc) => {
+            NET.timeCtrl = tc || null;
+            newGame(tc);
+          });
+        else if (!animOn && NET.mode === "bot") newGame();
+      });
       document
         .getElementById("togEval")
         .addEventListener("change", function () {
@@ -4150,21 +4537,33 @@
             this.checked = false;
             return;
           }
-          NET.mode = this.checked ? "local" : "bot";
-          NET.myCol = "w";
-          flipped = false;
-          _botAbort = true;
-          const bc = document.getElementById("hB");
-          if (bc && bc.parentElement)
-            bc.parentElement.style.display = this.checked ? "none" : "";
-          const mpls = document.getElementById("mBotLvls");
-          if (mpls) mpls.style.display = this.checked ? "none" : "flex";
-          const ml = document.getElementById("mLocal");
-          if (ml) ml.classList.toggle("on", this.checked);
-          newGame();
+          if (this.checked) {
+            NET.mode = "local";
+            NET.myCol = "w";
+            flipped = false;
+            _botAbort = true;
+            const bc = document.getElementById("hB");
+            if (bc && bc.parentElement) bc.parentElement.style.display = "none";
+            const mpls = document.getElementById("mBotLvls");
+            if (mpls) mpls.style.display = "none";
+            const ml = document.getElementById("mLocal");
+            if (ml) ml.classList.add("on");
+            openLocalTimeModal((tc) => {
+              NET.timeCtrl = tc || null;
+              newGame(tc);
+            });
+          } else {
+            NET.mode = "bot";
+            NET.myCol = "w";
+            const bc = document.getElementById("hB");
+            if (bc && bc.parentElement) bc.parentElement.style.display = "";
+            const mpls = document.getElementById("mBotLvls");
+            if (mpls) mpls.style.display = "flex";
+            const ml = document.getElementById("mLocal");
+            if (ml) ml.classList.remove("on");
+            newGame();
+          }
         });
-
-      // Mobile mode buttons
       document.getElementById("mOnline2").addEventListener("click", openLobby);
       document.getElementById("mLocal").addEventListener("click", () => {
         if (NET.mode === "host" || NET.mode === "guest") return;
@@ -4173,15 +4572,13 @@
         tog.dispatchEvent(new Event("change"));
       });
 
-      // ═══════════════════════════════════════════════════════════
-      // ONLINE — WebRTC P2P with Firebase RTDB free tier signaling
-      // No account needed — uses anonymous REST API
-      // ═══════════════════════════════════════════════════════════
+      // ═══════════════════════════════════════
+      // ONLINE
+      // ═══════════════════════════════════════
       let P = { peer: null, conn: null, role: "", roomId: "" };
       let lobbyRole = "",
         guestJoined = false,
         guestName = "";
-
       function genId(n = 8) {
         let s = "";
         while (s.length < n) s += Math.random().toString(36).substr(2);
@@ -4200,7 +4597,6 @@
           if (P.conn && P.conn.open) P.conn.send(d);
         } catch (e) {}
       }
-
       function closePeer() {
         try {
           P.conn && P.conn.close();
@@ -4210,7 +4606,6 @@
         } catch (e) {}
         P = { peer: null, conn: null, role: P.role, roomId: "" };
       }
-
       function loadPeerJS(cb) {
         if (window.Peer) {
           cb();
@@ -4219,11 +4614,9 @@
         const s = document.createElement("script");
         s.src = "https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js";
         s.onload = cb;
-        s.onerror = () =>
-          lstat("Failed to load PeerJS. Check internet connection.");
+        s.onerror = () => lstat("Failed to load PeerJS.");
         document.head.appendChild(s);
       }
-
       function hostFlow(roomId) {
         P.role = "host";
         P.roomId = roomId;
@@ -4231,11 +4624,8 @@
         loadPeerJS(() => {
           P.peer = new Peer(roomId, { debug: 0 });
           P.peer.on("error", (err) => {
-            if (err.type === "unavailable-id") {
-              hostFlow(genId(8));
-            } else {
-              lstat("Error: " + err.type);
-            }
+            if (err.type === "unavailable-id") hostFlow(genId(8));
+            else lstat("Error: " + err.type);
           });
           P.peer.on("open", (id) => {
             lstat("Waiting for guest...");
@@ -4251,7 +4641,6 @@
           });
         });
       }
-
       function guestFlow(roomId) {
         P.role = "guest";
         P.roomId = roomId;
@@ -4272,7 +4661,6 @@
           });
         });
       }
-
       function setupDC(conn, role) {
         conn.on("open", () => {
           lstat("Connected!");
@@ -4287,9 +4675,7 @@
             lmsg("Guest connected! Choose time control, then start.");
             if (selectedTC !== null)
               document.getElementById("lStart").style.display = "";
-          } else {
-            lstat("Connected! Waiting for host to start...");
-          }
+          } else lstat("Connected! Waiting for host to start...");
         });
         conn.on("data", (d) => {
           if (!NET.gameStarted) handleLobbyMsg(d, role);
@@ -4302,7 +4688,6 @@
           if (!NET.gameStarted) lstat("Connection error.");
         });
       }
-
       function handleLobbyMsg(d, myRole) {
         if (d.type === "hello") {
           if (myRole === "host") {
@@ -4315,11 +4700,8 @@
           closePeer();
           document.getElementById("lobby").classList.remove("on");
         }
-        if (d.type === "start_game") {
-          startOnlineGame(d, myRole);
-        }
+        if (d.type === "start_game") startOnlineGame(d, myRole);
       }
-
       function getMyName() {
         return document.getElementById("lobbyName").value.trim() || "Player";
       }
@@ -4332,7 +4714,6 @@
         }
         return { h: hn, g: gn };
       }
-
       function buildTimePicker() {
         const el = document.getElementById("tPicker");
         el.innerHTML = "";
@@ -4351,7 +4732,6 @@
           el.appendChild(b);
         });
       }
-
       function openLobby() {
         document.getElementById("lobby").classList.add("on");
         lstat("");
@@ -4366,7 +4746,6 @@
         document.getElementById("lKick").style.display = "none";
         guestJoined = false;
         closePeer();
-
         const room = new URLSearchParams(location.search).get("room");
         if (room) {
           lobbyRole = "guest";
@@ -4384,7 +4763,6 @@
           hostFlow(genId(8));
         }
       }
-
       function startOnlineGame(cfg, myRole) {
         document.getElementById("lobby").classList.remove("on");
         try {
@@ -4412,51 +4790,66 @@
         newGame(cfg.timeCtrl);
         if (cfg.timeCtrl && myRole === "host") startTurnTimer("w");
       }
-
       function handleGameMsg(d) {
         if (d.type === "move") {
-          if (d.timers) NET.timers = d.timers;
+          if (d.timers) {
+            // Sync timers precisely — use network timestamps
+            NET.timers = d.timers;
+          }
           if (d.castl) G.castl = { ...d.castl };
-          playMove(d.mv, false, true);
+          // Validate move before applying — prevent desync from illegal moves
+          const oppFrz = G.turn === "w" ? G.frz.byB : G.frz.byW;
+          const oppLegal = allMoves(G.brd, G.turn, G.castl, oppFrz);
+          const isLegal = oppLegal.some(
+            (m) =>
+              m.fr === d.mv.fr &&
+              m.fc === d.mv.fc &&
+              m.tr === d.mv.tr &&
+              m.tc === d.mv.tc,
+          );
+          if (!isLegal) {
+            console.warn("Rejected illegal move from network:", d.mv);
+            return;
+          }
+          // Sync eval and rating from sender
+          if (d.eval !== undefined && NET.showEval) setEval(d.eval);
+          playMove(d.mv, false, true)
+            .then?.(() => {})
+            .catch?.(() => {});
+          // Override displayed rating with sender's computed value (same analysis)
+          if (d.ri !== undefined && NET.showRating) {
+            const R = RTNG[d.ri] || RTNG[RTNG.length - 1];
+            document.getElementById("ratingEl").innerHTML =
+              `<span class="${R.c}">${R.s} ${R.l}</span><span style="color:var(--dim);font-size:.65rem"> (opp)</span>`;
+            document.getElementById("mRt").innerHTML =
+              `<span class="${R.c}">${R.s}</span>`;
+          }
         }
-        if (d.type === "promo") {
-          G.brd[G.lastMv.tr][G.lastMv.tc] = d.piece;
-          render();
-        }
+        // promo is now included in the move packet (mv.promo) — no separate handler needed
         if (d.type === "gameover") {
           if (!G.over) endGame(d.reason, d.winner);
         }
-        if (d.type === "resign") {
-          endGame("resign", NET.myCol);
-        }
-        if (d.type === "draw_offer") {
+        if (d.type === "resign") endGame("resign", NET.myCol);
+        if (d.type === "draw_offer")
           showConfirm("Draw Offered", NET.oppName + " offers a draw.", () => {
             netSend({ type: "draw_accept" });
             endGame("draw", "");
           });
-        }
-        if (d.type === "draw_accept") {
-          endGame("draw", "");
-        }
-        if (d.type === "rematch_offer") {
+        if (d.type === "draw_accept") endGame("draw", "");
+        if (d.type === "rematch_offer")
           showConfirm("Rematch?", NET.oppName + " wants a rematch.", () => {
             netSend({ type: "rematch_accept" });
             doRematch();
           });
-        }
-        if (d.type === "rematch_accept") {
-          doRematch();
-        }
+        if (d.type === "rematch_accept") doRematch();
+        if (d.type === "timer_sync") NET.timers = d.timers; // precise timer sync
       }
-
       function doRematch() {
         document.getElementById("toast").classList.remove("on");
-        // Keep same colors: host always white, guest always black (no swap)
         flipped = NET.myCol === "b";
         newGame(NET.rematchTime);
         if (NET.rematchTime && NET.myCol === "w") startTurnTimer("w");
       }
-
       document.getElementById("lKick").addEventListener("click", () => {
         netSend({ type: "kick" });
         guestJoined = false;
@@ -4527,18 +4920,35 @@
       if (new URLSearchParams(location.search).get("room")) openLobby();
 
       // ═══════════════════════════════════════
-      // SOUNDS (Web Audio API — no files needed)
+      // SOUNDS
       // ═══════════════════════════════════════
       const _AC = new (window.AudioContext || window.webkitAudioContext)();
       function _resume() {
         if (_AC.state === "suspended") _AC.resume();
       }
 
+      // Low time tick (chess.com style)
+      let _lastTickTime = 0;
+      function playLowTimeTick() {
+        _resume();
+        const t = _AC.currentTime;
+        const o = _AC.createOscillator(),
+          g = _AC.createGain();
+        o.connect(g);
+        g.connect(_AC.destination);
+        o.type = "square";
+        o.frequency.setValueAtTime(800, t);
+        g.gain.setValueAtTime(0.12, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+        o.start(t);
+        o.stop(t + 0.06);
+      }
+
       function playSound(type) {
         _resume();
         const t = _AC.currentTime;
-        const o = _AC.createOscillator();
-        const g = _AC.createGain();
+        const o = _AC.createOscillator(),
+          g = _AC.createGain();
         o.connect(g);
         g.connect(_AC.destination);
         if (type === "move") {
@@ -4558,7 +4968,6 @@
           o.start(t);
           o.stop(t + 0.18);
         } else if (type === "check") {
-          // two-tone alert
           const o2 = _AC.createOscillator(),
             g2 = _AC.createGain();
           o2.connect(g2);
