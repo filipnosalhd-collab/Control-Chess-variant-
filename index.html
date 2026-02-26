@@ -2647,7 +2647,7 @@
         }
 
         // Eval bar: shallow najpierw
-        if (NET.showEval) setEval(evalBoard(G.brd));
+        if (NET.showEval && !fromNet) setEval(evalBoard(G.brd));
 
         // Oblicz SYNCHRONICZNIE bestEvalCache dla NASTĘPNEGO ruchu (dla oceny następnego gracza)
         // Robimy to synchronicznie żeby było dostępne gdy gracz zagra ruch
@@ -2725,7 +2725,11 @@
                 if (sc > best3) best3 = sc;
               }
               G.bestEvalCache = _col === "w" ? best3 : -best3;
-              if (NET.showEval) setEval(G.bestEvalCache);
+              if (NET.showEval && !fromNet) {
+                setEval(G.bestEvalCache);
+                if (NET.conn)
+                  netSend({ type: "eval_sync", ev: G.bestEvalCache });
+              }
             }, 0);
           } else {
             G.bestEvalCache = null;
@@ -2746,7 +2750,7 @@
           document.getElementById("mRt").innerHTML =
             `<span class="${RTNG[ri].c}">${RTNG[ri].s}</span>`;
         }
-        if (NET.showEval) setEval(newEv);
+        if (NET.showEval && !fromNet) setEval(newEv);
         addNote(note, movingCol, G.hist.length, ri, showRt);
         G.hist.push(mv);
         G.turn = opp(movingCol);
@@ -4418,9 +4422,16 @@
             });
         }
         renderDrawings();
+        // Sync drawings to opponent
+        if (NET.mode === "host" || NET.mode === "guest")
+          netSend({ type: "drawings", shapes: DRAW.shapes });
       });
       boardEl2.addEventListener("click", (e) => {
-        if (DRAW.shapes.length > 0 && !DR.on) clearDrawings();
+        if (DRAW.shapes.length > 0 && !DR.on) {
+          clearDrawings();
+          if (NET.mode === "host" || NET.mode === "guest")
+            netSend({ type: "drawings", shapes: [] });
+        }
       });
       boardEl2.addEventListener(
         "touchstart",
@@ -4428,11 +4439,17 @@
           if (e.touches.length !== 2) return;
           e.preventDefault();
           clearDrawings();
+          if (NET.mode === "host" || NET.mode === "guest")
+            netSend({ type: "drawings", shapes: [] });
         },
         { passive: false },
       );
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") clearDrawings();
+        if (e.key === "Escape") {
+          clearDrawings();
+          if (NET.mode === "host" || NET.mode === "guest")
+            netSend({ type: "drawings", shapes: [] });
+        }
         if (e.key === "ArrowRight") {
           _drawColorIdx = (_drawColorIdx + 1) % DRAW_COLORS.length;
           DRAW.color = DRAW_COLORS[_drawColorIdx];
@@ -4797,25 +4814,28 @@
             NET.timers = d.timers;
           }
           if (d.castl) G.castl = { ...d.castl };
-          // Validate move before applying — prevent desync from illegal moves
-          const oppFrz = G.turn === "w" ? G.frz.byB : G.frz.byW;
-          const oppLegal = allMoves(G.brd, G.turn, G.castl, oppFrz);
-          const isLegal = oppLegal.some(
-            (m) =>
-              m.fr === d.mv.fr &&
-              m.fc === d.mv.fc &&
-              m.tr === d.mv.tr &&
-              m.tc === d.mv.tc,
-          );
-          if (!isLegal) {
-            console.warn("Rejected illegal move from network:", d.mv);
+          // Basic sanity check: piece must exist and belong to current turn
+          const netPiece = G.brd[d.mv.fr] && G.brd[d.mv.fr][d.mv.fc];
+          if (!netPiece || netPiece[0] !== G.turn) {
+            console.warn(
+              "Rejected move from network — wrong piece:",
+              d.mv,
+              netPiece,
+            );
             return;
           }
           // Sync eval and rating from sender
-          if (d.eval !== undefined && NET.showEval) setEval(d.eval);
           playMove(d.mv, false, true)
             .then?.(() => {})
             .catch?.(() => {});
+          // Use eval from sender directly — single source of truth
+          if (d.eval !== undefined && NET.showEval) {
+            setTimeout(() => {
+              setEval(d.eval);
+              // Echo back so both sides are guaranteed identical
+              netSend({ type: "eval_sync", ev: d.eval });
+            }, 15);
+          }
           // Override displayed rating with sender's computed value (same analysis)
           if (d.ri !== undefined && NET.showRating) {
             const R = RTNG[d.ri] || RTNG[RTNG.length - 1];
@@ -4826,6 +4846,13 @@
           }
         }
         // promo is now included in the move packet (mv.promo) — no separate handler needed
+        if (d.type === "drawings") {
+          DRAW.shapes = d.shapes || [];
+          renderDrawings();
+        }
+        if (d.type === "eval_sync") {
+          if (NET.showEval) setEval(d.ev);
+        }
         if (d.type === "gameover") {
           if (!G.over) endGame(d.reason, d.winner);
         }
