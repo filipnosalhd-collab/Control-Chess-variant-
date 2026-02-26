@@ -1553,7 +1553,7 @@
                 "
               >
                 <span style="font-size: 0.7rem; color: var(--dim)"
-                  >Twoje ELO</span
+                  >Your ELO</span
                 >
                 <span
                   id="eloVal"
@@ -1800,6 +1800,39 @@
         <div class="lsec" id="lTimeSec" style="display: none">
           <div class="llabel" style="text-align: center">⏱ Time Control</div>
           <div class="tpicker" id="tPicker"></div>
+        </div>
+        <div
+          id="lTimeApprove"
+          style="
+            display: none;
+            background: rgba(201, 168, 76, 0.1);
+            border: 1px solid var(--gold);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-top: 4px;
+          "
+        >
+          <div
+            style="font-size: 0.72rem; color: var(--gold); margin-bottom: 6px"
+          >
+            ⏱ Host proposes time: <strong id="lTimeApproveLabel"></strong>
+          </div>
+          <div style="display: flex; gap: 6px">
+            <button
+              class="btn bgd"
+              id="lTimeAcceptBtn"
+              style="flex: 1; padding: 5px"
+            >
+              ✓ Accept
+            </button>
+            <button
+              class="btn bsc"
+              id="lTimeDeclineBtn"
+              style="flex: 1; padding: 5px"
+            >
+              ✗ Decline
+            </button>
+          </div>
         </div>
         <div class="lmsg" id="lMsg"></div>
         <div class="lbtnrow">
@@ -2751,7 +2784,7 @@
 
         let ri;
         if (isCheckmate) {
-          ri = 0; // Mat → zawsze najlepsza ocena
+          ri = 0; // Checkmate → always best rating
         } else {
           // scoreActual: jak dobra jest pozycja dla movingCol po TYM ruchu
           // = negamax na aktualnej planszy z perspektywy oppCol, zanegowany
@@ -4790,7 +4823,7 @@
       function hostFlow(roomId) {
         P.role = "host";
         P.roomId = roomId;
-        lstat("Setting up room...");
+        lstat("Setting up room…");
         loadPeerJS(() => {
           P.peer = new Peer(roomId, { debug: 0 });
           P.peer.on("error", (err) => {
@@ -4821,7 +4854,7 @@
             lstat("Error: " + err.type + ". Check the link or try again."),
           );
           P.peer.on("open", () => {
-            lstat("Reaching host...");
+            lstat("Reaching host…");
             const conn = P.peer.connect(roomId, {
               reliable: true,
               label: "chess",
@@ -4842,10 +4875,10 @@
             document.getElementById("lpGuest").classList.add("joined");
             document.getElementById("lKick").style.display = "";
             document.getElementById("lTimeSec").style.display = "";
-            lmsg("Guest connected! Choose time control, then start.");
+            lmsg("Guest connected! Choose a time control, then start.");
             if (selectedTC !== null)
               document.getElementById("lStart").style.display = "";
-          } else lstat("Connected! Waiting for host to start...");
+          } else lstat("Connected! Waiting for host to choose time control…");
         });
         conn.on("data", (d) => {
           if (!NET.gameStarted) handleLobbyMsg(d, role);
@@ -4858,6 +4891,10 @@
           if (!NET.gameStarted) lstat("Connection error.");
         });
       }
+      let _tcDeclineCount = 0;
+      let _tcHostFree = false; // after 3 declines host picks freely
+      let _declinedIdxs = new Set(); // indices declined by guest this session
+
       function handleLobbyMsg(d, myRole) {
         if (d.type === "hello") {
           if (myRole === "host") {
@@ -4869,11 +4906,67 @@
           }
         }
         if (d.type === "kick") {
-          lmsg("You were kicked.");
+          lmsg("You were kicked from the room.");
           closePeer();
           document.getElementById("lobby").classList.remove("on");
         }
         if (d.type === "start_game") startOnlineGame(d, myRole);
+
+        if (d.type === "time_proposal" && myRole === "guest") {
+          const ap = document.getElementById("lTimeApprove");
+          const lb = document.getElementById("lTimeApproveLabel");
+          if (ap && lb) {
+            lb.textContent = d.tc.l;
+            ap.style.display = "block";
+          }
+          lstat("Host proposes: " + d.tc.l);
+          document.getElementById("lTimeAcceptBtn").onclick = () => {
+            netSend({ type: "time_accepted", idx: d.idx });
+            document.getElementById("lTimeApprove").style.display = "none";
+            lstat("Accepted! Waiting for host to start…");
+            _tcDeclineCount = 0;
+          };
+          document.getElementById("lTimeDeclineBtn").onclick = () => {
+            _tcDeclineCount++;
+            netSend({
+              type: "time_declined",
+              count: _tcDeclineCount,
+              idx: d.idx,
+            });
+            document.getElementById("lTimeApprove").style.display = "none";
+            lstat(`Declined (${_tcDeclineCount}/3). Waiting for new proposal…`);
+          };
+        }
+
+        if (d.type === "time_notify" && myRole === "guest") {
+          // Host picked freely after 3 declines — inform guest, no approval needed
+          document.getElementById("lTimeApprove").style.display = "none";
+          lstat("Host selected: " + d.tc.l);
+          lmsg("⏱ Time control: " + d.tc.l + " — waiting for host to start…");
+        }
+
+        if (d.type === "time_accepted" && myRole === "host") {
+          lmsg("Guest accepted! Ready to start.");
+          document.getElementById("lStart").style.display = "";
+        }
+
+        if (d.type === "time_declined" && myRole === "host") {
+          _declinedIdxs.add(d.idx);
+          selectedTC = null;
+          document.getElementById("lStart").style.display = "none";
+          _tcDeclineCount = d.count;
+          if (d.count >= 3) {
+            _tcHostFree = true;
+            _declinedIdxs.clear();
+            buildTimePicker(); // rebuild with all enabled
+            lmsg(
+              "Guest declined 3 times. Pick any time — game starts immediately.",
+            );
+          } else {
+            buildTimePicker(); // rebuild with declined ones disabled
+            lmsg(`Guest declined (${d.count}/3). Choose a different time.`);
+          }
+        }
       }
       function getMyName() {
         return document.getElementById("lobbyName").value.trim() || "Player";
@@ -4891,24 +4984,50 @@
         const el = document.getElementById("tPicker");
         el.innerHTML = "";
         TIME_CTRLS.forEach((tc, i) => {
+          const disabled = !_tcHostFree && _declinedIdxs.has(i);
           const b = document.createElement("button");
           b.className = "tpill" + (selectedTC === i ? " on" : "");
           b.textContent = tc.l;
+          if (disabled) {
+            b.style.opacity = "0.3";
+            b.style.pointerEvents = "none";
+          }
           b.addEventListener("click", () => {
+            if (disabled) return;
             selectedTC = i;
             document
-              .querySelectorAll(".tpill")
+              .querySelectorAll("#tPicker .tpill")
               .forEach((p, j) => p.classList.toggle("on", j === i));
-            if (guestJoined)
-              document.getElementById("lStart").style.display = "";
+            if (guestJoined) {
+              if (_tcHostFree) {
+                // After 3 declines: notify guest and show Start immediately (no approval needed)
+                netSend({ type: "time_notify", tc: TIME_CTRLS[i], idx: i });
+                lmsg("Time selected: " + TIME_CTRLS[i].l + ". Press Start.");
+                document.getElementById("lStart").style.display = "";
+              } else {
+                // Normal: send proposal, wait for guest approval
+                netSend({ type: "time_proposal", tc: TIME_CTRLS[i], idx: i });
+                lmsg("Proposal sent — waiting for guest…");
+                document.getElementById("lStart").style.display = "none";
+              }
+            }
           });
           el.appendChild(b);
         });
+      }
+      function setFavicon(emoji) {
+        const f = document.getElementById("favicon");
+        if (f)
+          f.href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='28'>${emoji}</text></svg>`;
       }
       function openLobby() {
         document.getElementById("lobby").classList.add("on");
         lstat("");
         lmsg("");
+        setFavicon("🏠");
+        _tcDeclineCount = 0;
+        _tcHostFree = false;
+        _declinedIdxs = new Set();
         ["lLinkSec", "lTimeSec", "lStart"].forEach((id) => {
           const e = document.getElementById(id);
           if (e) e.style.display = "none";
@@ -4938,6 +5057,7 @@
       }
       function startOnlineGame(cfg, myRole) {
         document.getElementById("lobby").classList.remove("on");
+        setFavicon("♟");
         try {
           history.replaceState({}, "", location.pathname);
         } catch (e) {}
@@ -5059,7 +5179,7 @@
         ["lKick", "lTimeSec", "lStart"].forEach(
           (id) => (document.getElementById(id).style.display = "none"),
         );
-        lmsg("Guest kicked.");
+        lmsg("Guest removed.");
       });
       document.getElementById("lStart").addEventListener("click", () => {
         if (!guestJoined) {
@@ -5085,6 +5205,7 @@
       });
       document.getElementById("lClose").addEventListener("click", () => {
         document.getElementById("lobby").classList.remove("on");
+        setFavicon("♟");
         try {
           history.replaceState({}, "", location.pathname);
         } catch (e) {}
@@ -5306,16 +5427,12 @@
 
         // Build history entry
         const resultLabel =
-          winner === myCol
-            ? "Wygrana"
-            : !winner || winner === ""
-              ? "Remis"
-              : "Przegrana";
+          winner === myCol ? "Win" : !winner || winner === "" ? "Draw" : "Loss";
         const sign = totalDelta >= 0 ? "+" : "";
         const oppName =
-          NET.mode === "bot" ? `Bot L${botLevel}` : NET.oppName || "Przeciwnik";
+          NET.mode === "bot" ? `Bot L${botLevel}` : NET.oppName || "Opponent";
         const entry = {
-          date: new Date().toLocaleDateString("pl"),
+          date: new Date().toLocaleDateString("en-GB"),
           result: resultLabel,
           opp: oppName,
           before,
@@ -5346,15 +5463,11 @@
         const lines = [];
         const gs = entry.gameDelta >= 0 ? "+" : "";
         const rs =
-          entry.result === "Wygrana"
-            ? "🏆"
-            : entry.result === "Remis"
-              ? "🤝"
-              : "💀";
-        lines.push(`${rs} Wynik: ${gs}${entry.gameDelta}`);
+          entry.result === "Win" ? "🏆" : entry.result === "Draw" ? "🤝" : "💀";
+        lines.push(`${rs} Result: ${gs}${entry.gameDelta}`);
         if (entry.moveDelta !== 0) {
           const ms = entry.moveDelta >= 0 ? "+" : "";
-          lines.push(`♟ Ruchy: ${ms}${entry.moveDelta}`);
+          lines.push(`♟ Moves: ${ms}${entry.moveDelta}`);
           // Show worst/best moves
           const bests = entry.moveLog.filter((m) => m.d > 0).slice(0, 3);
           const bads = entry.moveLog.filter((m) => m.d < 0).slice(0, 3);
@@ -5373,7 +5486,7 @@
         const ch = document.getElementById("eloChange");
         if (ch && _eloMoveDeltaAccum !== 0) {
           const s = _eloMoveDeltaAccum >= 0 ? "+" : "";
-          ch.textContent = `Ruchy: ${s}${_eloMoveDeltaAccum} (ta partia)`;
+          ch.textContent = `Moves: ${s}${_eloMoveDeltaAccum} (this game)`;
           ch.style.color = _eloMoveDeltaAccum >= 0 ? "#81c784" : "#e57373";
         }
       }
@@ -5408,6 +5521,26 @@
       }
 
       function eloInit() {
+        // Migrate old Polish entries in history
+        const h = eloHistGet();
+        let changed = false;
+        h.forEach((e) => {
+          if (typeof e === "object" && e.result) {
+            if (e.result === "Wygrana") {
+              e.result = "Win";
+              changed = true;
+            }
+            if (e.result === "Przegrana") {
+              e.result = "Loss";
+              changed = true;
+            }
+            if (e.result === "Remis") {
+              e.result = "Draw";
+              changed = true;
+            }
+          }
+        });
+        if (changed) localStorage.setItem(ELO_HIST_KEY, JSON.stringify(h));
         const el = document.getElementById("eloVal");
         if (el) el.textContent = eloGet();
         const te = document.getElementById("tEloResult");
