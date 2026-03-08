@@ -312,19 +312,12 @@
       .bwrap.flipped {
         transform: rotate(180deg);
       }
-      .bwrap.flipped .blbl {
-        transform: rotate(180deg);
-      }
-      .bwrap.flipped .pc {
-        transform: rotate(180deg);
-      }
-      .bwrap.flipped .friz {
-        transform: rotate(180deg);
-      }
+      .bwrap.flipped .blbl,
+      .bwrap.flipped .pc,
+      .bwrap.flipped .friz,
       .bwrap.flipped .dot::after {
         transform: rotate(180deg);
       }
-      /* Pre-move highlight — chess.com style */
       .pre {
         background: rgba(255, 200, 0, 0.35) !important;
       }
@@ -334,14 +327,12 @@
       .pre.dk {
         background: rgba(255, 200, 0, 0.3) !important;
       }
-      /* premove-from: darker orange overlay on source */
       .premove-from.lt {
         background: #f6a623cc !important;
       }
       .premove-from.dk {
         background: #d4870099 !important;
       }
-      /* premove-to: bright yellow-orange on destination */
       .premove-to.lt {
         background: #f6d022cc !important;
       }
@@ -441,7 +432,6 @@
         border: 3px solid rgba(0, 0, 0, 0.22);
         pointer-events: none;
       }
-      /* Premove possible squares — orange dots/rings like chess.com */
       .pre-dot::after {
         content: "";
         position: absolute;
@@ -698,7 +688,6 @@
         border-color: var(--gold);
         color: var(--gold);
       }
-      /* move rating colors */
       .br {
         color: #00e5ff;
       }
@@ -1186,7 +1175,6 @@
         user-select: none;
         -webkit-user-select: none;
       }
-      /* premove source/dest handled above */
       @media (max-width: 700px) {
         html,
         body {
@@ -1401,8 +1389,6 @@
             border: 1px solid #4caf50;
             border-radius: 6px;
             padding: 8px 12px;
-            margin-bottom: 4px;
-            display: none;
             align-items: center;
             justify-content: space-between;
             gap: 8px;
@@ -1695,14 +1681,12 @@
         <button class="mbtn" id="mDrw">Draw?</button>
       </div>
     </div>
-    <!-- PROMO -->
     <div class="modal" id="promoModal">
       <div class="mbox">
         <div class="mbt">Promote pawn</div>
         <div style="display: flex; gap: 10px" id="promoBox"></div>
       </div>
     </div>
-    <!-- CONFIRM -->
     <div class="modal" id="confModal">
       <div class="mbox">
         <div class="mbt" id="cfTi"></div>
@@ -1713,7 +1697,6 @@
         </div>
       </div>
     </div>
-    <!-- TOAST -->
     <div class="toast" id="toast">
       <div class="tti" id="tTi"></div>
       <div class="tsu" id="tSu"></div>
@@ -1748,7 +1731,6 @@
         </button>
       </div>
     </div>
-    <!-- LOBBY -->
     <div class="lobby" id="lobby">
       <div class="lbox">
         <div class="ltitle">🌐 Play Online</div>
@@ -1844,8 +1826,6 @@
         <div class="lcstat" id="lCStat"></div>
       </div>
     </div>
-
-    <!-- LOCAL TIME PICKER MODAL -->
     <div class="modal" id="localTimeModal">
       <div class="mbox" style="gap: 14px; min-width: 280px">
         <div class="mbt">⏱ Local Game Time Control</div>
@@ -1922,15 +1902,15 @@
       const FILES = "abcdefgh",
         RANKS = "87654321";
 
-      // Enhanced move ratings — 14 categories
+      // Move rating categories
       const RTNG = [
+        { l: "Genius!!!", s: "!!!", c: "br", mn: 500 },
         { l: "Brilliant!!", s: "!!", c: "br", mn: 300 },
-        { l: "Genius!!!", s: "!!!", c: "br", mn: 500 }, // ultra-brilliant
         { l: "Great!", s: "!", c: "gr", mn: 100 },
         { l: "Best", s: "★", c: "be", mn: 40 },
         { l: "Excellent", s: "✓", c: "ex", mn: 15 },
         { l: "Good", s: "·", c: "go", mn: 3 },
-        { l: "Book", s: "=", c: "ok", mn: -3 }, // equal/book move
+        { l: "Book", s: "=", c: "ok", mn: -3 },
         { l: "Okay", s: "○", c: "ok", mn: -20 },
         { l: "Inaccuracy", s: "?!", c: "in", mn: -50 },
         { l: "Mistake", s: "?", c: "mi", mn: -120 },
@@ -1938,7 +1918,6 @@
         { l: "Catastrophe", s: "???", c: "ct", mn: -500 },
         { l: "Losing", s: "✗", c: "ct", mn: -9999 },
       ];
-      // Sort by mn descending so first match wins
       RTNG.sort((a, b) => b.mn - a.mn);
 
       const cp = (b) => b.map((r) => [...r]);
@@ -2302,7 +2281,6 @@
       }
       function evalBoard(brd) {
         let s = 0;
-        // Material + PST
         for (let r = 0; r < 8; r++)
           for (let c = 0; c < 8; c++) {
             const p = brd[r][c];
@@ -2312,30 +2290,40 @@
               idx = col === "w" ? r * 8 + c : (7 - r) * 8 + c;
             s += (col === "w" ? 1 : -1) * (VAL[t] + ((PST[t] || [])[idx] || 0));
           }
-        // Control Chess: freeze penalty — frozen pieces lose their value contribution
         const frz = calcFrz(brd, null);
         for (const k of frz.byW) {
           const r = Math.floor(k / 8),
-            c2 = k % 8;
-          const p = brd[r][c2];
+            c = k % 8;
+          const p = brd[r][c];
           if (p && p[0] === "w") s -= VAL[p[1]] * 0.35;
         }
         for (const k of frz.byB) {
           const r = Math.floor(k / 8),
-            c2 = k % 8;
-          const p = brd[r][c2];
+            c = k % 8;
+          const p = brd[r][c];
           if (p && p[0] === "b") s += VAL[p[1]] * 0.35;
         }
         return s;
       }
 
-      // ─── Deep eval: quiescence search + deeper alpha-beta ───
+      // ═══════════════════════════════════════
+      // MASTER ENGINE — single source of truth for eval + move rating + impossible bot
+      // Alpha-beta with iterative deepening, move ordering, quiescence
+      // ═══════════════════════════════════════
+
+      // Move ordering: captures first (MVV-LVA), then PST
+      function scoreMv(brd, mv) {
+        const cap = brd[mv.tr][mv.tc];
+        return cap
+          ? (VAL[cap[1]] || 0) * 10 - (VAL[(brd[mv.fr][mv.fc] || "_")[1]] || 0)
+          : 0;
+      }
+
       function quiesce(brd, alpha, beta, col, depth) {
-        const stand = col === "w" ? evalBoard(brd) : -evalBoard(brd);
+        const stand = evalBoard(brd) * (col === "w" ? 1 : -1);
         if (depth <= 0) return stand;
         if (stand >= beta) return beta;
         if (stand > alpha) alpha = stand;
-        // Only captures
         const ms = [];
         for (let r = 0; r < 8; r++)
           for (let c = 0; c < 8; c++) {
@@ -2344,14 +2332,13 @@
             for (let tr = 0; tr < 8; tr++)
               for (let tc = 0; tc < 8; tc++) {
                 if (!brd[tr][tc] || brd[tr][tc][0] === col) continue;
-                const mv = { fr: r, fc: c, tr, tc, flag: null };
-                // Quick legality via movesFrom subset check - use reach
-                if (p[1] === "P") {
-                  const d = p[0] === "w" ? -1 : 1;
+                const pp = p;
+                if (pp[1] === "P") {
+                  const d = pp[0] === "w" ? -1 : 1;
                   if (tr !== r + d || Math.abs(tc - c) !== 1) continue;
-                } else if (!reach(brd, r, c, tr, tc, p[1])) continue;
-                if (brd[tr][tc][1] === p[1] && p[1] !== "P") continue;
-                ms.push(mv);
+                } else if (!reach(brd, r, c, tr, tc, pp[1])) continue;
+                if (brd[tr][tc][1] === pp[1] && pp[1] !== "P") continue;
+                ms.push({ fr: r, fc: c, tr, tc, flag: null });
               }
           }
         ms.sort(
@@ -2368,17 +2355,22 @@
         return alpha;
       }
 
-      function abDeep(brd, depth, alpha, beta, col, castl, frz, ply, deadline) {
-        if (deadline && Date.now() > deadline)
-          return evalBoard(brd) * (col === "w" ? 1 : -1);
-        if (depth <= 0) return quiesce(brd, alpha, beta, col, 3);
+      function abSearch(
+        brd,
+        depth,
+        alpha,
+        beta,
+        col,
+        castl,
+        frz,
+        ply,
+        deadline,
+      ) {
+        if (deadline && Date.now() > deadline) return null; // signal abort
+        if (depth <= 0) return quiesce(brd, alpha, beta, col, 4);
         const ms = allMoves(brd, col, castl, frz);
         if (!ms.length) return inCheck(brd, col) ? -19000 + ply : 0;
-        ms.sort(
-          (a, b) =>
-            (brd[b.tr][b.tc] ? VAL[brd[b.tr][b.tc][1]] || 0 : 0) -
-            (brd[a.tr][a.tc] ? VAL[brd[a.tr][a.tc][1]] || 0 : 0),
-        );
+        ms.sort((a, b) => scoreMv(brd, b) - scoreMv(brd, a));
         let best = -Infinity;
         for (const mv of ms) {
           const nb = cp(brd),
@@ -2392,10 +2384,14 @@
             nc.bK = false;
             nc.bQ = false;
           }
+          if (mv.fr === 7 && mv.fc === 7) nc.wK = false;
+          if (mv.fr === 7 && mv.fc === 0) nc.wQ = false;
+          if (mv.fr === 0 && mv.fc === 7) nc.bK = false;
+          if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
           applyMv(nb, mv, col);
           const nf = calcFrz(nb);
           const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
-          const sc = -abDeep(
+          const sc = -abSearch(
             nb,
             depth - 1,
             -beta,
@@ -2406,6 +2402,7 @@
             ply + 1,
             deadline,
           );
+          if (sc === null) return null; // propagate abort
           if (sc > best) best = sc;
           if (sc > alpha) alpha = sc;
           if (alpha >= beta) break;
@@ -2413,12 +2410,17 @@
         return best;
       }
 
-      // Deep eval for move rating — returns best possible score for side to move
-      function deepEvalForSide(brd, col, castl, frz, depth) {
+      // Find best move at EXACT depth — no deadline, never aborts mid-search.
+      // Returns {move, score} where score is from col's perspective.
+      function exactBestMove(brd, col, castl, frz, depth) {
         const ms = allMoves(brd, col, castl, frz);
-        if (!ms.length) return inCheck(brd, col) ? -19000 : 0;
-        const deadline = Date.now() + 800; // 800ms budget
-        let best = -Infinity;
+        if (!ms.length)
+          return { move: null, score: inCheck(brd, col) ? -19000 : 0 };
+        ms.sort((a, b) => scoreMv(brd, b) - scoreMv(brd, a));
+        let bestMove = ms[0],
+          bestScore = -Infinity,
+          alpha = -Infinity,
+          beta = Infinity;
         for (const mv of ms) {
           const nb = cp(brd),
             nc = { ...castl },
@@ -2431,24 +2433,113 @@
             nc.bK = false;
             nc.bQ = false;
           }
+          if (mv.fr === 7 && mv.fc === 7) nc.wK = false;
+          if (mv.fr === 7 && mv.fc === 0) nc.wQ = false;
+          if (mv.fr === 0 && mv.fc === 7) nc.bK = false;
+          if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
           applyMv(nb, mv, col);
           const nf = calcFrz(nb);
           const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
-          const sc = -abDeep(
+          // No deadline — full search, never cut short
+          const sc = -abSearch(
             nb,
             depth - 1,
-            -Infinity,
-            Infinity,
+            -beta,
+            -alpha,
             opp(col),
             nc,
             nfrz,
             1,
-            deadline,
+            null,
           );
-          if (sc > best) best = sc;
-          if (Date.now() > deadline) break;
+          if (sc === null) continue; // should never happen with null deadline, but safety
+          if (sc > bestScore) {
+            bestScore = sc;
+            bestMove = mv;
+          }
+          if (sc > alpha) alpha = sc;
+          // No alpha>=beta break at root — we must evaluate ALL moves to find global best
         }
-        return best;
+        return { move: bestMove, score: bestScore };
+      }
+
+      // Iterative deepening with deadline — for eval bar / rating only (NOT for impossible bot)
+      function masterBestMove(brd, col, castl, frz, timeMs) {
+        const ms = allMoves(brd, col, castl, frz);
+        if (!ms.length)
+          return { move: null, score: inCheck(brd, col) ? -19000 : 0 };
+        ms.sort((a, b) => scoreMv(brd, b) - scoreMv(brd, a));
+        const deadline = Date.now() + timeMs;
+        let bestMove = ms[0],
+          bestScore = -Infinity;
+        for (let depth = 1; depth <= 6; depth++) {
+          if (Date.now() > deadline) break;
+          // Only use result of depth if we finished ALL root moves at this depth
+          let dBest = -Infinity,
+            dMove = ms[0],
+            alpha = -Infinity,
+            beta = Infinity,
+            complete = true;
+          for (const mv of ms) {
+            if (Date.now() > deadline) {
+              complete = false;
+              break;
+            }
+            const nb = cp(brd),
+              nc = { ...castl },
+              p = brd[mv.fr][mv.fc];
+            if (p === "wK") {
+              nc.wK = false;
+              nc.wQ = false;
+            }
+            if (p === "bK") {
+              nc.bK = false;
+              nc.bQ = false;
+            }
+            if (mv.fr === 7 && mv.fc === 7) nc.wK = false;
+            if (mv.fr === 7 && mv.fc === 0) nc.wQ = false;
+            if (mv.fr === 0 && mv.fc === 7) nc.bK = false;
+            if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
+            applyMv(nb, mv, col);
+            const nf = calcFrz(nb);
+            const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
+            const sc = -abSearch(
+              nb,
+              depth - 1,
+              -beta,
+              -alpha,
+              opp(col),
+              nc,
+              nfrz,
+              1,
+              deadline,
+            );
+            if (sc === null) {
+              complete = false;
+              break;
+            }
+            if (sc > dBest) {
+              dBest = sc;
+              dMove = mv;
+            }
+            if (sc > alpha) alpha = sc;
+          }
+          // Only accept this depth's result if we finished all moves
+          if (complete) {
+            bestScore = dBest;
+            bestMove = dMove;
+          } else break;
+        }
+        return { move: bestMove, score: bestScore };
+      }
+
+      // Eval from white's perspective using master engine (for eval bar — same engine everywhere)
+      // Returns centipawns from white's perspective
+      function masterEvalWhite(brd, col, castl, frz, timeMs) {
+        // Best score from col's perspective
+        const { score } = masterBestMove(brd, col, castl, frz, timeMs);
+        // Convert to white perspective
+        return col === "w" ? score : -score;
       }
 
       // ═══════════════════════════════════════
@@ -2476,11 +2567,9 @@
         tMoved = false;
       let mDown = null,
         mXY = null;
-
-      // Pre-move state
-      let PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1 };
-
-      // Online state
+      let PMQUEUE = [],
+        PMSEL = null;
+      let PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1, poss: [] };
       let NET = {
         mode: "bot",
         peer: null,
@@ -2497,7 +2586,6 @@
         gameStarted: false,
         rematchTime: null,
       };
-
       const TIME_CTRLS = [
         { l: "1+0", base: 60000, inc: 0 },
         { l: "1+1", base: 60000, inc: 1000 },
@@ -2518,13 +2606,12 @@
       function formatTime(ms, showMs) {
         if (ms < 0) ms = 0;
         if (showMs) {
-          // Show seconds.tenths
           const s = Math.floor(ms / 1000),
             tenth = Math.floor((ms % 1000) / 100);
           return s + "." + tenth;
         }
-        const s = Math.ceil(ms / 1000);
-        const m = Math.floor(s / 60),
+        const s = Math.ceil(ms / 1000),
+          m = Math.floor(s / 60),
           ss = s % 60;
         return m + ":" + (ss < 10 ? "0" : "") + ss;
       }
@@ -2562,7 +2649,7 @@
           prevEval: 0,
           halfMove: 0,
           posHist: [],
-          bestEvalCache: null, // cache best move eval for rating
+          bestEvalBefore: null,
         };
         document.getElementById("toast").classList.remove("on");
         document.getElementById("movesEl").innerHTML = "";
@@ -2576,9 +2663,7 @@
           showTimers(true);
           updateTimerDisplay();
           if (NET.mode === "bot") startTurnTimer("w");
-        } else {
-          showTimers(false);
-        }
+        } else showTimers(false);
         setEval(0);
         const showEv = NET.showEval;
         document.getElementById("evbar").style.display = showEv ? "" : "none";
@@ -2609,7 +2694,7 @@
         stopTimers();
         if (!NET.timeCtrl) return;
         NET.lastTimestamp = Date.now();
-        NET.timerInterval = setInterval(() => tickTimer(col), 50); // 50ms precision
+        NET.timerInterval = setInterval(() => tickTimer(col), 50);
       }
       function tickTimer(col) {
         const now = Date.now(),
@@ -2617,7 +2702,6 @@
         NET.lastTimestamp = now;
         NET.timers[col] = Math.max(0, NET.timers[col] - dt);
         updateTimerDisplay();
-        // Warning ticks at low time — online: only for MY timer
         const t = NET.timers[col];
         if (t <= 10000 && t > 0) {
           const prev = t + dt;
@@ -2635,7 +2719,6 @@
         }
       }
       function updateTimerDisplay() {
-        // Determine which colour is shown at bottom (my side)
         const botCol =
           NET.mode === "bot"
             ? "w"
@@ -2673,18 +2756,20 @@
         const { fr, fc, tr, tc, flag } = mv;
         const piece = G.brd[fr][fc],
           cap = G.brd[tr][tc];
-
-        // Deep eval BEFORE move for rating comparison
-        let preEval = G.prevEval;
-        // Also compute what the best move would have scored (async, non-blocking for bot)
-        let bestEval = G.bestEvalCache;
-
         const note = buildNote(G.brd, mv, G.turn);
+        const movingCol = G.turn;
+
+        // Snapshot state BEFORE the move for rating computation
+        const snapBrd = cp(G.brd),
+          snapCastl = { ...G.castl };
+        const snapFrz = movingCol === "w" ? G.frz.byB : G.frz.byW;
+        const evalBefore = G.bestEvalBefore; // best possible score for movingCol (computed after prev move)
+
         if (NET.timeCtrl) {
           stopTimers();
           if (NET.timeCtrl.inc)
-            NET.timers[G.turn] = Math.min(
-              NET.timers[G.turn] + NET.timeCtrl.inc,
+            NET.timers[movingCol] = Math.min(
+              NET.timers[movingCol] + NET.timeCtrl.inc,
               NET.timeCtrl.base * 2,
             );
         }
@@ -2703,22 +2788,21 @@
         G.brd[tr][tc] = piece;
         G.brd[fr][fc] = null;
         if (flag === "cs") {
-          G.brd[tr][5] = G.turn + "R";
+          G.brd[tr][5] = movingCol + "R";
           G.brd[tr][7] = null;
         }
         if (flag === "cl") {
-          G.brd[tr][3] = G.turn + "R";
+          G.brd[tr][3] = movingCol + "R";
           G.brd[tr][0] = null;
         }
-        if (cap) (G.turn === "w" ? G.capW : G.capB).push(cap);
+        if (cap) (movingCol === "w" ? G.capW : G.capB).push(cap);
         if (piece === "wP" && tr === 0) {
           let q;
-          if (fromNet)
-            q = mv.promo || "wQ"; // use promo from network packet
+          if (fromNet) q = mv.promo || "wQ";
           else if (isBot) q = "wQ";
           else q = await doPromo("w");
           G.brd[tr][tc] = q;
-          mv.promo = q; // store in mv so netSend includes it
+          mv.promo = q;
         }
         if (piece === "bP" && tr === 7) {
           let q;
@@ -2731,195 +2815,89 @@
         G.lastMv = { fr, fc, tr, tc };
         G.prevFrz = G.frz;
         G.frz = calcFrz(G.brd, G.prevFrz);
-        const newEv = evalBoard(G.brd);
-        G.prevEval = newEv;
+        G.prevEval = evalBoard(G.brd);
 
-        // ── Move rating ─────────────────────────────────────────────────────────
-        const movingCol = G.turn;
+        // ── UNIFIED MOVE RATING (same for single and multiplayer) ──────────────────
+        // Compare: score after THIS move vs best possible score movingCol could have gotten
         const oppCol = opp(movingCol);
+        const nextFrz = oppCol === "w" ? G.frz.byB : G.frz.byW;
+        const nextMs = allMoves(G.brd, oppCol, G.castl, nextFrz);
+        const isCheckmate = nextMs.length === 0 && inCheck(G.brd, oppCol);
+        const isStalemate = nextMs.length === 0 && !inCheck(G.brd, oppCol);
 
-        // Helper: negamax eval from col's perspective, depth-limited, hard deadline
-        function negaMax(brd, col, castl, frz, depth, alpha, beta, dl) {
-          if (Date.now() > dl) return evalBoard(brd) * (col === "w" ? 1 : -1);
-          if (depth <= 0) return evalBoard(brd) * (col === "w" ? 1 : -1);
-          const ms = allMoves(brd, col, castl, frz);
-          if (!ms.length) return inCheck(brd, col) ? -18000 + depth : 0;
-          let best = -Infinity;
-          for (const m of ms) {
-            if (Date.now() > dl) break;
-            const nb = cp(brd),
-              nc = { ...castl },
-              pp = brd[m.fr][m.fc];
-            if (pp === "wK") {
-              nc.wK = false;
-              nc.wQ = false;
-            }
-            if (pp === "bK") {
-              nc.bK = false;
-              nc.bQ = false;
-            }
-            applyMv(nb, m, col);
-            const nf = calcFrz(nb),
-              nfrz = opp(col) === "w" ? nf.byB : nf.byW;
-            const sc = -negaMax(
-              nb,
-              opp(col),
-              nc,
-              nfrz,
-              depth - 1,
-              -beta,
-              -alpha,
-              dl,
-            );
-            if (sc > best) best = sc;
-            if (sc > alpha) alpha = sc;
-            if (alpha >= beta) break;
-          }
-          return best;
-        }
-
-        const nextFrzNow = oppCol === "w" ? G.frz.byB : G.frz.byW;
-        const oppMoves = allMoves(G.brd, oppCol, G.castl, nextFrzNow);
-        const isCheckmate = oppMoves.length === 0 && inCheck(G.brd, oppCol);
-
-        let ri;
-        if (isCheckmate) {
-          ri = 0; // Checkmate → always best rating
-        } else {
-          // scoreActual: jak dobra jest pozycja dla movingCol po TYM ruchu
-          // = negamax na aktualnej planszy z perspektywy oppCol, zanegowany
-          const dl1 = Date.now() + 200;
-          const scoreActual = -negaMax(
-            G.brd,
-            oppCol,
-            G.castl,
-            nextFrzNow,
-            2,
-            -Infinity,
-            Infinity,
-            dl1,
-          );
-
-          // scoreBest: jak dobra byłaby pozycja gdyby movingCol zagrał NAJLEPSZY ruch
-          // Mamy to w bestEvalCache z poprzedniego ruchu (obliczone synchronicznie poniżej)
-          // Jeśli null (pierwszy ruch) → eval materialny przed ruchem
-          let scoreBest;
-          if (bestEval !== null && bestEval !== undefined) {
-            // bestEval jest w jednostkach white-positive; konwertuj na movingCol-positive
-            scoreBest = bestEval * (movingCol === "w" ? 1 : -1);
+        let ri = RTNG.length - 1;
+        if (!fromNet) {
+          if (isCheckmate) {
+            ri = 0; // always "Genius!!!" for checkmate
           } else {
-            // Pierwszy ruch: oblicz synchronicznie best możliwy wynik
-            const myFrzNow = movingCol === "w" ? G.frz.byB : G.frz.byW; // stan PRZED ruchem (już zastąpiony)
-            // Brak poprzednich danych — użyj prostego materiału
-            scoreBest = evalBoard(G.brd) * (movingCol === "w" ? 1 : -1);
-          }
+            // scoreActual: from movingCol's perspective after this move
+            // = best response opponent can make, negated
+            const dl1 = Date.now() + 250;
+            const scoreActual = -abSearch(
+              G.brd,
+              2,
+              -Infinity,
+              Infinity,
+              oppCol,
+              G.castl,
+              nextFrz,
+              1,
+              dl1,
+            );
 
-          const delta = scoreActual - scoreBest; // > 0: lepiej niż best → podejrzane; < 0: gorzej
-          // Normalize: jeśli gracz zagrał dokładnie najlepszy ruch, delta ≈ 0
-          ri = RTNG.length - 1;
-          for (let i = 0; i < RTNG.length; i++)
-            if (delta >= RTNG[i].mn) {
-              ri = i;
-              break;
+            // scoreBest: what movingCol could have achieved with the best possible move
+            let scoreBest;
+            if (evalBefore !== null && evalBefore !== undefined) {
+              // Already computed before this move
+              scoreBest = evalBefore;
+            } else {
+              // First move or cold start — compute quickly
+              scoreBest = evalBoard(G.brd) * (movingCol === "w" ? 1 : -1);
             }
+            const delta = scoreActual - scoreBest;
+            ri = RTNG.length - 1;
+            for (let i = 0; i < RTNG.length; i++)
+              if (delta >= RTNG[i].mn) {
+                ri = i;
+                break;
+              }
+          }
         }
 
-        // Eval bar: shallow najpierw
+        // ── Compute bestEvalBefore for NEXT move's rating ──────────────────────────
+        // What's the best oppCol can do right now? (Used to rate oppCol's next move)
+        // Use master engine — same quality for both single and multiplayer
+        setTimeout(() => {
+          if (G.over) return;
+          const _col = oppCol,
+            _frz2 = nextFrz,
+            _castl2 = { ...G.castl },
+            _brd2 = G.brd;
+          const ms2 = allMoves(_brd2, _col, _castl2, _frz2);
+          if (!ms2.length) {
+            G.bestEvalBefore = null;
+            return;
+          }
+          // Time budget: 400ms for rating quality, same regardless of mode
+          const { score } = masterBestMove(_brd2, _col, _castl2, _frz2, 400);
+          G.bestEvalBefore = score; // from _col's perspective
+          // Also update eval bar with same engine result
+          const evWhite = _col === "w" ? score : -score;
+          if (NET.showEval && !fromNet) {
+            setEval(evWhite);
+            if (NET.conn) netSend({ type: "eval_sync", ev: evWhite });
+          }
+        }, 0);
+
+        // Initial quick eval for bar
         if (NET.showEval && !fromNet) setEval(evalBoard(G.brd));
 
-        // Oblicz SYNCHRONICZNIE bestEvalCache dla NASTĘPNEGO ruchu (dla oceny następnego gracza)
-        // Robimy to synchronicznie żeby było dostępne gdy gracz zagra ruch
-        // Max 300ms żeby nie lagować
-        {
-          const _col = oppCol,
-            _frz = nextFrzNow,
-            _castl = { ...G.castl },
-            _brd = G.brd;
-          const ms2 = allMoves(_brd, _col, _castl, _frz);
-          if (ms2.length) {
-            const dl2 = Date.now() + 300;
-            let best2 = -Infinity;
-            for (const m of ms2) {
-              if (Date.now() > dl2) break;
-              const nb = cp(_brd),
-                nc = { ..._castl },
-                pp = _brd[m.fr][m.fc];
-              if (pp === "wK") {
-                nc.wK = false;
-                nc.wQ = false;
-              }
-              if (pp === "bK") {
-                nc.bK = false;
-                nc.bQ = false;
-              }
-              applyMv(nb, m, _col);
-              const nf = calcFrz(nb),
-                nfrz = opp(_col) === "w" ? nf.byB : nf.byW;
-              const sc = -negaMax(
-                nb,
-                opp(_col),
-                nc,
-                nfrz,
-                1,
-                -Infinity,
-                Infinity,
-                dl2,
-              );
-              if (sc > best2) best2 = sc;
-            }
-            // Zapisz w white-positive
-            G.bestEvalCache = _col === "w" ? best2 : -best2;
-            // Refined eval bar async
-            setTimeout(() => {
-              if (G.over) return;
-              const dl3 = Date.now() + 500;
-              let best3 = -Infinity;
-              for (const m of ms2) {
-                if (Date.now() > dl3) break;
-                const nb = cp(_brd),
-                  nc = { ..._castl },
-                  pp = _brd[m.fr][m.fc];
-                if (pp === "wK") {
-                  nc.wK = false;
-                  nc.wQ = false;
-                }
-                if (pp === "bK") {
-                  nc.bK = false;
-                  nc.bQ = false;
-                }
-                applyMv(nb, m, _col);
-                const nf = calcFrz(nb),
-                  nfrz = opp(_col) === "w" ? nf.byB : nf.byW;
-                const sc = -negaMax(
-                  nb,
-                  opp(_col),
-                  nc,
-                  nfrz,
-                  3,
-                  -Infinity,
-                  Infinity,
-                  dl3,
-                );
-                if (sc > best3) best3 = sc;
-              }
-              G.bestEvalCache = _col === "w" ? best3 : -best3;
-              if (NET.showEval && !fromNet) {
-                setEval(G.bestEvalCache);
-                if (NET.conn)
-                  netSend({ type: "eval_sync", ev: G.bestEvalCache });
-              }
-            }, 0);
-          } else {
-            G.bestEvalCache = null;
-          }
-        }
-
+        // ── Display rating ────────────────────────────────────────────────────────
         const showRt = NET.showRating;
-        if (showRt) {
+        if (showRt && !fromNet) {
           const R = RTNG[ri];
           let html = `<span class="${R.c}">${R.s} ${R.l}</span>`;
-          if (inCheck(G.brd, opp(G.turn)))
-            html += ` <span class="ck">Check!</span>`;
+          if (inCheck(G.brd, oppCol)) html += ` <span class="ck">Check!</span>`;
           if (NET.mode !== "bot") {
             const isMyMove = movingCol === NET.myCol;
             html = isMyMove ? `<b>You:</b> ${html}` : `<b>Opp:</b> ${html}`;
@@ -2928,12 +2906,11 @@
           document.getElementById("mRt").innerHTML =
             `<span class="${RTNG[ri].c}">${RTNG[ri].s}</span>`;
         }
-        if (NET.showEval && !fromNet) setEval(newEv);
-        // ELO: update from move quality (only player's moves, not bot/net)
+
         if (!isBot && !fromNet) eloOnMove(ri);
-        addNote(note, movingCol, G.hist.length, ri, showRt);
+        addNote(note, movingCol, G.hist.length, ri, showRt && !fromNet);
         G.hist.push(mv);
-        G.turn = opp(movingCol);
+        G.turn = oppCol;
         const wasCapOrPawn = cap || piece[1] === "P";
         G.halfMove = wasCapOrPawn ? 0 : G.halfMove + 1;
         const posKey =
@@ -2945,13 +2922,12 @@
         G.posHist.push(posKey);
         const repCount = G.posHist.filter((k) => k === posKey).length;
         if (!fromNet && NET.mode !== "bot" && NET.conn) {
-          // mv.promo is set above if promotion occurred — receiver uses it directly
           netSend({
             type: "move",
             mv,
             timers: NET.timers,
             castl: G.castl,
-            eval: newEv,
+            eval: evalBoard(G.brd),
             ri,
             showRt: NET.showRating,
           });
@@ -2968,59 +2944,54 @@
           endGame("insufficient", "");
           return;
         }
-        const nextFrz = G.turn === "w" ? G.frz.byB : G.frz.byW;
-        const nextMs = allMoves(G.brd, G.turn, G.castl, nextFrz);
-        if (!nextMs.length) {
-          endGame(
-            inCheck(G.brd, G.turn) ? "checkmate" : "stalemate",
-            opp(G.turn),
-          );
+        if (isCheckmate) {
+          endGame("checkmate", movingCol);
+          return;
+        }
+        if (isStalemate) {
+          endGame("stalemate", "");
           return;
         }
         if (NET.mode === "local" && !G.over) flipped = G.turn === "b";
-
-        // Sounds
         if (flag === "cs" || flag === "cl") playSound("castle");
         else if (cap) playSound("capture");
         else playSound("move");
         if (inCheck(G.brd, G.turn)) playSound("check");
-
         render();
         updStatus();
         updCaps();
         if (NET.timeCtrl && !G.over) startTurnTimer(G.turn);
 
-        // ── Execute pre-move chain ─────────────────────────────────────────────────
-        // myCol = kolor gracza (nie bota) który ustawił pre-move
+        // Execute pre-move chain
         if (PMQUEUE.length > 0 && !G.over) {
           const pmCol =
             NET.mode === "bot" ? "w" : NET.mode === "local" ? null : NET.myCol;
-          // W trybie local pre-move nie ma sensu (zawsze moja tura)
           if (pmCol && G.turn === pmCol) {
             const pm = PMQUEUE.shift();
             PMSEL = null;
             pmSync();
-            const myFrz = G.turn === "w" ? G.frz.byB : G.frz.byW;
-            const piece = G.brd[pm.fr][pm.fc];
-            // Figura musi należeć do mnie i stać na spodziewanym polu
-            if (piece && piece[0] === G.turn) {
-              const validMoves = movesFrom(G.brd, pm.fr, pm.fc, G.castl, myFrz);
-              // Szukaj ruchu na docelowe pole — nieważne czy tam stoi figura czy nie
-              // (sytuacja mogła się zmienić — bicie zniknęło, ale ruch pusty jest legalny)
+            const myFrz2 = G.turn === "w" ? G.frz.byB : G.frz.byW;
+            const pieceAtPm = G.brd[pm.fr][pm.fc];
+            if (pieceAtPm && pieceAtPm[0] === G.turn) {
+              const validMoves = movesFrom(
+                G.brd,
+                pm.fr,
+                pm.fc,
+                G.castl,
+                myFrz2,
+              );
               const pmv = validMoves.find(
                 (m) => m.tr === pm.tr && m.tc === pm.tc,
               );
               if (pmv) {
                 G.sel = null;
                 G.poss = [];
-                // Small delay ensures render completes, then execute premove
                 setTimeout(() => {
                   if (!G.over && G.turn === pmCol) playMove(pmv, false, false);
                 }, 50);
                 return;
               }
             }
-            // Ten krok nielegalny → cały łańcuch odpada
             PMQUEUE = [];
             PMSEL = null;
             pmSync();
@@ -3031,7 +3002,7 @@
         if (NET.mode === "bot" && G.turn === "b" && !G.over) {
           document.getElementById("thkEl").classList.add("on");
           document.getElementById("mThk").classList.add("on");
-          const delay = [300, 500, 700, 1000, 1400][botLevel - 1];
+          const delay = [300, 500, 700, 900, 1200][botLevel - 1];
           setTimeout(runBot, delay);
         }
       }
@@ -3066,22 +3037,40 @@
 
       // ═══════════════════════════════════════
       // BOT
+      // Level 1: random  Level 2: greedy  Level 3: depth-2+noise
+      // Level 4: depth-3+noise  Level 5: IMPOSSIBLE — depth 4, zero noise, async via setTimeout
       // ═══════════════════════════════════════
-      let _botAbort = false;
+      let _botAbort = false,
+        _botGeneration = 0;
+
       function runBot() {
         document.getElementById("thkEl").classList.add("on");
         document.getElementById("mThk").classList.add("on");
         _botAbort = false;
-        const delay = [150, 250, 400, 600, 900][botLevel - 1] || 300;
-        setTimeout(() => _botAsync(G.brd, G.castl, G.frz.byW, botLevel), delay);
+        _botGeneration++;
+        const gen = _botGeneration;
+        const delay = [300, 500, 700, 900, 200][botLevel - 1] || 300;
+        setTimeout(
+          () => _doBotMove(G.brd, G.castl, G.frz.byW, botLevel, gen),
+          delay,
+        );
       }
-      function _botAsync(brd, castl, frzW, level) {
-        if (_botAbort || G.over || G.turn !== "b" || NET.mode !== "bot") return;
+
+      function _doBotMove(brd, castl, frzW, level, gen) {
+        if (
+          _botAbort ||
+          G.over ||
+          G.turn !== "b" ||
+          NET.mode !== "bot" ||
+          gen !== _botGeneration
+        )
+          return;
         const ms = allMoves(brd, "b", castl, frzW);
         if (!ms.length) {
           postBotMove(null);
           return;
         }
+
         if (level === 1) {
           const nc = ms.filter((m) => !brd[m.tr][m.tc]);
           const pool = nc.length && Math.random() < 0.85 ? nc : ms;
@@ -3104,23 +3093,13 @@
           postBotMove(best);
           return;
         }
-        const depth = [0, 0, 0, 2, 3, 4][level] || 2; // deeper search levels
-        const noise = [0, 0, 0, 0.06, 0.02, 0][level] || 0;
-        const timeLimit = [0, 0, 0, 500, 1000, 2000][level] || 700;
-        const deadline = Date.now() + timeLimit;
-        ms.sort(
-          (a, b) =>
-            (brd[b.tr][b.tc] ? VAL[brd[b.tr][b.tc][1]] || 0 : 0) -
-            (brd[a.tr][a.tc] ? VAL[brd[a.tr][a.tc][1]] || 0 : 0),
-        );
-        let bestMove = ms[0],
-          bestScore = -Infinity,
-          idx = 0;
-        function step() {
-          if (_botAbort) return;
-          const chunkEnd = Math.min(idx + 3, ms.length);
-          while (idx < chunkEnd) {
-            const mv = ms[idx++];
+        if (level === 3) {
+          ms.sort((a, b) => scoreMv(brd, b) - scoreMv(brd, a));
+          let bestMove = ms[0],
+            bestScore = -Infinity;
+          const deadline = Date.now() + 600;
+          for (const mv of ms) {
+            if (Date.now() > deadline) break;
             const nb = cp(brd),
               nc = { ...castl },
               p = brd[mv.fr][mv.fc];
@@ -3130,9 +3109,9 @@
             }
             applyMv(nb, mv, "b");
             const nf = calcFrz(nb);
-            let sc = -abDeep(
+            const raw = abSearch(
               nb,
-              depth - 1,
+              1,
               -Infinity,
               Infinity,
               "w",
@@ -3141,17 +3120,61 @@
               1,
               deadline,
             );
-            if (noise) sc += (Math.random() * 2 - 1) * noise * 500;
+            const sc =
+              (raw === null ? -Infinity : -raw) + (Math.random() * 2 - 1) * 80;
             if (sc > bestScore) {
               bestScore = sc;
               bestMove = mv;
             }
           }
-          if (idx >= ms.length || Date.now() > deadline) postBotMove(bestMove);
-          else setTimeout(step, 0);
+          postBotMove(bestMove);
+          return;
         }
-        step();
+        if (level === 4) {
+          ms.sort((a, b) => scoreMv(brd, b) - scoreMv(brd, a));
+          let bestMove = ms[0],
+            bestScore = -Infinity;
+          const deadline = Date.now() + 1500;
+          for (const mv of ms) {
+            if (Date.now() > deadline) break;
+            const nb = cp(brd),
+              nc = { ...castl },
+              p = brd[mv.fr][mv.fc];
+            if (p === "bK") {
+              nc.bK = false;
+              nc.bQ = false;
+            }
+            applyMv(nb, mv, "b");
+            const nf = calcFrz(nb);
+            const raw = abSearch(
+              nb,
+              2,
+              -Infinity,
+              Infinity,
+              "w",
+              nc,
+              nf.byW,
+              1,
+              deadline,
+            );
+            const sc =
+              (raw === null ? -Infinity : -raw) + (Math.random() * 2 - 1) * 25;
+            if (sc > bestScore) {
+              bestScore = sc;
+              bestMove = mv;
+            }
+          }
+          postBotMove(bestMove);
+          return;
+        }
+
+        // ── LEVEL 5: IMPOSSIBLE ─────────────────────────────────────────────────
+        // exactBestMove depth 4 — ~600ms, runs via setTimeout so UI can breathe first
+        // No deadline, no noise — always returns the true best move
+        const { move } = exactBestMove(brd, "b", castl, frzW, 4);
+        postBotMove(move || ms[0]);
       }
+
       function postBotMove(mv) {
         document.getElementById("thkEl").classList.remove("on");
         document.getElementById("mThk").classList.remove("on");
@@ -3160,13 +3183,8 @@
       }
 
       // ═══════════════════════════════════════
-      // PRE-MOVE — all pieces, all modes, chess.com style
+      // PRE-MOVE
       // ═══════════════════════════════════════
-      // ── Pre-move chain helpers ────────────────────────────────────────────────────
-      // PMQUEUE = [{fr,fc,tr,tc}, ...] — chain of moves to execute in order
-      // PMSEL   = {fr,fc,poss:[]} | null — currently highlighted source (picking next step)
-      // PREMOVE = legacy compat alias (first item in queue, or empty)
-
       function pmClear() {
         PMQUEUE = [];
         PMSEL = null;
@@ -3174,7 +3192,6 @@
         render();
       }
       function pmSync() {
-        // Keep PREMOVE in sync with first queued item (legacy code still uses PREMOVE)
         if (PMQUEUE.length > 0) {
           const q = PMQUEUE[0];
           PREMOVE = {
@@ -3189,31 +3206,22 @@
           PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1, poss: [] };
         }
       }
-      // Called when user picks a destination during pre-move setup
-      // Adds to queue, then starts picking next step from that destination
       function pmAddStep(fr, fc, tr, tc, brdState, col) {
         const simBrd = brdSim(brdState, fr, fc, tr, tc);
-        // Store simulated board state WITH this step so later steps can build on it
         PMQUEUE.push({ fr, fc, tr, tc, brd: simBrd });
         pmSync();
-        // Auto-select the piece at its new position for next step
         const piece = brdState[fr][fc];
         if (piece) {
           const nextPoss = premovePoss(tr, tc, simBrd, col);
           PMSEL = { fr: tr, fc: tc, poss: nextPoss, brd: simBrd };
-        } else {
-          PMSEL = null;
-        }
+        } else PMSEL = null;
         render();
       }
-      // Simulate one move on a board without modifying it (lightweight, no copy for queens/sliders)
       function brdSim(brd, fr, fc, tr, tc) {
-        // Fast shallow copy of 2D array
         const b = brd.map((r) => r.slice());
         const p = b[fr][fc];
         b[tr][tc] = p;
         b[fr][fc] = null;
-        // Handle castling geometry
         if (p && p[1] === "K") {
           const rk = p[0] === "w" ? 7 : 0;
           if (fr === rk && fc === 4 && tc === 6) {
@@ -3225,11 +3233,9 @@
             b[rk][0] = null;
           }
         }
-        // Pawn promotion → queen for simulation purposes
         if (p && p[1] === "P" && (tr === 0 || tr === 7)) b[tr][tc] = p[0] + "Q";
         return b;
       }
-      // Legacy alias
       function setPremove(fr, fc, tr, tc) {
         const b = brdSim(G.brd, fr, fc, tr, tc);
         PMQUEUE = [{ fr, fc, tr, tc, brd: b }];
@@ -3240,8 +3246,6 @@
       function clearPremove() {
         pmClear();
       }
-      // Fast premove squares — pure geometry, no board copy, no check validation
-      // brd = board to use (current or hypothetical), col = moving color
       function premovePoss(fr, fc, brd, col) {
         if (!brd) brd = G.brd;
         const p = brd[fr][fc];
@@ -3252,8 +3256,8 @@
         function ok(tr, tc) {
           if (tr < 0 || tr >= 8 || tc < 0 || tc >= 8) return false;
           const t = brd[tr][tc];
-          if (t && t[0] === col) return false; // own piece
-          if (t && t[1] === type && type !== "P") return false; // same-type capture banned
+          if (t && t[0] === col) return false;
+          if (t && t[1] === type && type !== "P") return false;
           return true;
         }
         function add(tr, tc) {
@@ -3347,13 +3351,11 @@
         }
         return sq;
       }
-      // Who is "me" for premove purposes
       function myColor() {
-        if (NET.mode === "local") return G.turn; // local: always current player
-        if (NET.mode === "bot") return "w"; // vs bot: always white
-        return NET.myCol; // online: my assigned color
+        if (NET.mode === "local") return G.turn;
+        if (NET.mode === "bot") return "w";
+        return NET.myCol;
       }
-      // Is it currently my turn to move?
       function isMyTurn() {
         if (G.over) return false;
         if (NET.mode === "local") return true;
@@ -3365,19 +3367,13 @@
       // RENDER
       // ═══════════════════════════════════════
       function buildLabels() {
-        const labLeft = document.getElementById("labLeft");
-        const labRight = document.getElementById("labRight");
-        const labTop = document.getElementById("labTop");
-        const labBot = document.getElementById("labBot");
+        const labLeft = document.getElementById("labLeft"),
+          labRight = document.getElementById("labRight"),
+          labTop = document.getElementById("labTop"),
+          labBot = document.getElementById("labBot");
         [labLeft, labRight, labTop, labBot].forEach((el) => {
           if (el) el.innerHTML = "";
         });
-
-        // Rangi (1-8) — zawsze po lewej stronie wizualnej
-        // !flipped: labLeft jest fizycznie po lewej. i=0(góra)→8, i=7(dół)→1
-        // flipped: cały wrapper obrócony 180°, więc labLeft jest po prawej wizualnie
-        //   → wpisz do labRight; rotacja odwróci kolejność DOM:
-        //   chcemy 8 na górze wizualnie → w DOM i=0→1, i=7→8 (rotacja: 8 na górze ✓)
         if (!flipped) {
           if (labLeft)
             for (let i = 0; i < 8; i++) {
@@ -3395,11 +3391,6 @@
               labRight.appendChild(d);
             }
         }
-
-        // Pliki (a-h) — zawsze na dole wizualnym
-        // !flipped: labBot fizycznie na dole. i=0→a, i=7→h
-        // flipped: labTop staje się dołem po rotacji; rotacja odwróci kolejność
-        //   chcemy a po lewej wizualnie → w DOM i=0→h, i=7→a (rotacja: a po lewej ✓)
         if (!flipped) {
           if (labBot)
             for (let i = 0; i < 8; i++) {
@@ -3417,15 +3408,11 @@
               labTop.appendChild(d);
             }
         }
-
-        // b-top i b-bot mają margin-left:var(--lbl) (dla labLeft gdy !flipped)
-        // gdy flipped labLeft jest pusty → usuń ten margin
-        const bTopEl = document.querySelector(".b-top");
-        const bBotEl = document.querySelector(".b-bot");
+        const bTopEl = document.querySelector(".b-top"),
+          bBotEl = document.querySelector(".b-bot");
         if (bTopEl) bTopEl.style.marginLeft = flipped ? "0" : "";
         if (bBotEl) bBotEl.style.marginLeft = flipped ? "0" : "";
       }
-
       function render() {
         const bwrapEl = document.getElementById("bwrap");
         if (bwrapEl) {
@@ -3435,24 +3422,18 @@
           if (
             flipped !== wasFlipped ||
             !document.getElementById("labLeft").children.length
-          ) {
+          )
             buildLabels();
-          }
         }
         const boardEl = document.getElementById("board");
         const frzSet = new Set(G.frz.all);
         const possSet = new Set(G.poss.map((m) => m.tr * 8 + m.tc));
-        // Pre-move chain: collect all squares involved
-        // All queued from/to squares
         const pmFromSet = new Set(PMQUEUE.map((s) => s.fr * 8 + s.fc));
         const pmToSet = new Set(PMQUEUE.map((s) => s.tr * 8 + s.tc));
-        // Poss dots for currently active PMSEL
         const prePossSet = new Set(
           PMSEL && PMSEL.poss ? PMSEL.poss.map((m) => m.tr * 8 + m.tc) : [],
         );
-        // All destinations in queue shown as premove-to (brighter orange)
         const pmDestSet = new Set(PMQUEUE.map((s) => s.tr * 8 + s.tc));
-        // Last destination per piece — for "continue journey" highlight
         const pmSelSrc = PMSEL ? PMSEL.fr * 8 + PMSEL.fc : -1;
         let kchk = -1;
         if (inCheck(G.brd, G.turn))
@@ -3479,12 +3460,11 @@
               if (k === kchk) cls += " chk";
               else if (frzSet.has(k)) cls += " frz";
               if (possSet.has(k)) cls += p ? " cring" : " dot";
-              // Pre-move chain highlights
-              if (pmFromSet.has(k)) cls += " premove-from"; // sources
-              if (pmDestSet.has(k)) cls += " premove-to"; // all destinations (bright orange)
-              if (k === pmSelSrc) cls += " premove-from"; // active selection source
+              if (pmFromSet.has(k)) cls += " premove-from";
+              if (pmDestSet.has(k)) cls += " premove-to";
+              if (k === pmSelSrc) cls += " premove-from";
               if (prePossSet.has(k) && !pmDestSet.has(k))
-                cls += p ? " pre-cring" : " pre-dot"; // next step dots
+                cls += p ? " pre-cring" : " pre-dot";
               if (sq.className !== cls) sq.className = cls;
               const existing = sq.querySelector(".pc");
               if (p) {
@@ -3508,9 +3488,7 @@
                   sq.appendChild(fi);
                 } else if (!frzSet.has(k) && hasFriz)
                   sq.querySelector(".friz").remove();
-              } else {
-                if (sq.innerHTML !== "") sq.innerHTML = "";
-              }
+              } else if (sq.innerHTML !== "") sq.innerHTML = "";
               sq.onclick = () => handleClick(r, c);
             }
         } else {
@@ -3584,33 +3562,16 @@
         updMobile();
       }
 
-      // ── Pre-move queue helpers (top-level) ───────────────────────────────────────
-      function pmLastStepEndingAt(r, c) {
-        for (let i = PMQUEUE.length - 1; i >= 0; i--)
-          if (PMQUEUE[i].tr === r && PMQUEUE[i].tc === c) return i;
-        return -1;
-      }
-      function pmLastStepFrom(r, c) {
-        for (let i = PMQUEUE.length - 1; i >= 0; i--)
-          if (PMQUEUE[i].fr === r && PMQUEUE[i].fc === c) return i;
-        return -1;
-      }
-      function pmQueueBrd() {
-        return PMQUEUE.length > 0 ? PMQUEUE[PMQUEUE.length - 1].brd : G.brd;
-      }
-
       // ═══════════════════════════════════════
-      // CLICK — premove chain (chess.com style, all pieces/modes)
+      // CLICK
       // ═══════════════════════════════════════
       function handleClick(r, c) {
         if (G.over) return;
         const mc = myColor();
         const p = G.brd[r][c];
         const myTurn = isMyTurn();
-
-        // ── MY TURN ──────────────────────────────────────────────
         if (myTurn) {
-          pmClear(); // cancel any queued premoves when I actually interact
+          pmClear();
           const frz = mc === "w" ? G.frz.byB : G.frz.byW;
           if (G.sel) {
             const mv = G.poss.find((m) => m.tr === r && m.tc === c);
@@ -3645,21 +3606,14 @@
           }
           return;
         }
-
-        // ── NOT MY TURN → PRE-MOVE CHAIN ────────────────────────
         if (NET.mode === "local") return;
-
         if (PMSEL) {
           const simBrd = PMSEL.brd || G.brd;
-
-          // 1. Klik na tę samą figurę którą masz zaznaczoną → odznacz (już jesteś na jej ostatniej pozycji)
           if (r === PMSEL.fr && c === PMSEL.fc) {
             PMSEL = null;
             render();
             return;
           }
-
-          // 2. Klik na pomarańczowe pole (ostatni krok innej figury) → kontynuuj tę figurę
           const endIdx = pmLastStepEndingAt(r, c);
           if (endIdx !== -1) {
             const brdThere = PMQUEUE[endIdx].brd;
@@ -3668,8 +3622,6 @@
             render();
             return;
           }
-
-          // 3. Klik na własną figurę (na symulowanej planszy) → przełącz zaznaczenie
           const simP = simBrd[r] && simBrd[r][c];
           if (simP && simP[0] === mc) {
             const poss = premovePoss(r, c, simBrd, mc);
@@ -3677,27 +3629,19 @@
             render();
             return;
           }
-
-          // 4. Klik na pole w zasięgu figury (w prePossSet) → dodaj krok
           const inPoss =
             PMSEL.poss && PMSEL.poss.some((m) => m.tr === r && m.tc === c);
           if (inPoss) {
             pmAddStep(PMSEL.fr, PMSEL.fc, r, c, PMSEL.brd || G.brd, mc);
             return;
           }
-
-          // 5. Klik poza zasięgiem, puste pole lub figura wroga → NIC (dots zostają)
           return;
         }
-
-        // Brak aktywnego zaznaczenia — klik na własną figurę startuje pre-move
         if (p && p[0] === mc) {
-          // Śledź gdzie ta figura wylądowała po wszystkich krokach w kolejce
-          // Figura na (r,c) mogła zrobić: r→A→B→C — teleportuj do C
           let endR = r,
             endC = c,
-            lastIdx = -1;
-          let changed = true;
+            lastIdx = -1,
+            changed = true;
           while (changed) {
             changed = false;
             for (let i = 0; i < PMQUEUE.length; i++) {
@@ -3711,7 +3655,6 @@
             }
           }
           if (lastIdx !== -1) {
-            // Figura ma kroki — teleportuj do ostatniej zakolejkowanej pozycji
             const lastStep = PMQUEUE[lastIdx];
             const poss = premovePoss(
               lastStep.tr,
@@ -3726,16 +3669,20 @@
               brd: lastStep.brd,
             };
           } else {
-            // Figura nie ma kroków — normalny start
             const poss = premovePoss(r, c, G.brd, mc);
             PMSEL = { fr: r, fc: c, poss, brd: G.brd };
           }
           render();
         }
       }
+      function pmLastStepEndingAt(r, c) {
+        for (let i = PMQUEUE.length - 1; i >= 0; i--)
+          if (PMQUEUE[i].tr === r && PMQUEUE[i].tc === c) return i;
+        return -1;
+      }
 
       // ═══════════════════════════════════════
-      // DRAG & DROP — premove for ALL pieces/modes
+      // DRAG & DROP
       // ═══════════════════════════════════════
       function getXY(e) {
         if (e.touches && e.touches.length)
@@ -3758,20 +3705,11 @@
         }
         return { r: dr, c: dc };
       }
-      function myTurnNow() {
-        return isMyTurn();
-      }
-
       function startDrag(r, c, x, y) {
         const p = G.brd[r][c];
         if (!p) return false;
         const mc = myColor();
         const myTurn = isMyTurn();
-
-        // Pre-move: only via click, not drag — so ignore drag when not my turn
-        if (!myTurn) return false;
-
-        // NORMAL drag — my turn
         if (!myTurn) return false;
         if (p[0] !== mc) return false;
         const frz = mc === "w" ? G.frz.byB : G.frz.byW;
@@ -3827,7 +3765,7 @@
           pmClear();
           render();
           return;
-        } // premove only via click
+        }
         const mv = sq && DR.poss.find((m) => m.tr === sq.r && m.tc === sq.c);
         if (mv) {
           G.sel = null;
@@ -3839,7 +3777,6 @@
           render();
         }
       }
-
       const boardEl = document.getElementById("board");
       boardEl.addEventListener(
         "mousedown",
@@ -3943,11 +3880,11 @@
         }
         const chk = inCheck(G.brd, G.turn),
           fz = G.frz.all.length;
-        const isMyTurn = myTurnNow();
+        const isMyTurnNow = isMyTurn();
         const turnLabel =
           NET.mode === "local"
             ? (G.turn === "w" ? "White" : "Black") + "'s turn"
-            : isMyTurn
+            : isMyTurnNow
               ? "Your turn"
               : NET.mode === "bot"
                 ? "Bot (Black)"
@@ -3967,12 +3904,12 @@
       function updMobile() {
         const chk = inCheck(G.brd, G.turn),
           fz = G.frz.all.length;
-        const isMyTurn = myTurnNow();
+        const isMyTurnNow = isMyTurn();
         let st = G.over
           ? "Game Over"
           : NET.mode === "local"
             ? (G.turn === "w" ? "White" : "Black") + "'s turn"
-            : isMyTurn
+            : isMyTurnNow
               ? "Your turn"
               : NET.mode === "bot"
                 ? "Bot ♟"
@@ -4005,7 +3942,6 @@
           const h = brd.getBoundingClientRect().height;
           if (h > 0) et.style.height = h + "px";
         }
-        // Mate scores (±19000) → show full bar
         const isMate = Math.abs(score) > 9000;
         const clamp = isMate
           ? score > 0
@@ -4402,9 +4338,8 @@
           document.getElementById("localTimeModal").classList.remove("on");
           cb(null);
         };
-        document.getElementById("localTimeCancel").onclick = () => {
+        document.getElementById("localTimeCancel").onclick = () =>
           document.getElementById("localTimeModal").classList.remove("on");
-        };
       }
 
       // ═══════════════════════════════════════
@@ -4521,17 +4456,12 @@
         renderDrawings();
       }
       const boardEl2 = document.getElementById("board");
-      boardEl2.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-      });
-      // Right-click cancels premove (chess.com behaviour)
+      boardEl2.addEventListener("contextmenu", (e) => e.preventDefault());
       boardEl2.addEventListener(
         "mousedown",
         (e) => {
           if (e.button !== 2) return;
-          if (PMQUEUE.length || PMSEL) {
-            pmClear();
-          }
+          if (PMQUEUE.length || PMSEL) pmClear();
         },
         { passive: true },
       );
@@ -4540,7 +4470,7 @@
         (e) => {
           if (e.button !== 2) return;
           e.preventDefault();
-          if (NET.mode === "host" || NET.mode === "guest") return; // no drawings in online mode
+          if (NET.mode === "host" || NET.mode === "guest") return;
           const sq = sqFromBoardXY(e.clientX, e.clientY);
           if (!sq) return;
           DRAW.dragFrom = { ...sq };
@@ -4607,7 +4537,6 @@
             });
         }
         renderDrawings();
-        // Sync drawings to opponent
         if (NET.mode === "host" || NET.mode === "guest")
           netSend({ type: "drawings", shapes: DRAW.shapes });
       });
@@ -4639,7 +4568,6 @@
           _drawColorIdx = (_drawColorIdx + 1) % DRAW_COLORS.length;
           DRAW.color = DRAW_COLORS[_drawColorIdx];
         }
-        // Backspace: usuń ostatni krok pre-move
         if (e.key === "Backspace" && !isMyTurn() && (PMQUEUE.length || PMSEL)) {
           e.preventDefault();
           if (PMSEL) {
@@ -4666,7 +4594,12 @@
       // BUTTON WIRING
       // ═══════════════════════════════════════
       document.getElementById("newBtn").addEventListener("click", () => {
-        if (!animOn && NET.mode === "bot") newGame();
+        if (NET.mode === "local")
+          openLocalTimeModal((tc) => {
+            NET.timeCtrl = tc || null;
+            newGame(tc);
+          });
+        else if (!animOn && NET.mode === "bot") newGame();
       });
       document.getElementById("flipBtn").addEventListener("click", () => {
         flipped = !flipped;
@@ -4679,14 +4612,12 @@
         render();
       });
       document.getElementById("mNew").addEventListener("click", () => {
-        if (NET.mode === "bot") {
-          newGame();
-        } else if (NET.mode === "local") {
+        if (NET.mode === "bot") newGame();
+        else if (NET.mode === "local")
           openLocalTimeModal((tc) => {
             NET.timeCtrl = tc || null;
             newGame(tc);
           });
-        }
       });
       document.getElementById("mRes").addEventListener("click", doResign);
       document.getElementById("mDrw").addEventListener("click", doDraw);
@@ -4705,14 +4636,6 @@
           netSend({ type: "rematch_offer" });
           showMsg("Rematch", "Waiting for opponent…");
         }
-      });
-      document.getElementById("newBtn").addEventListener("click", () => {
-        if (NET.mode === "local")
-          openLocalTimeModal((tc) => {
-            NET.timeCtrl = tc || null;
-            newGame(tc);
-          });
-        else if (!animOn && NET.mode === "bot") newGame();
       });
       document
         .getElementById("togEval")
@@ -4891,19 +4814,16 @@
           if (!NET.gameStarted) lstat("Connection error.");
         });
       }
-      let _tcDeclineCount = 0;
-      let _tcHostFree = false; // after 3 declines host picks freely
-      let _declinedIdxs = new Set(); // indices declined by guest this session
-
+      let _tcDeclineCount = 0,
+        _tcHostFree = false,
+        _declinedIdxs = new Set();
       function handleLobbyMsg(d, myRole) {
         if (d.type === "hello") {
           if (myRole === "host") {
             guestName = d.name;
             guestElo = d.elo || 500;
             document.getElementById("lpGuestNm").textContent = d.name;
-          } else {
-            document.getElementById("lpHostNm").textContent = d.name;
-          }
+          } else document.getElementById("lpHostNm").textContent = d.name;
         }
         if (d.type === "kick") {
           lmsg("You were kicked from the room.");
@@ -4911,10 +4831,9 @@
           document.getElementById("lobby").classList.remove("on");
         }
         if (d.type === "start_game") startOnlineGame(d, myRole);
-
         if (d.type === "time_proposal" && myRole === "guest") {
-          const ap = document.getElementById("lTimeApprove");
-          const lb = document.getElementById("lTimeApproveLabel");
+          const ap = document.getElementById("lTimeApprove"),
+            lb = document.getElementById("lTimeApproveLabel");
           if (ap && lb) {
             lb.textContent = d.tc.l;
             ap.style.display = "block";
@@ -4937,19 +4856,15 @@
             lstat(`Declined (${_tcDeclineCount}/3). Waiting for new proposal…`);
           };
         }
-
         if (d.type === "time_notify" && myRole === "guest") {
-          // Host picked freely after 3 declines — inform guest, no approval needed
           document.getElementById("lTimeApprove").style.display = "none";
           lstat("Host selected: " + d.tc.l);
           lmsg("⏱ Time control: " + d.tc.l + " — waiting for host to start…");
         }
-
         if (d.type === "time_accepted" && myRole === "host") {
           lmsg("Guest accepted! Ready to start.");
           document.getElementById("lStart").style.display = "";
         }
-
         if (d.type === "time_declined" && myRole === "host") {
           _declinedIdxs.add(d.idx);
           selectedTC = null;
@@ -4958,12 +4873,12 @@
           if (d.count >= 3) {
             _tcHostFree = true;
             _declinedIdxs.clear();
-            buildTimePicker(); // rebuild with all enabled
+            buildTimePicker();
             lmsg(
               "Guest declined 3 times. Pick any time — game starts immediately.",
             );
           } else {
-            buildTimePicker(); // rebuild with declined ones disabled
+            buildTimePicker();
             lmsg(`Guest declined (${d.count}/3). Choose a different time.`);
           }
         }
@@ -5000,12 +4915,10 @@
               .forEach((p, j) => p.classList.toggle("on", j === i));
             if (guestJoined) {
               if (_tcHostFree) {
-                // After 3 declines: notify guest and show Start immediately (no approval needed)
                 netSend({ type: "time_notify", tc: TIME_CTRLS[i], idx: i });
                 lmsg("Time selected: " + TIME_CTRLS[i].l + ". Press Start.");
                 document.getElementById("lStart").style.display = "";
               } else {
-                // Normal: send proposal, wait for guest approval
                 netSend({ type: "time_proposal", tc: TIME_CTRLS[i], idx: i });
                 lmsg("Proposal sent — waiting for guest…");
                 document.getElementById("lStart").style.display = "none";
@@ -5089,34 +5002,22 @@
       }
       function handleGameMsg(d) {
         if (d.type === "move") {
-          if (d.timers) {
-            // Sync timers precisely — use network timestamps
-            NET.timers = d.timers;
-          }
+          if (d.timers) NET.timers = d.timers;
           if (d.castl) G.castl = { ...d.castl };
-          // Basic sanity check: piece must exist and belong to current turn
           const netPiece = G.brd[d.mv.fr] && G.brd[d.mv.fr][d.mv.fc];
           if (!netPiece || netPiece[0] !== G.turn) {
-            console.warn(
-              "Rejected move from network — wrong piece:",
-              d.mv,
-              netPiece,
-            );
+            console.warn("Rejected move from network:", d.mv, netPiece);
             return;
           }
-          // Sync eval and rating from sender
-          playMove(d.mv, false, true)
-            .then?.(() => {})
-            .catch?.(() => {});
-          // Use eval from sender directly — single source of truth
+          playMove(d.mv, false, true).then?.().catch?.();
+          // Sync eval from sender
           if (d.eval !== undefined && NET.showEval) {
             setTimeout(() => {
               setEval(d.eval);
-              // Echo back so both sides are guaranteed identical
               netSend({ type: "eval_sync", ev: d.eval });
             }, 15);
           }
-          // Override displayed rating with sender's computed value (same analysis)
+          // Sync rating from sender — both sides use same master engine so ratings match
           if (d.ri !== undefined && NET.showRating) {
             const R = RTNG[d.ri] || RTNG[RTNG.length - 1];
             document.getElementById("ratingEl").innerHTML =
@@ -5125,7 +5026,6 @@
               `<span class="${R.c}">${R.s}</span>`;
           }
         }
-        // promo is now included in the move packet (mv.promo) — no separate handler needed
         if (d.type === "drawings") {
           DRAW.shapes = d.shapes || [];
           renderDrawings();
@@ -5161,7 +5061,7 @@
             doRematch();
           });
         if (d.type === "rematch_accept") doRematch();
-        if (d.type === "timer_sync") NET.timers = d.timers; // precise timer sync
+        if (d.type === "timer_sync") NET.timers = d.timers;
       }
       function doRematch() {
         document.getElementById("toast").classList.remove("on");
@@ -5222,7 +5122,7 @@
           .then(() => {
             const e = document.getElementById("lCopyMsg");
             if (e) {
-              e.textContent = "✓ Skopiowano!";
+              e.textContent = "✓ Copied!";
               e.style.color = "var(--grn)";
               setTimeout(() => (e.textContent = ""), 2500);
             }
@@ -5249,9 +5149,6 @@
       function _resume() {
         if (_AC.state === "suspended") _AC.resume();
       }
-
-      // Low time tick (chess.com style)
-      let _lastTickTime = 0;
       function playLowTimeTick() {
         _resume();
         const t = _AC.currentTime;
@@ -5266,7 +5163,6 @@
         o.start(t);
         o.stop(t + 0.06);
       }
-
       function playSound(type) {
         _resume();
         const t = _AC.currentTime;
@@ -5330,9 +5226,8 @@
       // ═══════════════════════════════════════
       // ELO SYSTEM
       // ═══════════════════════════════════════
-      const ELO_KEY = "controlchess_elo";
-      const ELO_HIST_KEY = "controlchess_elo_hist";
-
+      const ELO_KEY = "controlchess_elo",
+        ELO_HIST_KEY = "controlchess_elo_hist";
       function eloGet() {
         return parseInt(localStorage.getItem(ELO_KEY) || "500");
       }
@@ -5352,7 +5247,6 @@
         if (h.length > 10) h.pop();
         localStorage.setItem(ELO_HIST_KEY, JSON.stringify(h));
       }
-
       const ELO_MOVE_DELTA = {
         "Genius!!!": +6,
         "Brilliant!!": +5,
@@ -5368,7 +5262,6 @@
         Catastrophe: -10,
         Losing: -15,
       };
-
       function eloGameDelta(reason, winner, myCol) {
         const iWon = winner === myCol,
           isDraw = !winner || winner === "";
@@ -5382,12 +5275,9 @@
         if (reason === "stalemate") return +2;
         return iWon ? +12 : -10;
       }
-
-      // Per-game accumulators (reset each new game)
-      let _eloMoveDeltaAccum = 0; // sum of move deltas this game
-      let _eloMoveLog = []; // [{label, d}] for breakdown display
-      let _eloEligible = false; // whether ELO applies this game
-
+      let _eloMoveDeltaAccum = 0,
+        _eloMoveLog = [],
+        _eloEligible = false;
       function eloGameStart() {
         _eloMoveDeltaAccum = 0;
         _eloMoveLog = [];
@@ -5395,16 +5285,13 @@
           (NET.mode === "bot" && botLevel >= 4) ||
           NET.mode === "host" ||
           NET.mode === "guest";
-        // Reset toast breakdown
         const te = document.getElementById("tEloResult");
         if (te) te.style.display = "none";
         const tb = document.getElementById("tEloBreakdown");
         if (tb) tb.style.display = "none";
-        // Reset sidebar live counter
         const ch = document.getElementById("eloChange");
         if (ch) ch.textContent = "";
       }
-
       function eloOnMove(ri) {
         if (!_eloEligible || ri === null || ri === undefined) return;
         const label = RTNG[ri]?.l || "";
@@ -5412,10 +5299,8 @@
         if (d === 0) return;
         _eloMoveDeltaAccum += d;
         _eloMoveLog.push({ label, d });
-        // Update sidebar live
         eloDisplay();
       }
-
       function eloOnGame(reason, winner) {
         if (!_eloEligible) return;
         const myCol = NET.mode === "bot" ? "w" : NET.myCol || "w";
@@ -5424,11 +5309,8 @@
         const before = eloGet();
         const after = Math.max(0, before + totalDelta);
         eloSet(after);
-
-        // Build history entry
         const resultLabel =
           winner === myCol ? "Win" : !winner || winner === "" ? "Draw" : "Loss";
-        const sign = totalDelta >= 0 ? "+" : "";
         const oppName =
           NET.mode === "bot" ? `Bot L${botLevel}` : NET.oppName || "Opponent";
         const entry = {
@@ -5443,23 +5325,18 @@
           moveLog: [..._eloMoveLog],
         };
         eloHistPush(entry);
-
-        // Show breakdown in toast
         eloShowToastResult(entry);
         eloDisplay();
         eloRenderHistory();
       }
-
       function eloShowToastResult(entry) {
-        const er = document.getElementById("tEloResult");
-        const eb = document.getElementById("tEloBreakdown");
+        const er = document.getElementById("tEloResult"),
+          eb = document.getElementById("tEloBreakdown");
         if (!er || !eb) return;
         const sign = entry.total >= 0 ? "+" : "";
         er.textContent = `ELO: ${entry.before} → ${entry.after} (${sign}${entry.total})`;
         er.style.display = "block";
         er.style.color = entry.total >= 0 ? "#81c784" : "#e57373";
-
-        // Build breakdown lines
         const lines = [];
         const gs = entry.gameDelta >= 0 ? "+" : "";
         const rs =
@@ -5468,7 +5345,6 @@
         if (entry.moveDelta !== 0) {
           const ms = entry.moveDelta >= 0 ? "+" : "";
           lines.push(`♟ Moves: ${ms}${entry.moveDelta}`);
-          // Show worst/best moves
           const bests = entry.moveLog.filter((m) => m.d > 0).slice(0, 3);
           const bads = entry.moveLog.filter((m) => m.d < 0).slice(0, 3);
           bests.forEach((m) => lines.push(`  ✓ ${m.label}: +${m.d}`));
@@ -5479,7 +5355,6 @@
           .join("");
         eb.style.display = "block";
       }
-
       function eloDisplay() {
         const el = document.getElementById("eloVal");
         if (el) el.textContent = eloGet();
@@ -5490,7 +5365,6 @@
           ch.style.color = _eloMoveDeltaAccum >= 0 ? "#81c784" : "#e57373";
         }
       }
-
       function eloRenderHistory() {
         const el = document.getElementById("eloHistory");
         if (!el) return;
@@ -5499,17 +5373,14 @@
           .map((e) => {
             if (typeof e === "string")
               return `<div style="padding:1px 0;border-bottom:1px solid rgba(255,255,255,.05)">${e}</div>`;
-            return `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-      <span style="color:var(--dim)">${e.result} vs ${e.opp} · ${e.date} · </span><span style="color:${e.total >= 0 ? "#81c784" : "#e57373"}">${e.before}→${e.after}</span>
-    </div>`;
+            return `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="color:var(--dim)">${e.result} vs ${e.opp} · ${e.date} · </span><span style="color:${e.total >= 0 ? "#81c784" : "#e57373"}">${e.before}→${e.after}</span></div>`;
           })
           .join("");
       }
-
       function eloShowOnlinePinfo() {
         if (NET.mode !== "host" && NET.mode !== "guest") return;
-        const botEl = document.getElementById("eloBot");
-        const topEl = document.getElementById("eloTop");
+        const botEl = document.getElementById("eloBot"),
+          topEl = document.getElementById("eloTop");
         if (botEl) {
           botEl.textContent = `ELO: ${eloGet()}`;
           botEl.style.display = "block";
@@ -5519,9 +5390,7 @@
           topEl.style.display = "block";
         }
       }
-
       function eloInit() {
-        // Migrate old Polish entries in history
         const h = eloHistGet();
         let changed = false;
         h.forEach((e) => {
