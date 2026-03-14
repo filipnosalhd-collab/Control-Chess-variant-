@@ -28,12 +28,8 @@
         --acc: #4a9eff;
         --red: #e53935;
         --grn: #4caf50;
-        --sq: clamp(
-          44px,
-          min(calc((100vw - 330px) / 8), calc((100vh - 140px) / 8)),
-          80px
-        );
-        --lbl: 20px;
+        --sq: 60px;
+        --lbl: 18px;
       }
       * {
         margin: 0;
@@ -230,6 +226,26 @@
         z-index: 3;
         pointer-events: none;
       }
+      .evdepth {
+        position: absolute;
+        right: 18px;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid #222;
+        border-radius: 3px;
+        padding: 1px 4px;
+        font-family: "Cinzel", serif;
+        font-size: 0.42rem;
+        color: var(--acc);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        top: 50%;
+        transform: translateY(-50%);
+        white-space: nowrap;
+      }
+      .evbar:hover .evdepth {
+        opacity: 1;
+      }
       .center {
         flex: 1;
         display: flex;
@@ -237,7 +253,7 @@
         align-items: center;
         justify-content: center;
         gap: 5px;
-        padding: 10px;
+        padding: 8px;
         min-width: 0;
         overflow: hidden;
       }
@@ -1175,6 +1191,257 @@
         user-select: none;
         -webkit-user-select: none;
       }
+      /* ── COACH PANEL ─────────────────────────────── */
+      #coachPanel {
+        position: fixed;
+        top: 44px;
+        left: 10px;
+        width: 320px;
+        max-height: calc(100vh - 54px);
+        background: #12121a;
+        border: 1px solid var(--gold);
+        border-radius: 14px;
+        box-shadow:
+          0 8px 40px rgba(0, 0, 0, 0.7),
+          0 0 0 1px rgba(201, 168, 76, 0.15);
+        z-index: 400;
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        font-family: "Crimson Pro", serif;
+        resize: horizontal;
+        min-width: 260px;
+        max-width: 480px;
+      }
+      #coachPanel.open {
+        display: flex;
+      }
+      .coach-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px 8px;
+        background: rgba(201, 168, 76, 0.07);
+        border-bottom: 1px solid rgba(201, 168, 76, 0.18);
+        flex-shrink: 0;
+        cursor: move;
+        user-select: none;
+      }
+      .coach-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2a2218 0%, #1a1a1e 100%);
+        border: 2px solid var(--gold);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        box-shadow: 0 0 12px rgba(201, 168, 76, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+      .coach-avatar::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 35% 35%,
+          rgba(255, 255, 255, 0.12),
+          transparent 60%
+        );
+      }
+      .coach-pulse {
+        position: absolute;
+        bottom: 1px;
+        right: 1px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--grn);
+        border: 2px solid #12121a;
+        animation: pulse-g 2s infinite;
+      }
+      .coach-pulse.thinking {
+        background: #f6a623;
+        animation: pulse-r 0.6s infinite;
+      }
+      .coach-title {
+        flex: 1;
+      }
+      .coach-name {
+        font-family: "Cinzel", serif;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--gold);
+        line-height: 1.2;
+      }
+      .coach-status {
+        font-size: 0.62rem;
+        color: var(--dim);
+        margin-top: 1px;
+      }
+      .coach-close {
+        background: none;
+        border: none;
+        color: var(--dim);
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 2px 5px;
+        border-radius: 4px;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+      .coach-close:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--txt);
+      }
+      .coach-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px 14px;
+        min-height: 80px;
+        max-height: 420px;
+        scroll-behavior: smooth;
+      }
+      .coach-body::-webkit-scrollbar {
+        width: 3px;
+      }
+      .coach-body::-webkit-scrollbar-thumb {
+        background: var(--brd);
+        border-radius: 2px;
+      }
+      .coach-msg {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+        animation: coachFadeIn 0.3s ease;
+      }
+      @keyframes coachFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .coach-bubble {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 4px 12px 12px 12px;
+        padding: 10px 13px;
+        font-size: 0.95rem;
+        line-height: 1.65;
+        color: var(--txt);
+      }
+      .coach-bubble.thinking-bubble {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--acc);
+        font-size: 0.85rem;
+        background: rgba(74, 158, 255, 0.06);
+        border-color: rgba(74, 158, 255, 0.15);
+      }
+      .coach-move-label {
+        font-family: "Cinzel", serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+      }
+      .coach-best-hint {
+        margin-top: 8px;
+        padding: 5px 10px;
+        background: rgba(74, 158, 255, 0.1);
+        border: 1px solid rgba(74, 158, 255, 0.25);
+        border-radius: 5px;
+        font-size: 0.85rem;
+        color: var(--acc);
+      }
+      .coach-footer {
+        padding: 6px 14px 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .coach-toggle-label {
+        font-size: 0.62rem;
+        color: var(--dim);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        flex: 1;
+      }
+      .coach-toggle-label input {
+        accent-color: var(--gold);
+      }
+      .coach-clear {
+        font-size: 0.58rem;
+        color: var(--dim);
+        background: none;
+        border: 1px solid var(--brd);
+        border-radius: 4px;
+        padding: 2px 7px;
+        cursor: pointer;
+        font-family: "Crimson Pro", serif;
+      }
+      .coach-clear:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+      @media (max-width: 700px) {
+        #coachPanel {
+          width: calc(100vw - 20px);
+          top: auto;
+          bottom: 60px;
+          max-height: 45vh;
+        }
+        #coachBtn {
+          display: block !important;
+        }
+      }
+      .best-arrow-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 11;
+        overflow: visible;
+        fill: none;
+        background: transparent;
+      }
+      .lb-celeb {
+        border-color: rgba(201, 168, 76, 0.4) !important;
+      }
+      .lb-celeb.on {
+        background: rgba(201, 168, 76, 0.18) !important;
+        border-color: var(--gold) !important;
+        color: var(--gold) !important;
+      }
+      .bvb-mode .pnm {
+        color: var(--acc) !important;
+      }
+      /* Trainer styles */
+      .trainer-label {
+        font-size: 0.58rem;
+        font-family: "Cinzel", serif;
+        color: var(--gold);
+        font-weight: 700;
+        margin-bottom: 3px;
+      }
       @media (max-width: 700px) {
         html,
         body {
@@ -1283,8 +1550,6 @@
           --lbl: 14px;
         }
         .board {
-          --bsize: min(100vw, calc(100dvh - 138px));
-          --sq: calc((var(--bsize) - var(--lbl) * 2 - 4px) / 8);
           border-width: 1px;
           box-shadow: none;
         }
@@ -1352,6 +1617,7 @@
         <button class="hbtn" id="mOnlineBtn" style="display: none">
           🌐 Online
         </button>
+        <button class="hbtn" id="coachBtn">🎓 Coach</button>
         <button class="hbtn gold" id="onlineBtn">🌐 Play Online</button>
       </div>
     </header>
@@ -1439,6 +1705,7 @@
               <div class="evlbl-w" id="evLblW"></div>
             </div>
             <div class="evsc" id="evSc">+0.0</div>
+            <div class="evdepth" id="evDepth">d1</div>
           </div>
           <div class="bwrap" id="bwrap">
             <div class="b-top" id="labTop"></div>
@@ -1457,6 +1724,7 @@
                   overflow: visible;
                 "
               ></svg>
+              <svg id="bestSvg" class="best-arrow-svg"></svg>
               <div class="b-right" id="labRight"></div>
             </div>
             <div class="b-bot" id="labBot"></div>
@@ -1515,14 +1783,153 @@
           </div>
         </div>
         <div class="card">
-          <div class="chdr" id="hB">🤖 Bot Level <i class="arr">▼</i></div>
+          <div class="chdr" id="hB">🤖 Opponent <i class="arr">▼</i></div>
           <div class="cbody" id="bB">
-            <div class="dwrap">
-              <button class="lb" data-l="1">Trivial</button>
-              <button class="lb on" data-l="2">Easy</button>
-              <button class="lb" data-l="3">Medium</button>
-              <button class="lb" data-l="4">Hard</button>
-              <button class="lb" data-l="5">Impossible</button>
+            <div class="dwrap" style="flex-direction: column; gap: 6px">
+              <div
+                style="
+                  font-size: 0.58rem;
+                  color: var(--dim);
+                  font-family: Cinzel, serif;
+                  letter-spacing: 0.08em;
+                  padding: 2px 0;
+                "
+              >
+                DIFFICULTY
+              </div>
+              <div style="display: flex; gap: 3px; flex-wrap: wrap">
+                <button class="lb" data-l="1">Trivial</button>
+                <button class="lb on" data-l="2">Easy</button>
+                <button class="lb" data-l="3">Medium</button>
+                <button class="lb" data-l="4">Hard</button>
+                <button class="lb" data-l="5">Impossible</button>
+              </div>
+              <div
+                style="
+                  font-size: 0.58rem;
+                  color: var(--dim);
+                  font-family: Cinzel, serif;
+                  letter-spacing: 0.08em;
+                  padding: 2px 0;
+                  margin-top: 2px;
+                "
+              >
+                CELEBRITY BOTS
+              </div>
+              <div style="display: flex; gap: 3px; flex-wrap: wrap">
+                <button
+                  class="lb lb-celeb"
+                  data-l="6"
+                  title="Magnus Carlsen — positional genius, seeks endgame dominance"
+                >
+                  ♔ Magnus Carlsen
+                </button>
+                <button
+                  class="lb lb-celeb"
+                  data-l="7"
+                  title="Hikaru Nakamura — aggressive tactician, speed & chaos"
+                >
+                  ⚡ Hikaru Nakamura
+                </button>
+                <button
+                  class="lb lb-celeb"
+                  data-l="8"
+                  title="Jan-Krzysztof Duda — dynamic attacker, risks everything"
+                >
+                  🔥 J-K Duda
+                </button>
+              </div>
+              <div
+                style="
+                  font-size: 0.58rem;
+                  color: var(--dim);
+                  font-family: Cinzel, serif;
+                  letter-spacing: 0.08em;
+                  padding: 2px 0;
+                  margin-top: 2px;
+                "
+              >
+                BOT vs BOT
+              </div>
+              <div
+                id="bvbPanel"
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  padding: 4px 0;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 0.68rem;
+                  "
+                >
+                  <span style="color: var(--txt); min-width: 38px">White:</span>
+                  <select
+                    id="bvbWhite"
+                    style="
+                      flex: 1;
+                      background: var(--sur);
+                      border: 1px solid var(--brd);
+                      border-radius: 4px;
+                      color: var(--txt);
+                      font-size: 0.65rem;
+                      padding: 2px 4px;
+                    "
+                  >
+                    <option value="1">Trivial</option>
+                    <option value="2" selected>Easy</option>
+                    <option value="3">Medium</option>
+                    <option value="4">Hard</option>
+                    <option value="5">Impossible</option>
+                    <option value="6">♔ Magnus Carlsen</option>
+                    <option value="7">⚡ Hikaru Nakamura</option>
+                    <option value="8">🔥 J-K Duda</option>
+                  </select>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 0.68rem;
+                  "
+                >
+                  <span style="color: var(--txt); min-width: 38px">Black:</span>
+                  <select
+                    id="bvbBlack"
+                    style="
+                      flex: 1;
+                      background: var(--sur);
+                      border: 1px solid var(--brd);
+                      border-radius: 4px;
+                      color: var(--txt);
+                      font-size: 0.65rem;
+                      padding: 2px 4px;
+                    "
+                  >
+                    <option value="1">Trivial</option>
+                    <option value="2">Easy</option>
+                    <option value="3">Medium</option>
+                    <option value="4">Hard</option>
+                    <option value="5" selected>Impossible</option>
+                    <option value="6">♔ Magnus Carlsen</option>
+                    <option value="7">⚡ Hikaru Nakamura</option>
+                    <option value="8">🔥 J-K Duda</option>
+                  </select>
+                </div>
+                <button
+                  class="btn bgd"
+                  id="bvbStartBtn"
+                  style="margin-top: 2px; font-size: 0.6rem"
+                >
+                  ▶ Start Bot Match
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1674,6 +2081,9 @@
           <button class="mpl" data-l="3">Medium</button>
           <button class="mpl" data-l="4">Hard</button>
           <button class="mpl" data-l="5">Impossible</button>
+          <button class="mpl" data-l="6">♔ M.Carlsen</button>
+          <button class="mpl" data-l="7">⚡ Nakamura</button>
+          <button class="mpl" data-l="8">🔥 Duda</button>
         </div>
         <button class="mbtn" id="mFlip">⇄</button>
         <button class="mbtn" id="mNew">New</button>
@@ -1842,6 +2252,44 @@
       </div>
     </div>
 
+    <!-- ── COACH PANEL ───────────────────────────── -->
+    <div id="coachPanel">
+      <div class="coach-header" id="coachDragHandle">
+        <div class="coach-avatar">
+          ♟
+          <div class="coach-pulse" id="coachPulse"></div>
+        </div>
+        <div class="coach-title">
+          <div class="coach-name">Magnus</div>
+          <div class="coach-status" id="coachStatus">Ready — play a move</div>
+        </div>
+        <button class="coach-close" id="coachClose">✕</button>
+      </div>
+      <div class="coach-body" id="coachBody">
+        <div class="coach-msg">
+          <div
+            class="coach-bubble"
+            style="
+              background: rgba(201, 168, 76, 0.06);
+              border-color: rgba(201, 168, 76, 0.2);
+              color: var(--dim);
+              font-size: 0.74rem;
+            "
+          >
+            👋 Hi! I'm Magnus, your AI chess coach. I'll analyse every move —
+            yours and the bot's — and explain what's happening on the board.
+            Enable me below and make your first move!
+          </div>
+        </div>
+      </div>
+      <div class="coach-footer">
+        <label class="coach-toggle-label">
+          <input type="checkbox" id="togTrainer" /> Enable coach analysis
+        </label>
+        <button class="coach-clear" id="coachClear">Clear</button>
+      </div>
+    </div>
+
     <script>
       // ═══════════════════════════════════════
       // CHESS ENGINE
@@ -1901,8 +2349,6 @@
       };
       const FILES = "abcdefgh",
         RANKS = "87654321";
-
-      // Move rating categories
       const RTNG = [
         { l: "Genius!!!", s: "!!!", c: "br", mn: 500 },
         { l: "Brilliant!!", s: "!!", c: "br", mn: 300 },
@@ -2105,8 +2551,8 @@
       function calcFrz(brd, prevFrz) {
         const prevFrzW = prevFrz ? new Set(prevFrz.byW) : null;
         const prevFrzB = prevFrz ? new Set(prevFrz.byB) : null;
-        const byW = frozenBy(brd, "w", prevFrzW);
-        const byB = frozenBy(brd, "b", prevFrzB);
+        const byW = frozenBy(brd, "w", prevFrzW),
+          byB = frozenBy(brd, "b", prevFrzB);
         return { byW, byB, all: [...new Set([...byW, ...byB])] };
       }
       function movesFrom(brd, r, c, castl, frozenArr) {
@@ -2279,6 +2725,45 @@
         }
         if (p === col + "P" && (tr === 0 || tr === 7)) brd[tr][tc] = col + "Q";
       }
+
+      // ── King safety bonus ──────────────────────────────────────────────────────
+      function kingMobilityPenalty(brd, col) {
+        // penalise exposed king (few defenders around it)
+        let penalty = 0;
+        for (let r = 0; r < 8; r++)
+          for (let c = 0; c < 8; c++) {
+            if (brd[r][c] !== col + "K") continue;
+            // count pawn shield
+            const d = col === "w" ? -1 : 1;
+            let shield = 0;
+            for (const dc of [-1, 0, 1]) {
+              const nr = r + d,
+                nc = c + dc;
+              if (
+                nr >= 0 &&
+                nr < 8 &&
+                nc >= 0 &&
+                nc < 8 &&
+                brd[nr][nc] === col + "P"
+              )
+                shield++;
+            }
+            penalty -= shield * 15;
+            // open file = bad
+            let pawnsOnFile = 0;
+            for (let rr = 0; rr < 8; rr++)
+              if (brd[rr][c] === col + "P") pawnsOnFile++;
+            if (pawnsOnFile === 0) penalty += 25;
+          }
+        return penalty;
+      }
+
+      // ── Mobility score ─────────────────────────────────────────────────────────
+      function mobilityScore(brd, col, castl, frz) {
+        const ms = allMoves(brd, col, castl, frz);
+        return ms.length * 3;
+      }
+
       function evalBoard(brd) {
         let s = 0;
         for (let r = 0; r < 8; r++)
@@ -2295,35 +2780,57 @@
           const r = Math.floor(k / 8),
             c = k % 8;
           const p = brd[r][c];
-          if (p && p[0] === "w") s -= VAL[p[1]] * 0.35;
+          if (p && p[0] === "w") s -= VAL[p[1]] * 0.4;
         }
         for (const k of frz.byB) {
           const r = Math.floor(k / 8),
             c = k % 8;
           const p = brd[r][c];
-          if (p && p[0] === "b") s += VAL[p[1]] * 0.35;
+          if (p && p[0] === "b") s += VAL[p[1]] * 0.4;
         }
+        // King safety
+        s += kingMobilityPenalty(brd, "w");
+        s -= kingMobilityPenalty(brd, "b");
         return s;
       }
 
-      // ═══════════════════════════════════════
-      // MASTER ENGINE — single source of truth for eval + move rating + impossible bot
-      // Alpha-beta with iterative deepening, move ordering, quiescence
-      // ═══════════════════════════════════════
-
-      // Move ordering: captures first (MVV-LVA), then PST
-      function scoreMv(brd, mv) {
+      // ── Move ordering: MVV-LVA + killer heuristic + PST ──────────────────────
+      function scoreMvOrder(brd, mv, killers, ply) {
         const cap = brd[mv.tr][mv.tc];
-        return cap
-          ? (VAL[cap[1]] || 0) * 10 - (VAL[(brd[mv.fr][mv.fc] || "_")[1]] || 0)
-          : 0;
+        if (cap)
+          return (
+            10000 +
+            (VAL[cap[1]] || 0) * 10 -
+            (VAL[(brd[mv.fr][mv.fc] || "_")[1]] || 0)
+          );
+        if (
+          killers &&
+          killers[ply] &&
+          killers[ply].some(
+            (k) =>
+              k &&
+              k.fr === mv.fr &&
+              k.fc === mv.fc &&
+              k.tr === mv.tr &&
+              k.tc === mv.tc,
+          )
+        )
+          return 9000;
+        const p = brd[mv.fr][mv.fc];
+        if (!p) return 0;
+        const t = p[1],
+          col = p[0],
+          idx = col === "w" ? mv.tr * 8 + mv.tc : (7 - mv.tr) * 8 + mv.tc;
+        return (PST[t] || [])[idx] || 0;
       }
 
+      // ── Quiescence search ─────────────────────────────────────────────────────
       function quiesce(brd, alpha, beta, col, depth) {
         const stand = evalBoard(brd) * (col === "w" ? 1 : -1);
         if (depth <= 0) return stand;
         if (stand >= beta) return beta;
         if (stand > alpha) alpha = stand;
+        // Only captures
         const ms = [];
         for (let r = 0; r < 8; r++)
           for (let c = 0; c < 8; c++) {
@@ -2355,6 +2862,7 @@
         return alpha;
       }
 
+      // ── Alpha-beta with killer heuristics ─────────────────────────────────────
       function abSearch(
         brd,
         depth,
@@ -2365,13 +2873,20 @@
         frz,
         ply,
         deadline,
+        killers,
       ) {
-        if (deadline && Date.now() > deadline) return null; // signal abort
-        if (depth <= 0) return quiesce(brd, alpha, beta, col, 4);
+        if (deadline && Date.now() > deadline) return null;
+        if (depth <= 0) return quiesce(brd, alpha, beta, col, 6);
         const ms = allMoves(brd, col, castl, frz);
         if (!ms.length) return inCheck(brd, col) ? -19000 + ply : 0;
-        ms.sort((a, b) => scoreMv(brd, b) - scoreMv(brd, a));
+        ms.sort(
+          (a, b) =>
+            scoreMvOrder(brd, b, killers, ply) -
+            scoreMvOrder(brd, a, killers, ply),
+        );
         let best = -Infinity;
+        if (!killers) killers = [];
+        if (!killers[ply]) killers[ply] = [];
         for (const mv of ms) {
           const nb = cp(brd),
             nc = { ...castl },
@@ -2401,26 +2916,37 @@
             nfrz,
             ply + 1,
             deadline,
+            killers,
           );
-          if (sc === null) return null; // propagate abort
+          if (sc === null) return null;
           if (sc > best) best = sc;
-          if (sc > alpha) alpha = sc;
+          if (sc > alpha) {
+            alpha = sc;
+            if (!brd[mv.tr][mv.tc]) {
+              killers[ply][1] = killers[ply][0];
+              killers[ply][0] = mv;
+            }
+          }
           if (alpha >= beta) break;
         }
         return best;
       }
 
-      // Find best move at EXACT depth — no deadline, never aborts mid-search.
+      // ── True best move: full negamax, no deadline, no noise ──────────────────
+      // This is the single source of truth for "best move at depth D".
       // Returns {move, score} where score is from col's perspective.
       function exactBestMove(brd, col, castl, frz, depth) {
         const ms = allMoves(brd, col, castl, frz);
         if (!ms.length)
           return { move: null, score: inCheck(brd, col) ? -19000 : 0 };
-        ms.sort((a, b) => scoreMv(brd, b) - scoreMv(brd, a));
+        const killers = Array.from({ length: depth + 2 }, () => [null, null]);
+        ms.sort(
+          (a, b) =>
+            scoreMvOrder(brd, b, killers, 0) - scoreMvOrder(brd, a, killers, 0),
+        );
         let bestMove = ms[0],
-          bestScore = -Infinity,
-          alpha = -Infinity,
-          beta = Infinity;
+          bestScore = -Infinity;
+        // Full window at root — no pruning of root moves
         for (const mv of ms) {
           const nb = cp(brd),
             nc = { ...castl },
@@ -2440,47 +2966,63 @@
           applyMv(nb, mv, col);
           const nf = calcFrz(nb);
           const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
-          // No deadline — full search, never cut short
+          // Use full [-INF,+INF] window so every root move gets exact score
           const sc = -abSearch(
             nb,
             depth - 1,
-            -beta,
-            -alpha,
+            -Infinity,
+            Infinity,
             opp(col),
             nc,
             nfrz,
             1,
             null,
+            killers,
           );
-          if (sc === null) continue; // should never happen with null deadline, but safety
-          if (sc > bestScore) {
+          if (sc !== null && sc > bestScore) {
             bestScore = sc;
             bestMove = mv;
           }
-          if (sc > alpha) alpha = sc;
-          // No alpha>=beta break at root — we must evaluate ALL moves to find global best
         }
         return { move: bestMove, score: bestScore };
       }
 
-      // Iterative deepening with deadline — for eval bar / rating only (NOT for impossible bot)
-      function masterBestMove(brd, col, castl, frz, timeMs) {
+      // ── Iterative deepening best move with deadline (for eval/rating) ────────
+      function masterBestMove(brd, col, castl, frz, timeMs, maxDepth) {
         const ms = allMoves(brd, col, castl, frz);
         if (!ms.length)
-          return { move: null, score: inCheck(brd, col) ? -19000 : 0 };
-        ms.sort((a, b) => scoreMv(brd, b) - scoreMv(brd, a));
+          return {
+            move: null,
+            score: inCheck(brd, col) ? -19000 : 0,
+            depth: 0,
+          };
+        maxDepth = maxDepth || 8;
         const deadline = Date.now() + timeMs;
+        const killers = Array.from({ length: maxDepth + 2 }, () => [
+          null,
+          null,
+        ]);
+        ms.sort(
+          (a, b) =>
+            scoreMvOrder(brd, b, killers, 0) - scoreMvOrder(brd, a, killers, 0),
+        );
         let bestMove = ms[0],
-          bestScore = -Infinity;
-        for (let depth = 1; depth <= 6; depth++) {
+          bestScore = -Infinity,
+          reachedDepth = 0;
+        for (let depth = 1; depth <= maxDepth; depth++) {
           if (Date.now() > deadline) break;
-          // Only use result of depth if we finished ALL root moves at this depth
           let dBest = -Infinity,
             dMove = ms[0],
             alpha = -Infinity,
             beta = Infinity,
             complete = true;
-          for (const mv of ms) {
+          const orderedMs = [...ms];
+          const prevBestIdx = orderedMs.indexOf(bestMove);
+          if (prevBestIdx > 0) {
+            orderedMs.splice(prevBestIdx, 1);
+            orderedMs.unshift(bestMove);
+          }
+          for (const mv of orderedMs) {
             if (Date.now() > deadline) {
               complete = false;
               break;
@@ -2513,6 +3055,7 @@
               nfrz,
               1,
               deadline,
+              killers,
             );
             if (sc === null) {
               complete = false;
@@ -2524,30 +3067,772 @@
             }
             if (sc > alpha) alpha = sc;
           }
-          // Only accept this depth's result if we finished all moves
           if (complete) {
             bestScore = dBest;
             bestMove = dMove;
+            reachedDepth = depth;
           } else break;
         }
-        return { move: bestMove, score: bestScore };
+        return { move: bestMove, score: bestScore, depth: reachedDepth };
       }
 
-      // Eval from white's perspective using master engine (for eval bar — same engine everywhere)
-      // Returns centipawns from white's perspective
-      function masterEvalWhite(brd, col, castl, frz, timeMs) {
-        // Best score from col's perspective
-        const { score } = masterBestMove(brd, col, castl, frz, timeMs);
-        // Convert to white perspective
-        return col === "w" ? score : -score;
+      // ── Progressive eval (called in background, updates bar iteratively) ──────
+      let _evalWorker = { abort: false, gen: 0 };
+
+      function startProgressiveEval(brd, col, castl, frz, onUpdate) {
+        _evalWorker.abort = true;
+        const gen = ++_evalWorker.gen;
+        _evalWorker = { abort: false, gen };
+        const ms = allMoves(brd, col, castl, frz);
+        if (!ms.length) return;
+        const killers = [];
+
+        // Quick initial eval (static)
+        let currentEval = evalBoard(brd) * (col === "w" ? 1 : -1);
+        onUpdate(col === "w" ? currentEval : -currentEval, 1);
+
+        let lastBestMove = ms[0];
+        let depth = 1;
+        const maxDepth = 7;
+
+        function doDepth() {
+          if (_evalWorker.gen !== gen || _evalWorker.abort) return;
+          if (depth > maxDepth) return;
+          // ~300ms per depth iteration
+          const deadline = Date.now() + 350;
+          const orderedMs = [...ms];
+          const prevIdx = orderedMs.indexOf(lastBestMove);
+          if (prevIdx > 0) {
+            orderedMs.splice(prevIdx, 1);
+            orderedMs.unshift(lastBestMove);
+          }
+          let dBest = -Infinity,
+            dMove = orderedMs[0],
+            alpha = -Infinity,
+            beta = Infinity,
+            complete = true;
+          for (const mv of orderedMs) {
+            if (Date.now() > deadline) {
+              complete = false;
+              break;
+            }
+            if (_evalWorker.gen !== gen) return;
+            const nb = cp(brd),
+              nc = { ...castl },
+              p = brd[mv.fr][mv.fc];
+            if (p === "wK") {
+              nc.wK = false;
+              nc.wQ = false;
+            }
+            if (p === "bK") {
+              nc.bK = false;
+              nc.bQ = false;
+            }
+            if (mv.fr === 7 && mv.fc === 7) nc.wK = false;
+            if (mv.fr === 7 && mv.fc === 0) nc.wQ = false;
+            if (mv.fr === 0 && mv.fc === 7) nc.bK = false;
+            if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
+            applyMv(nb, mv, col);
+            const nf = calcFrz(nb);
+            const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
+            const sc = -abSearch(
+              nb,
+              depth - 1,
+              -beta,
+              -alpha,
+              opp(col),
+              nc,
+              nfrz,
+              1,
+              deadline,
+              killers,
+            );
+            if (sc === null) {
+              complete = false;
+              break;
+            }
+            if (sc > dBest) {
+              dBest = sc;
+              dMove = mv;
+            }
+            if (sc > alpha) alpha = sc;
+          }
+          if (complete) {
+            lastBestMove = dMove;
+            currentEval = dBest;
+            const evWhite = col === "w" ? dBest : -dBest;
+            onUpdate(evWhite, depth);
+          }
+          depth++;
+          setTimeout(doDepth, 0);
+        }
+        setTimeout(doDepth, 0);
+      }
+
+      // ── Rate a move: compare vs best move score ───────────────────────────────
+      // Uses deeper search than before for accuracy
+      function rateMoveDeep(
+        snapBrd,
+        mv,
+        movingCol,
+        snapCastl,
+        snapFrz,
+        bestBefore,
+        isCheckmate,
+      ) {
+        if (isCheckmate) return 0;
+        // Apply the move
+        const afterBrd = cp(snapBrd);
+        const nc = { ...snapCastl };
+        const p = snapBrd[mv.fr][mv.fc];
+        if (p === "wK") {
+          nc.wK = false;
+          nc.wQ = false;
+        }
+        if (p === "bK") {
+          nc.bK = false;
+          nc.bQ = false;
+        }
+        if (mv.fr === 7 && mv.fc === 7) nc.wK = false;
+        if (mv.fr === 7 && mv.fc === 0) nc.wQ = false;
+        if (mv.fr === 0 && mv.fc === 7) nc.bK = false;
+        if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
+        applyMv(afterBrd, mv, movingCol);
+        const nf = calcFrz(afterBrd);
+        const oppCol = opp(movingCol);
+        const nextFrz = oppCol === "w" ? nf.byB : nf.byW;
+
+        // Score after this move (opponent's best response) — depth 3
+        const deadline = Date.now() + 600;
+        const sc = abSearch(
+          afterBrd,
+          3,
+          -Infinity,
+          Infinity,
+          oppCol,
+          nc,
+          nextFrz,
+          1,
+          deadline,
+          null,
+        );
+        const scoreActual =
+          sc === null
+            ? evalBoard(afterBrd) * (movingCol === "w" ? 1 : -1)
+            : -(sc || 0);
+
+        const delta = scoreActual - (bestBefore || 0);
+        let ri = RTNG.length - 1;
+        for (let i = 0; i < RTNG.length; i++) {
+          if (delta >= RTNG[i].mn) {
+            ri = i;
+            break;
+          }
+        }
+        return ri;
       }
 
       // ═══════════════════════════════════════
-      // GAME STATE
+      // COACH PANEL
       // ═══════════════════════════════════════
+      let TRAINER = { on: false, busy: false };
+      let BEST_ARROW = { mv: null, gen: 0 };
+
+      function trainerEnabled() {
+        return TRAINER.on && NET.mode === "bot";
+      }
+
+      // ── Draggable panel ───────────────────
+      (function () {
+        const panel = document.getElementById("coachPanel");
+        const handle = document.getElementById("coachDragHandle");
+        if (!panel || !handle) return;
+        let ox = 0,
+          oy = 0,
+          drag = false;
+        handle.addEventListener("mousedown", (e) => {
+          if (e.target.closest("button")) return;
+          drag = true;
+          ox = e.clientX - panel.offsetLeft;
+          oy = e.clientY - panel.offsetTop;
+          panel.style.transition = "none";
+          e.preventDefault();
+        });
+        document.addEventListener("mousemove", (e) => {
+          if (!drag) return;
+          panel.style.left =
+            Math.max(
+              0,
+              Math.min(window.innerWidth - panel.offsetWidth, e.clientX - ox),
+            ) + "px";
+          panel.style.top =
+            Math.max(0, Math.min(window.innerHeight - 60, e.clientY - oy)) +
+            "px";
+        });
+        document.addEventListener("mouseup", () => {
+          drag = false;
+          panel.style.transition = "";
+        });
+      })();
+
+      function coachSetStatus(txt, thinking) {
+        const s = document.getElementById("coachStatus"),
+          p = document.getElementById("coachPulse");
+        if (s) s.textContent = txt;
+        if (p) p.classList.toggle("thinking", !!thinking);
+      }
+      function coachAddThinking() {
+        const body = document.getElementById("coachBody");
+        if (!body) return;
+        const msg = document.createElement("div");
+        msg.className = "coach-msg";
+        msg.id = "coachThinkingMsg";
+        msg.innerHTML = `<div class="coach-bubble thinking-bubble"><div class="d"></div><div class="d"></div><div class="d"></div><span>Analysing…</span></div>`;
+        body.appendChild(msg);
+        body.scrollTop = body.scrollHeight;
+      }
+      function coachRemoveThinking() {
+        const t = document.getElementById("coachThinkingMsg");
+        if (t) t.remove();
+      }
+      function coachAddMessage(html) {
+        const body = document.getElementById("coachBody");
+        if (!body) return;
+        const msg = document.createElement("div");
+        msg.className = "coach-msg";
+        msg.innerHTML = `<div class="coach-bubble">${html}</div>`;
+        body.appendChild(msg);
+        body.scrollTop = body.scrollHeight;
+      }
+      function coachClearMessages() {
+        const body = document.getElementById("coachBody");
+        if (!body) return;
+        body.innerHTML = `<div class="coach-msg"><div class="coach-bubble" style="background:rgba(201,168,76,.06);border-color:rgba(201,168,76,.2);color:var(--dim);font-size:.74rem">✅ Ready — play a move for analysis.</div></div>`;
+      }
+
+      // ── Board helpers ─────────────────────
+      function boardToText(brd) {
+        const rows = [];
+        for (let r = 0; r < 8; r++) {
+          const cells = [];
+          for (let c = 0; c < 8; c++) {
+            const p = brd[r][c];
+            cells.push(p ? (p[0] === "w" ? "W" : "B") + p[1] : "..");
+          }
+          rows.push(8 - r + " " + cells.join(" "));
+        }
+        rows.push("  a  b  c  d  e  f  g  h");
+        return rows.join("\n");
+      }
+      function pieceName(code) {
+        return (
+          {
+            K: "King",
+            Q: "Queen",
+            R: "Rook",
+            B: "Bishop",
+            N: "Knight",
+            P: "Pawn",
+          }[code] || code
+        );
+      }
+      function colorName(c) {
+        return c === "w" ? "White" : "Black";
+      }
+      function sq(r, c) {
+        return FILES[c] + RANKS[r];
+      }
+      function pick(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      // ── Local coach text generator — zero API, instant, always works ─────────
+      function generateCoachComment(
+        snapBrd,
+        mv,
+        movingCol,
+        note,
+        ri,
+        bestMv,
+        bestNote,
+        evalBefore,
+        evalAfter,
+        isCheckmate,
+        isCheck,
+        frzCount,
+        capPiece,
+        histLen,
+      ) {
+        const riLabel = RTNG[ri]?.l || "?";
+        const isBest =
+          !bestMv ||
+          (bestMv.fr === mv.fr &&
+            bestMv.fc === mv.fc &&
+            bestMv.tr === mv.tr &&
+            bestMv.tc === mv.tc);
+        const p = snapBrd[mv.fr][mv.fc];
+        const pieceT = p ? p[1] : "P";
+        const pName = pieceName(pieceT);
+        const from = sq(mv.fr, mv.fc),
+          to = sq(mv.tr, mv.tc);
+        const evDiff = evalAfter - evalBefore;
+        const evStr = (v) =>
+          Math.abs(v) > 9000
+            ? "Mate"
+            : (v >= 0 ? "+" : "") + (v / 100).toFixed(1);
+        const isWhite = movingCol === "w";
+        const actor = isWhite ? "You" : "The bot";
+        const opp_actor = isWhite ? "The bot" : "You";
+        const parts = [];
+
+        // ── Opening line based on rating ─────────────────────────────────────
+        if (isCheckmate) {
+          parts.push(
+            pick([
+              `Checkmate! ${actor} delivered the final blow with ${note} — the ${pName} on ${to} leaves the king with nowhere to go.`,
+              `Game over. ${note} is a beautiful finishing move — the ${pName} seals every escape route.`,
+              `Checkmate with ${note}! A well-earned finish.`,
+            ]),
+          );
+        } else {
+          const openings = {
+            "Genius!!!": [
+              `${note} is an extraordinary sacrifice — ${actor} found a hidden tactical sequence that the engine rates at ${evStr(evalAfter)}.`,
+              `Stunning! ${note} sacrifices material to gain a decisive advantage. This is the kind of move that wins brilliancy prizes.`,
+            ],
+            "Brilliant!!": [
+              `${note} is a brilliant find! ${actor} spots a non-obvious idea that jumps the evaluation to ${evStr(evalAfter)}.`,
+              `Excellent calculation — ${note} combines tactics and strategy in a way most players would miss.`,
+            ],
+            "Great!": [
+              `${note} is a great move. The ${pName} lands on ${to} with real purpose, improving the position significantly.`,
+              `Well played — ${note} creates immediate pressure and gains ${evStr(evDiff)} in evaluation.`,
+            ],
+            Best: [
+              `${note} is the engine's top choice. The ${pName} moves from ${from} to ${to}, maximising its activity.`,
+              `Solid and accurate — ${note} is precisely what the position demands.`,
+            ],
+            Excellent: [
+              `${note} is an excellent move — the ${pName} finds an active square on ${to} and keeps the advantage.`,
+              `Clean and purposeful. ${note} maintains control without giving the opponent any counterplay.`,
+            ],
+            Good: [
+              `${note} is a good, sensible move. The ${pName} takes a useful square on ${to}.`,
+              `${note} is fine — it improves the position without creating any weaknesses.`,
+            ],
+            Book: [
+              `${note} is a standard, book-quality move. Nothing dramatic, but it keeps the balance.`,
+              `${note} is a solid, theory-level move. The position remains roughly equal.`,
+            ],
+            Okay: [
+              `${note} is okay — not the sharpest choice, but it doesn't create any serious problems.`,
+              `${note} is a reasonable move, though there were slightly better options available.`,
+            ],
+            Inaccuracy: [
+              `${note} is a slight inaccuracy — the ${pName} goes to ${to} but this lets the opponent off the hook a little.`,
+              `${note} is not the most precise. ${actor} had a stronger continuation available.`,
+            ],
+            Mistake: [
+              `${note} is a mistake! The ${pName} moves to ${to} but this gives away ${evStr(-evDiff)} in evaluation.`,
+              `This is a serious error. ${note} misses the key idea and hands the initiative to ${opp_actor.toLowerCase()}.`,
+            ],
+            Blunder: [
+              `${note} is a blunder! Moving the ${pName} to ${to} loses ${evStr(-evDiff)} — a major setback.`,
+              `A costly blunder. ${note} overlooks a fundamental tactical issue in the position.`,
+            ],
+            Catastrophe: [
+              `${note} is catastrophic — the position collapses after this move. The evaluation swings by ${evStr(-evDiff)}.`,
+              `A game-losing error. ${note} misses everything that matters in this position.`,
+            ],
+            Losing: [
+              `${note} essentially loses the game on the spot. The evaluation is now ${evStr(evalAfter)}.`,
+              `This move gives up the position entirely. After ${note} there is no realistic path to recovery.`,
+            ],
+          };
+          const pool = openings[riLabel] || openings["Good"];
+          parts.push(pick(pool));
+        }
+
+        // ── Move-specific detail ──────────────────────────────────────────────
+        if (!isCheckmate) {
+          // Capture detail
+          if (capPiece) {
+            const capName = pieceName(capPiece[1]);
+            parts.push(
+              pick([
+                `By taking the ${capName} on ${to}, ${isWhite ? "you gain" : "the bot gains"} ${evStr(VAL[capPiece[1]] || 0)} in material.`,
+                `The ${capName} capture on ${to} is ${riLabel === "Blunder" || riLabel === "Mistake" ? "unfortunately necessary — but it walks into trouble" : "a clean win of material"}.`,
+                `Capturing the ${capName} on ${to} changes the material balance in ${isWhite ? "your" : "the bot's"} favour.`,
+              ]),
+            );
+          }
+          // Castling
+          else if (mv.flag === "cs" || mv.flag === "cl") {
+            parts.push(
+              pick([
+                `Castling ${mv.flag === "cs" ? "kingside" : "queenside"} tucks the king away safely and connects the rooks — a key developmental milestone.`,
+                `Getting the king to safety with ${mv.flag === "cs" ? "O-O" : "O-O-O"} is always a priority. The rooks are now ready to coordinate.`,
+              ]),
+            );
+          }
+          // Pawn advance
+          else if (pieceT === "P") {
+            const rank = parseInt(RANKS[mv.tr]);
+            if (rank === 1 || rank === 8) {
+              parts.push(
+                "The pawn reaches the promotion square — a decisive advantage.",
+              );
+            } else if (Math.abs(mv.tr - mv.fr) === 2) {
+              parts.push(
+                pick([
+                  `The two-square pawn advance to ${to} claims central space and opens lines for the pieces behind it.`,
+                  `Pushing two squares to ${to} stakes a claim in the centre — an important early-game principle.`,
+                ]),
+              );
+            } else {
+              parts.push(
+                pick([
+                  `The pawn advances to ${to}, gaining space and potentially restricting the opponent's pieces.`,
+                  `This pawn push to ${to} creates a mobile centre and supports future piece activity.`,
+                ]),
+              );
+            }
+          }
+          // Knight
+          else if (pieceT === "N") {
+            parts.push(
+              pick([
+                `The Knight on ${to} is well-placed — knights thrive near the centre where they control the maximum number of squares.`,
+                `Knights can't land adjacent to same-type allies in Control Chess, making ${to} an ideal outpost here.`,
+                `The Knight jumps to ${to}, covering several key squares and threatening future activity.`,
+              ]),
+            );
+          }
+          // Bishop
+          else if (pieceT === "B") {
+            parts.push(
+              pick([
+                `The Bishop is now active on ${to}, controlling a long diagonal and putting pressure on the opponent's position.`,
+                `Opening the Bishop's diagonal by moving to ${to} improves coordination and threatens the opponent's structure.`,
+              ]),
+            );
+          }
+          // Rook
+          else if (pieceT === "R") {
+            parts.push(
+              pick([
+                `The Rook slides to ${to} — rooks are most powerful on open files and the 7th rank.`,
+                `Activating the Rook to ${to} increases the pressure along this file.`,
+              ]),
+            );
+          }
+          // Queen
+          else if (pieceT === "Q") {
+            parts.push(
+              pick([
+                `The Queen moves to ${to} — be careful not to bring the Queen out too early where it can be attacked.`,
+                `The Queen on ${to} is a powerful centralising move, combining attack and control.`,
+              ]),
+            );
+          }
+
+          // Check
+          if (isCheck) {
+            parts.push(
+              pick([
+                `This also delivers check — forcing the opponent to respond immediately and lose a tempo.`,
+                `The check on ${to} forces a defensive response, gaining a critical tempo.`,
+                `Giving check gains time — the opponent must deal with the immediate threat before developing.`,
+              ]),
+            );
+          }
+
+          // Freeze mechanic
+          if (frzCount > 0) {
+            parts.push(
+              pick([
+                `After this move, ${frzCount} opponent piece${frzCount > 1 ? "s are" : " is"} frozen — they cannot move next turn, which is the unique strength of Control Chess.`,
+                `The freeze mechanic activates: ${frzCount} enemy piece${frzCount > 1 ? "s" : ""} is paralysed until ${isWhite ? "the bot" : "you"} respond${isWhite ? "s" : ""}.`,
+                `This position freezes ${frzCount} piece${frzCount > 1 ? "s" : ""}. Use that paralysis to advance without opposition next turn.`,
+              ]),
+            );
+          }
+
+          // Eval context
+          if (Math.abs(evalAfter) > 9000) {
+            parts.push(
+              "The position is now completely decisive — checkmate is forced.",
+            );
+          } else if (evalAfter > 500) {
+            parts.push(
+              `The evaluation stands at ${evStr(evalAfter)} — ${isWhite ? "White" : "Black"} has a winning advantage.`,
+            );
+          } else if (evalAfter < -500) {
+            parts.push(
+              `The evaluation is ${evStr(evalAfter)} — ${isWhite ? "White" : "Black"} is in a difficult, potentially losing position.`,
+            );
+          } else if (Math.abs(evalAfter) < 50) {
+            parts.push(
+              `The position is roughly equal after this move (eval ${evStr(evalAfter)}).`,
+            );
+          }
+        }
+
+        // ── Best move hint ────────────────────────────────────────────────────
+        if (!isBest && bestMv && !isCheckmate) {
+          const bFrom = sq(bestMv.fr, bestMv.fc),
+            bTo = sq(bestMv.tr, bestMv.tc);
+          const bPiece = snapBrd[bestMv.fr]?.[bestMv.fc];
+          const bPName = bPiece ? pieceName(bPiece[1]) : "piece";
+          const badness = {
+            Inaccuracy: "slightly better",
+            Mistake: "much stronger",
+            Blunder: "far superior",
+            Catastrophe: "completely winning",
+            Losing: "the only move",
+          };
+          const qualifier = badness[riLabel] || "stronger";
+          parts.push(
+            pick([
+              `The engine prefers ${bestNote} — moving the ${bPName} from ${bFrom} to ${bTo} was ${qualifier} here.`,
+              `${bestNote} (${bPName} to ${bTo}) was the ${qualifier} continuation in this position.`,
+              `A ${qualifier} option was ${bestNote}, placing the ${bPName} on ${bTo} with more effect.`,
+            ]),
+          );
+        }
+
+        // Build final comment — 2-3 sentences, varied
+        const selected = parts.slice(0, Math.min(parts.length, 3));
+        return selected.join(" ");
+      }
+
+      function runTrainer(
+        snapBrd,
+        mv,
+        movingCol,
+        note,
+        ri,
+        bestMv,
+        bestNote,
+        evalBefore,
+        evalAfter,
+        isCheckmate,
+        isCheck,
+        frzCount,
+        capPiece,
+        histLen,
+      ) {
+        if (!trainerEnabled() || TRAINER.busy) return;
+        TRAINER.busy = true;
+        coachSetStatus("Analysing…", true);
+        // Instant — no API
+        const comment = generateCoachComment(
+          snapBrd,
+          mv,
+          movingCol,
+          note,
+          ri,
+          bestMv,
+          bestNote,
+          evalBefore,
+          evalAfter,
+          isCheckmate,
+          isCheck,
+          frzCount,
+          capPiece,
+          histLen,
+        );
+        TRAINER.busy = false;
+        if (!TRAINER.on) return;
+        const R = RTNG[ri];
+        const isBest =
+          !bestMv ||
+          (bestMv.fr === mv.fr &&
+            bestMv.fc === mv.fc &&
+            bestMv.tr === mv.tr &&
+            bestMv.tc === mv.tc);
+        let who;
+        if (isCheckmate) who = "♛ Checkmate";
+        else if (BVB.on)
+          who =
+            movingCol === "w"
+              ? "♙ " + botName(BVB.wLevel) + " (White)"
+              : "♟ " + botName(BVB.bLevel) + " (Black)";
+        else
+          who =
+            movingCol === "w"
+              ? "♙ You (White)"
+              : "♟ " + botName(botLevel) + " (Black)";
+        let html = `<div class="coach-move-label">${who} — <b>${note}</b> <span class="${R?.c || "ok"}">${R?.s || ""} ${R?.l || ""}</span></div>`;
+        html += `<div style="line-height:1.6">${comment}</div>`;
+        if (bestMv && !isBest)
+          html += `<div class="coach-best-hint">💡 Engine best: <b>${bestNote}</b></div>`;
+        coachAddMessage(html);
+        coachSetStatus(colorName(movingCol) + " — " + note, false);
+      }
+
+      // ── BEST MOVE ARROW ───────────────────────────────────────────────────────
+      function clearBestArrow() {
+        BEST_ARROW.mv = null;
+        const svg = document.getElementById("bestSvg");
+        if (svg) svg.innerHTML = "";
+      }
+
+      function drawBestArrow(mv) {
+        if (!mv) return;
+        BEST_ARROW.mv = mv;
+        const svg = document.getElementById("bestSvg");
+        if (!svg) return;
+        svg.innerHTML = "";
+        const board = document.getElementById("board");
+        if (!board) return;
+        const bRect = board.getBoundingClientRect();
+        const sRect = svg.parentElement.getBoundingClientRect();
+        const sqW = bRect.width / 8,
+          sqH = bRect.height / 8;
+        const bx = bRect.left - sRect.left,
+          by = bRect.top - sRect.top;
+
+        // Adjust for flip
+        let fr = mv.fr,
+          fc = mv.fc,
+          tr = mv.tr,
+          tc = mv.tc;
+        if (flipped) {
+          fr = 7 - fr;
+          fc = 7 - fc;
+          tr = 7 - tr;
+          tc = 7 - tc;
+        }
+
+        const x1 = bx + (fc + 0.5) * sqW,
+          y1 = by + (fr + 0.5) * sqH;
+        const x2 = bx + (tc + 0.5) * sqW,
+          y2 = by + (tr + 0.5) * sqH;
+
+        const dx = x2 - x1,
+          dy = y2 - y1,
+          len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 5) return;
+
+        const color = "#00e5ff";
+        const hw = sqW * 0.2,
+          hl = sqW * 0.32,
+          sw = sqW * 0.1,
+          ux = dx / len,
+          uy = dy / len;
+        const ex = x2 - ux * hl * 0.5,
+          ey = y2 - uy * hl * 0.5;
+
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+        // Glow filter
+        const defs = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "defs",
+        );
+        const filter = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "filter",
+        );
+        filter.setAttribute("id", "bestglow");
+        const blur = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "feGaussianBlur",
+        );
+        blur.setAttribute("stdDeviation", "3");
+        blur.setAttribute("result", "blur");
+        filter.appendChild(blur);
+        defs.appendChild(filter);
+        svg.appendChild(defs);
+
+        // Shadow arrow
+        const gs = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        gs.setAttribute("filter", "url(#bestglow)");
+        gs.setAttribute("opacity", "0.6");
+        const ls = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "line",
+        );
+        ls.setAttribute("x1", x1);
+        ls.setAttribute("y1", y1);
+        ls.setAttribute("x2", ex);
+        ls.setAttribute("y2", ey);
+        ls.setAttribute("stroke", color);
+        ls.setAttribute("stroke-width", sw * 2);
+        ls.setAttribute("stroke-linecap", "round");
+        gs.appendChild(ls);
+        const px = -uy * hw * 1.2,
+          py = ux * hw * 1.2;
+        const polys = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "polygon",
+        );
+        polys.setAttribute(
+          "points",
+          `${x2},${y2} ${ex + px},${ey + py} ${ex - px},${ey - py}`,
+        );
+        polys.setAttribute("fill", color);
+        gs.appendChild(polys);
+        svg.appendChild(gs);
+
+        // Main arrow
+        g.setAttribute("opacity", "0.92");
+        const line = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "line",
+        );
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", ex);
+        line.setAttribute("y2", ey);
+        line.setAttribute("stroke", color);
+        line.setAttribute("stroke-width", sw);
+        line.setAttribute("stroke-linecap", "round");
+        g.appendChild(line);
+        const px2 = -uy * hw,
+          py2 = ux * hw;
+        const pts = `${x2},${y2} ${ex + px2},${ey + py2} ${ex - px2},${ey - py2}`;
+        const poly = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "polygon",
+        );
+        poly.setAttribute("points", pts);
+        poly.setAttribute("fill", color);
+        g.appendChild(poly);
+
+        // Pulse animation on source square
+        const circle = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle",
+        );
+        circle.setAttribute("cx", x1);
+        circle.setAttribute("cy", y1);
+        circle.setAttribute("r", sqW * 0.35);
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", color);
+        circle.setAttribute("stroke-width", sw * 0.7);
+        circle.setAttribute("opacity", "0.5");
+        const anim = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "animate",
+        );
+        anim.setAttribute("attributeName", "r");
+        anim.setAttribute(
+          "values",
+          `${sqW * 0.25};${sqW * 0.42};${sqW * 0.25}`,
+        );
+        anim.setAttribute("dur", "1.4s");
+        anim.setAttribute("repeatCount", "indefinite");
+        circle.appendChild(anim);
+        g.appendChild(circle);
+
+        svg.appendChild(g);
+      }
       let G = {},
         botLevel = 2,
         flipped = false;
+      let BVB = { on: false, wLevel: 2, bLevel: 5, paused: false }; // Bot vs Bot mode
       let promoOk = null;
       let animH = [],
         animC = [],
@@ -2625,6 +3910,11 @@
         PMQUEUE = [];
         PMSEL = null;
         PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1, poss: [] };
+        _evalWorker.abort = true;
+        TRAINER.busy = false;
+        clearBestArrow();
+        coachSetStatus("Ready — play a move", false);
+        if (TRAINER.on) coachClearMessages();
         const bk = ["R", "N", "B", "Q", "K", "B", "N", "R"];
         const brd = Array.from({ length: 8 }, () => Array(8).fill(null));
         for (let c = 0; c < 8; c++) {
@@ -2650,6 +3940,8 @@
           halfMove: 0,
           posHist: [],
           bestEvalBefore: null,
+          lastEngineBest: null,
+          nextEngineBest: null,
         };
         document.getElementById("toast").classList.remove("on");
         document.getElementById("movesEl").innerHTML = "";
@@ -2664,7 +3956,7 @@
           updateTimerDisplay();
           if (NET.mode === "bot") startTurnTimer("w");
         } else showTimers(false);
-        setEval(0);
+        setEval(0, 0);
         const showEv = NET.showEval;
         document.getElementById("evbar").style.display = showEv ? "" : "none";
         const rCard = document.getElementById("bR");
@@ -2674,6 +3966,12 @@
         render();
         updStatus();
         updCaps();
+        // BvB: kick off white with comfortable delay
+        if (BVB.on && NET.mode === "bot" && !G.over) {
+          document.getElementById("thkEl").classList.add("on");
+          document.getElementById("mThk").classList.add("on");
+          setTimeout(() => runBotForColor("w", BVB.wLevel), 1200);
+        }
       }
 
       // ═══════════════════════════════════════
@@ -2759,11 +4057,11 @@
         const note = buildNote(G.brd, mv, G.turn);
         const movingCol = G.turn;
 
-        // Snapshot state BEFORE the move for rating computation
+        // Snapshot for rating
         const snapBrd = cp(G.brd),
           snapCastl = { ...G.castl };
         const snapFrz = movingCol === "w" ? G.frz.byB : G.frz.byW;
-        const evalBefore = G.bestEvalBefore; // best possible score for movingCol (computed after prev move)
+        const evalBefore = G.bestEvalBefore;
 
         if (NET.timeCtrl) {
           stopTimers();
@@ -2817,56 +4115,185 @@
         G.frz = calcFrz(G.brd, G.prevFrz);
         G.prevEval = evalBoard(G.brd);
 
-        // ── UNIFIED MOVE RATING (same for single and multiplayer) ──────────────────
-        // Compare: score after THIS move vs best possible score movingCol could have gotten
         const oppCol = opp(movingCol);
         const nextFrz = oppCol === "w" ? G.frz.byB : G.frz.byW;
         const nextMs = allMoves(G.brd, oppCol, G.castl, nextFrz);
         const isCheckmate = nextMs.length === 0 && inCheck(G.brd, oppCol);
         const isStalemate = nextMs.length === 0 && !inCheck(G.brd, oppCol);
 
+        // ── MOVE RATING (deep, async after render) ────────────────────────────────
         let ri = RTNG.length - 1;
+        // Always clear best-move arrow when someone plays
+        clearBestArrow();
+
         if (!fromNet) {
           if (isCheckmate) {
-            ri = 0; // always "Genius!!!" for checkmate
-          } else {
-            // scoreActual: from movingCol's perspective after this move
-            // = best response opponent can make, negated
-            const dl1 = Date.now() + 250;
-            const scoreActual = -abSearch(
-              G.brd,
-              2,
-              -Infinity,
-              Infinity,
-              oppCol,
-              G.castl,
-              nextFrz,
-              1,
-              dl1,
-            );
-
-            // scoreBest: what movingCol could have achieved with the best possible move
-            let scoreBest;
-            if (evalBefore !== null && evalBefore !== undefined) {
-              // Already computed before this move
-              scoreBest = evalBefore;
-            } else {
-              // First move or cold start — compute quickly
-              scoreBest = evalBoard(G.brd) * (movingCol === "w" ? 1 : -1);
+            ri = 0;
+            if (NET.showRating) {
+              const R = RTNG[0];
+              document.getElementById("ratingEl").innerHTML =
+                `<span class="${R.c}">${R.s} ${R.l}</span>`;
+              document.getElementById("mRt").innerHTML =
+                `<span class="${R.c}">${R.s}</span>`;
             }
-            const delta = scoreActual - scoreBest;
-            ri = RTNG.length - 1;
-            for (let i = 0; i < RTNG.length; i++)
-              if (delta >= RTNG[i].mn) {
-                ri = i;
-                break;
+          } else {
+            const _snapBrd2 = cp(snapBrd),
+              _mv2 = { ...mv },
+              _movingCol2 = movingCol,
+              _snapCastl2 = { ...snapCastl },
+              _snapFrz2 = [...snapFrz],
+              _evalBefore2 = evalBefore,
+              _histLen = G.hist.length;
+            const _note2 = note,
+              _cap2 = cap,
+              _isCheck2 = inCheck(G.brd, oppCol),
+              _frzCount2 = G.frz.all.length;
+            setTimeout(() => {
+              if (G.over) return;
+              const rIdx = rateMoveDeep(
+                _snapBrd2,
+                _mv2,
+                _movingCol2,
+                _snapCastl2,
+                _snapFrz2,
+                _evalBefore2,
+                false,
+              );
+              const R = RTNG[rIdx];
+              const showRt = NET.showRating;
+              if (showRt) {
+                let html = `<span class="${R.c}">${R.s} ${R.l}</span>`;
+                if (_isCheck2) html += ` <span class="ck">Check!</span>`;
+                // Label whose move it was
+                const lbl = BVB.on
+                  ? botName(_movingCol2 === "w" ? BVB.wLevel : BVB.bLevel) +
+                    ": "
+                  : _movingCol2 === "w"
+                    ? "<b>You:</b> "
+                    : "<b>Bot:</b> ";
+                document.getElementById("ratingEl").innerHTML = lbl + html;
+                document.getElementById("mRt").innerHTML =
+                  `<span class="${R.c}">${R.s}</span>`;
               }
+              // Add icon to move history
+              const moveSpans = document.getElementById("movesEl").children;
+              if (_histLen < moveSpans.length) {
+                const sp = moveSpans[_histLen];
+                if (!sp.querySelector(".ri-icon") && showRt) {
+                  const icon = document.createElement("span");
+                  icon.className = `${R.c} ri-icon`;
+                  icon.style.cssText = "font-size:.68rem;margin-left:1px";
+                  icon.title = R.l;
+                  icon.textContent = R.s;
+                  sp.appendChild(icon);
+                }
+              }
+              // ELO only for player moves
+              if (!isBot) eloOnMove(rIdx);
+
+              // ── TRAINER + BEST ARROW — both player AND bot moves, including BvB ──
+              if (trainerEnabled() && !G.over) {
+                let bestMv2, bestNote2;
+                const cached = G.lastEngineBest;
+                const cacheValid =
+                  cached &&
+                  cached.col === _movingCol2 &&
+                  cached.brd &&
+                  _snapBrd2.every((row, r) =>
+                    row.every((v, c) => v === cached.brd[r][c]),
+                  );
+                if (cacheValid && cached.move) {
+                  bestMv2 = cached.move;
+                  bestNote2 =
+                    cached.note || buildNote(_snapBrd2, bestMv2, _movingCol2);
+                } else {
+                  // Full engine search — same quality as single player
+                  const bResult = masterBestMove(
+                    cp(_snapBrd2),
+                    _movingCol2,
+                    _snapCastl2,
+                    _snapFrz2,
+                    800,
+                    5,
+                  );
+                  bestMv2 = bResult.move;
+                  bestNote2 = bestMv2
+                    ? buildNote(_snapBrd2, bestMv2, _movingCol2)
+                    : "?";
+                }
+                const evAfter =
+                  evalBoard(G.brd) * (_movingCol2 === "w" ? 1 : -1);
+                const isBest2 =
+                  !bestMv2 ||
+                  (bestMv2.fr === _mv2.fr &&
+                    bestMv2.fc === _mv2.fc &&
+                    bestMv2.tr === _mv2.tr &&
+                    bestMv2.tc === _mv2.tc);
+                if (!isBest2 && bestMv2) drawBestArrow(bestMv2);
+                runTrainer(
+                  _snapBrd2,
+                  _mv2,
+                  _movingCol2,
+                  _note2,
+                  rIdx,
+                  bestMv2,
+                  bestNote2,
+                  _evalBefore2 || 0,
+                  evAfter,
+                  false,
+                  _isCheck2,
+                  _frzCount2,
+                  _cap2,
+                  _histLen,
+                );
+                G.lastEngineBest = null;
+              }
+            }, 0);
+            // Quick initial display
+            ri = RTNG.length - 1;
+            if (evalBefore !== null && evalBefore !== undefined) {
+              const quickDelta =
+                evalBoard(G.brd) * (movingCol === "w" ? 1 : -1) - evalBefore;
+              for (let i = 0; i < RTNG.length; i++) {
+                if (quickDelta >= RTNG[i].mn) {
+                  ri = i;
+                  break;
+                }
+              }
+            }
+            if (NET.showRating) {
+              const R = RTNG[ri];
+              const lbl = BVB.on
+                ? botName(movingCol === "w" ? BVB.wLevel : BVB.bLevel) + ": "
+                : movingCol === "w"
+                  ? "<b>You:</b> "
+                  : "<b>Bot:</b> ";
+              document.getElementById("ratingEl").innerHTML =
+                lbl + `<span class="${R.c}">${R.s} ${R.l}</span>`;
+              document.getElementById("mRt").innerHTML =
+                `<span class="${R.c}">${R.s}</span>`;
+            }
           }
         }
 
-        // ── Compute bestEvalBefore for NEXT move's rating ──────────────────────────
-        // What's the best oppCol can do right now? (Used to rate oppCol's next move)
-        // Use master engine — same quality for both single and multiplayer
+        // ── PROGRESSIVE EVAL BAR ─────────────────────────────────────────────────
+        if (NET.showEval) {
+          setEval(evalBoard(G.brd), 0);
+          startProgressiveEval(
+            G.brd,
+            oppCol,
+            G.castl,
+            nextFrz,
+            (evWhite, depth) => {
+              if (G.over) return;
+              setEval(evWhite, depth);
+              if (NET.conn && NET.showEval)
+                netSend({ type: "eval_sync", ev: evWhite, depth });
+            },
+          );
+        }
+
+        // ── Compute bestEvalBefore + engine best (for trainer + Impossible bot) ──
         setTimeout(() => {
           if (G.over) return;
           const _col = oppCol,
@@ -2876,39 +4303,30 @@
           const ms2 = allMoves(_brd2, _col, _castl2, _frz2);
           if (!ms2.length) {
             G.bestEvalBefore = null;
+            G.nextEngineBest = null;
             return;
           }
-          // Time budget: 400ms for rating quality, same regardless of mode
-          const { score } = masterBestMove(_brd2, _col, _castl2, _frz2, 400);
-          G.bestEvalBefore = score; // from _col's perspective
-          // Also update eval bar with same engine result
-          const evWhite = _col === "w" ? score : -score;
-          if (NET.showEval && !fromNet) {
-            setEval(evWhite);
-            if (NET.conn) netSend({ type: "eval_sync", ev: evWhite });
-          }
+          const { score, move } = masterBestMove(
+            _brd2,
+            _col,
+            _castl2,
+            _frz2,
+            800,
+            5,
+          );
+          G.bestEvalBefore = score;
+          G.nextEngineBest = move
+            ? {
+                col: _col,
+                move,
+                brd: cp(_brd2),
+                castl: { ..._castl2 },
+                note: move ? buildNote(_brd2, move, _col) : null,
+              }
+            : null;
         }, 0);
 
-        // Initial quick eval for bar
-        if (NET.showEval && !fromNet) setEval(evalBoard(G.brd));
-
-        // ── Display rating ────────────────────────────────────────────────────────
-        const showRt = NET.showRating;
-        if (showRt && !fromNet) {
-          const R = RTNG[ri];
-          let html = `<span class="${R.c}">${R.s} ${R.l}</span>`;
-          if (inCheck(G.brd, oppCol)) html += ` <span class="ck">Check!</span>`;
-          if (NET.mode !== "bot") {
-            const isMyMove = movingCol === NET.myCol;
-            html = isMyMove ? `<b>You:</b> ${html}` : `<b>Opp:</b> ${html}`;
-          }
-          document.getElementById("ratingEl").innerHTML = html;
-          document.getElementById("mRt").innerHTML =
-            `<span class="${RTNG[ri].c}">${RTNG[ri].s}</span>`;
-        }
-
-        if (!isBot && !fromNet) eloOnMove(ri);
-        addNote(note, movingCol, G.hist.length, ri, showRt && !fromNet);
+        addNote(note, movingCol, G.hist.length);
         G.hist.push(mv);
         G.turn = oppCol;
         const wasCapOrPawn = cap || piece[1] === "P";
@@ -2921,7 +4339,7 @@
           JSON.stringify(G.castl);
         G.posHist.push(posKey);
         const repCount = G.posHist.filter((k) => k === posKey).length;
-        if (!fromNet && NET.mode !== "bot" && NET.conn) {
+        if (!fromNet && NET.mode !== "bot" && NET.conn)
           netSend({
             type: "move",
             mv,
@@ -2931,7 +4349,6 @@
             ri,
             showRt: NET.showRating,
           });
-        }
         if (G.halfMove >= 100) {
           endGame("fifty", "");
           return;
@@ -2962,7 +4379,6 @@
         updCaps();
         if (NET.timeCtrl && !G.over) startTurnTimer(G.turn);
 
-        // Execute pre-move chain
         if (PMQUEUE.length > 0 && !G.over) {
           const pmCol =
             NET.mode === "bot" ? "w" : NET.mode === "local" ? null : NET.myCol;
@@ -2999,11 +4415,24 @@
           }
         }
 
-        if (NET.mode === "bot" && G.turn === "b" && !G.over) {
-          document.getElementById("thkEl").classList.add("on");
-          document.getElementById("mThk").classList.add("on");
-          const delay = [300, 500, 700, 900, 1200][botLevel - 1];
-          setTimeout(runBot, delay);
+        if (NET.mode === "bot" && !G.over) {
+          if (BVB.on) {
+            // Bot vs Bot: add comfortable viewing delay (1.2-2s)
+            const nextLevel = G.turn === "w" ? BVB.wLevel : BVB.bLevel;
+            document.getElementById("thkEl").classList.add("on");
+            document.getElementById("mThk").classList.add("on");
+            // Base delay 1200ms + per-level thinking time
+            const delay =
+              1200 + [0, 200, 400, 600, 400, 600, 500, 700][nextLevel - 1] ||
+              1200;
+            setTimeout(() => runBotForColor(G.turn, nextLevel), delay);
+          } else if (G.turn === "b") {
+            document.getElementById("thkEl").classList.add("on");
+            document.getElementById("mThk").classList.add("on");
+            const delay =
+              [300, 500, 700, 900, 400, 600, 500, 700][botLevel - 1] || 400;
+            setTimeout(runBot, delay);
+          }
         }
       }
 
@@ -3036,23 +4465,302 @@
       }
 
       // ═══════════════════════════════════════
-      // BOT
-      // Level 1: random  Level 2: greedy  Level 3: depth-2+noise
-      // Level 4: depth-3+noise  Level 5: IMPOSSIBLE — depth 4, zero noise, async via setTimeout
+      // ═══════════════════════════════════════
+      // BOT — async chunked search, no Worker (CSP-safe)
+      // Impossible: plays pre-computed engine best instantly
       // ═══════════════════════════════════════
       let _botAbort = false,
         _botGeneration = 0;
 
-      function runBot() {
-        document.getElementById("thkEl").classList.add("on");
-        document.getElementById("mThk").classList.add("on");
+      // ── Celebrity bot name helper ─────────────────────────────────────────────
+      function botName(level) {
+        return (
+          {
+            1: "Trivial",
+            2: "Easy",
+            3: "Medium",
+            4: "Hard",
+            5: "Impossible",
+            6: "Magnus Carlsen",
+            7: "Hikaru Nakamura",
+            8: "Jan-Krzysztof Duda",
+          }[level] || "Bot"
+        );
+      }
+
+      // ── Celebrity bot personalities ───────────────────────────────────────────
+      // Each celebrity bot modifies move scoring to simulate their style
+      function celebBotMove(brd, castl, frzW, persona, gen) {
+        if (_botAbort || G.over || NET.mode !== "bot" || gen !== _botGeneration)
+          return;
+        const col = G.turn; // supports both colors in BvB
+        const frz = col === "w" ? G.frz.byB : G.frz.byW; // frozen for col
+        const ms = allMoves(brd, col, castl, frz);
+        if (!ms.length) {
+          postBotMoveColor(null, col);
+          return;
+        }
+
+        const killers = Array.from({ length: 8 }, () => [null, null]);
+        ms.sort(
+          (a, b) =>
+            scoreMvOrder(brd, b, killers, 0) - scoreMvOrder(brd, a, killers, 0),
+        );
+
+        // Score each move with personality modifier
+        const scoredMoves = ms.map((mv) => {
+          const nb = cp(brd),
+            nc = { ...castl },
+            p = brd[mv.fr][mv.fc];
+          if (p === "wK") {
+            nc.wK = false;
+            nc.wQ = false;
+          }
+          if (p === "bK") {
+            nc.bK = false;
+            nc.bQ = false;
+          }
+          if (mv.fr === 7 && mv.fc === 7) nc.wK = false;
+          if (mv.fr === 7 && mv.fc === 0) nc.wQ = false;
+          if (mv.fr === 0 && mv.fc === 7) nc.bK = false;
+          if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
+          applyMv(nb, mv, col);
+          const nf = calcFrz(nb);
+          const oppFrz = opp(col) === "w" ? nf.byB : nf.byW;
+          const dl = Date.now() + 800;
+          const raw = abSearch(
+            nb,
+            2,
+            -Infinity,
+            Infinity,
+            opp(col),
+            nc,
+            oppFrz,
+            1,
+            dl,
+            killers,
+          );
+          const base =
+            raw === null ? evalBoard(nb) * (col === "w" ? 1 : -1) : -(raw || 0);
+          let bonus = 0;
+          const piece = brd[mv.fr][mv.fc];
+          const pt = piece ? piece[1] : "P";
+          const toRank = parseInt(RANKS[mv.tr]);
+          const cap = brd[mv.tr][mv.tc];
+
+          if (persona === 6) {
+            // Magnus — positional mastery, endgame strength, minimal risk
+            // Loves central control, king safety, long-term structure
+            if (
+              pt === "N" &&
+              mv.tr >= 2 &&
+              mv.tr <= 5 &&
+              mv.tc >= 2 &&
+              mv.tc <= 5
+            )
+              bonus += 35; // central knights
+            if (pt === "P" && mv.tr === mv.fr - 1) bonus += 8; // steady pawn moves
+            if (mv.flag === "cs" || mv.flag === "cl") bonus += 25; // always castles
+            if (cap && VAL[cap[1]] > VAL[pt]) bonus += 60; // favors winning exchanges
+            if (pt === "K") bonus -= 40; // king safety paramount
+            // Freeze exploitation — Magnus loves paralyzing opponent
+            const frzAfter = calcFrz(nb, null);
+            bonus += frzAfter.all.length * 20;
+            // Slight noise for variety
+            bonus += (Math.random() - 0.5) * 15;
+          } else if (persona === 7) {
+            // Hikaru — aggressive speed chess, tactics, chaos, sacrifices
+            // Loves sacrifices, checks, open positions
+            if (inCheck(nb, opp(col))) bonus += 80; // LOVE checks
+            if (cap) bonus += VAL[cap[1]] * 0.15; // aggressive captures
+            if (pt === "Q") bonus += 30; // queen activity
+            if (
+              pt === "R" &&
+              (mv.tc === 0 || mv.tc === 7 || mv.tr === 0 || mv.tr === 7)
+            )
+              bonus -= 10;
+            if (pt === "P" && (col === "w" ? toRank <= 4 : toRank >= 5))
+              bonus += 25; // push pawns
+            // Hikaru loves to sacrifice for attack
+            if (cap && VAL[cap[1]] < VAL[pt]) bonus += 30; // piece sacrifices
+            // Open files and diagonals
+            if (pt === "B" || pt === "Q") {
+              const dx = Math.abs(mv.tc - mv.fc) + Math.abs(mv.tr - mv.fr);
+              bonus += dx * 4;
+            }
+            bonus += (Math.random() - 0.5) * 30; // more chaotic
+          } else if (persona === 8) {
+            // Duda — dynamic attacker, knight lover, risks for initiative
+            if (pt === "N") bonus += 40; // knight SPECIALIST
+            if (pt === "N" && mv.tr >= 2 && mv.tr <= 5) bonus += 25;
+            if (inCheck(nb, opp(col))) bonus += 60;
+            if (cap) bonus += 25;
+            // Duda loves initiative even at material cost
+            const frzAfter = calcFrz(nb, null);
+            bonus += frzAfter.all.length * 25;
+            if (pt === "P" && Math.abs(mv.tc - mv.fc) === 0)
+              bonus += (col === "w" ? 6 - mv.tr : mv.tr - 1) * 12; // pawn storms
+            if (mv.flag === "cs" || mv.flag === "cl") bonus -= 10; // Duda often skips castling
+            bonus += (Math.random() - 0.5) * 25;
+          }
+          return { mv, score: base + bonus };
+        });
+
+        scoredMoves.sort((a, b) => b.score - a.score);
+        // Take best move, with small chance of second-best for variety
+        const pick =
+          Math.random() < 0.85
+            ? scoredMoves[0]
+            : scoredMoves[Math.min(1, scoredMoves.length - 1)];
+        postBotMoveColor(pick.mv, col);
+      }
+
+      // ── Generic: run bot for a specific color (BvB support) ──────────────────
+      function runBotForColor(col, level) {
+        if (
+          _botAbort ||
+          G.over ||
+          G.turn !== col ||
+          NET.mode !== "bot" ||
+          !BVB.on
+        )
+          return;
         _botAbort = false;
         _botGeneration++;
         const gen = _botGeneration;
-        const delay = [300, 500, 700, 900, 200][botLevel - 1] || 300;
+        const brd = cp(G.brd),
+          castl = { ...G.castl };
+        const frz = col === "w" ? G.frz.byB : G.frz.byW;
+        const ms = allMoves(brd, col, castl, frz);
+        if (!ms.length) {
+          postBotMoveColor(null, col);
+          return;
+        }
+
+        if (level === 1) {
+          const nc = ms.filter((m) => !brd[m.tr][m.tc]);
+          const pool = nc.length && Math.random() < 0.85 ? nc : ms;
+          postBotMoveColor(pool[Math.floor(Math.random() * pool.length)], col);
+          return;
+        }
+        if (level === 2) {
+          let best = ms[Math.floor(Math.random() * ms.length)];
+          if (Math.random() > 0.55) {
+            let bsc = -Infinity;
+            for (const mv of ms) {
+              const cap = brd[mv.tr][mv.tc];
+              const sc = cap ? VAL[cap[1]] || 0 : Math.random() * 30 - 15;
+              if (sc > bsc) {
+                bsc = sc;
+                best = mv;
+              }
+            }
+          }
+          postBotMoveColor(best, col);
+          return;
+        }
+        if (level >= 6) {
+          // Celebrity bot
+          setTimeout(() => celebBotMove(brd, castl, frz, level, gen), 0);
+          return;
+        }
+        // Levels 3-5: async chunked
+        const depth = level === 3 ? 1 : level === 4 ? 2 : 3;
+        const noise = level === 3 ? 60 : level === 4 ? 20 : 5;
+        const killers = Array.from({ length: 8 }, () => [null, null]);
+        ms.sort(
+          (a, b) =>
+            scoreMvOrder(brd, b, killers, 0) - scoreMvOrder(brd, a, killers, 0),
+        );
+        let idx = 0,
+          bestMove = ms[0],
+          bestScore = -Infinity;
+        function doChunk() {
+          if (_botAbort || G.over || gen !== _botGeneration) {
+            postBotMoveColor(bestMove, col);
+            return;
+          }
+          const t = Date.now();
+          while (idx < ms.length) {
+            const mv = ms[idx++];
+            const nb = cp(brd),
+              nc = { ...castl },
+              p = brd[mv.fr][mv.fc];
+            if (p === "wK") {
+              nc.wK = false;
+              nc.wQ = false;
+            }
+            if (p === "bK") {
+              nc.bK = false;
+              nc.bQ = false;
+            }
+            if (mv.fr === 7 && mv.fc === 7) nc.wK = false;
+            if (mv.fr === 7 && mv.fc === 0) nc.wQ = false;
+            if (mv.fr === 0 && mv.fc === 7) nc.bK = false;
+            if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
+            applyMv(nb, mv, col);
+            const nf = calcFrz(nb);
+            const oppFrz = opp(col) === "w" ? nf.byB : nf.byW;
+            const raw = abSearch(
+              nb,
+              depth - 1,
+              -Infinity,
+              Infinity,
+              opp(col),
+              nc,
+              oppFrz,
+              1,
+              null,
+              killers,
+            );
+            const sc =
+              (raw === null ? -Infinity : -raw) +
+              (Math.random() * 2 - 1) * noise;
+            if (sc > bestScore) {
+              bestScore = sc;
+              bestMove = mv;
+            }
+            if (Date.now() - t > 12) {
+              setTimeout(doChunk, 0);
+              return;
+            }
+          }
+          postBotMoveColor(bestMove, col);
+        }
+        doChunk();
+      }
+
+      function postBotMoveColor(mv, col) {
+        document.getElementById("thkEl").classList.remove("on");
+        document.getElementById("mThk").classList.remove("on");
+        if (mv && !G.over && G.turn === col && NET.mode === "bot")
+          playMove(mv, true, false);
+      }
+
+      function runBot() {
+        _botAbort = false;
+        _botGeneration++;
+        const gen = _botGeneration;
+        const level = botLevel;
+        if (level >= 6) {
+          // Celebrity bot for single-player (black)
+          setTimeout(
+            () =>
+              celebBotMove(cp(G.brd), { ...G.castl }, G.frz.byW, level, gen),
+            0,
+          );
+          return;
+        }
         setTimeout(
-          () => _doBotMove(G.brd, G.castl, G.frz.byW, botLevel, gen),
-          delay,
+          () =>
+            _doBotMove(
+              cp(G.brd),
+              { ...G.castl },
+              G.frz.byW.slice(),
+              level,
+              gen,
+            ),
+          30,
         );
       }
 
@@ -3071,12 +4779,14 @@
           return;
         }
 
+        // Level 1: random
         if (level === 1) {
           const nc = ms.filter((m) => !brd[m.tr][m.tc]);
           const pool = nc.length && Math.random() < 0.85 ? nc : ms;
           postBotMove(pool[Math.floor(Math.random() * pool.length)]);
           return;
         }
+        // Level 2: greedy
         if (level === 2) {
           let best = ms[Math.floor(Math.random() * ms.length)];
           if (Math.random() > 0.55) {
@@ -3093,50 +4803,39 @@
           postBotMove(best);
           return;
         }
-        if (level === 3) {
-          ms.sort((a, b) => scoreMv(brd, b) - scoreMv(brd, a));
-          let bestMove = ms[0],
-            bestScore = -Infinity;
-          const deadline = Date.now() + 600;
-          for (const mv of ms) {
-            if (Date.now() > deadline) break;
-            const nb = cp(brd),
-              nc = { ...castl },
-              p = brd[mv.fr][mv.fc];
-            if (p === "bK") {
-              nc.bK = false;
-              nc.bQ = false;
-            }
-            applyMv(nb, mv, "b");
-            const nf = calcFrz(nb);
-            const raw = abSearch(
-              nb,
-              1,
-              -Infinity,
-              Infinity,
-              "w",
-              nc,
-              nf.byW,
-              1,
-              deadline,
-            );
-            const sc =
-              (raw === null ? -Infinity : -raw) + (Math.random() * 2 - 1) * 80;
-            if (sc > bestScore) {
-              bestScore = sc;
-              bestMove = mv;
-            }
+        // Level 5: use pre-computed engine best (same as masterBestMove result)
+        if (level === 5) {
+          const cached = G.nextEngineBest;
+          const ok =
+            cached &&
+            cached.col === "b" &&
+            cached.move &&
+            cached.brd &&
+            brd.every((row, r) => row.every((v, c) => v === cached.brd[r][c]));
+          if (ok) {
+            G.lastEngineBest = { ...cached };
+            G.nextEngineBest = null;
+            G._impRetries = 0;
+            postBotMove(cached.move);
+            return;
           }
-          postBotMove(bestMove);
-          return;
-        }
-        if (level === 4) {
-          ms.sort((a, b) => scoreMv(brd, b) - scoreMv(brd, a));
-          let bestMove = ms[0],
-            bestScore = -Infinity;
-          const deadline = Date.now() + 1500;
+          // Wait up to 2s for background computation to finish
+          G._impRetries = (G._impRetries || 0) + 1;
+          if (G._impRetries < 20) {
+            setTimeout(() => _doBotMove(brd, castl, frzW, level, gen), 100);
+            return;
+          }
+          // Fallback: fast depth-3 synchronous search
+          G._impRetries = 0;
+          const kf = Array.from({ length: 6 }, () => [null, null]);
+          ms.sort(
+            (a, b) => scoreMvOrder(brd, b, kf, 0) - scoreMvOrder(brd, a, kf, 0),
+          );
+          let bf = ms[0],
+            bsf = -Infinity,
+            df = Date.now() + 1500;
           for (const mv of ms) {
-            if (Date.now() > deadline) break;
+            if (Date.now() > df) break;
             const nb = cp(brd),
               nc = { ...castl },
               p = brd[mv.fr][mv.fc];
@@ -3144,9 +4843,11 @@
               nc.bK = false;
               nc.bQ = false;
             }
+            if (mv.fr === 0 && mv.fc === 7) nc.bK = false;
+            if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
             applyMv(nb, mv, "b");
             const nf = calcFrz(nb);
-            const raw = abSearch(
+            const sc = -abSearch(
               nb,
               2,
               -Infinity,
@@ -3155,24 +4856,74 @@
               nc,
               nf.byW,
               1,
-              deadline,
+              df,
+              kf,
+            );
+            if (sc !== null && sc > bsf) {
+              bsf = sc;
+              bf = mv;
+            }
+          }
+          postBotMove(bf);
+          return;
+        }
+        // Levels 3-4: async chunked search — yields every 12ms so UI stays responsive
+        const killers = Array.from({ length: 8 }, () => [null, null]);
+        ms.sort(
+          (a, b) =>
+            scoreMvOrder(brd, b, killers, 0) - scoreMvOrder(brd, a, killers, 0),
+        );
+        const depth = level === 3 ? 1 : 2;
+        const noise = level === 3 ? 60 : 20;
+        let idx = 0,
+          bestMove = ms[0],
+          bestScore = -Infinity;
+        function doChunk() {
+          if (_botAbort || G.over || gen !== _botGeneration) {
+            postBotMove(bestMove);
+            return;
+          }
+          const t = Date.now();
+          while (idx < ms.length) {
+            const mv = ms[idx++];
+            const nb = cp(brd),
+              nc = { ...castl },
+              p = brd[mv.fr][mv.fc];
+            if (p === "bK") {
+              nc.bK = false;
+              nc.bQ = false;
+            }
+            if (mv.fr === 0 && mv.fc === 7) nc.bK = false;
+            if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
+            applyMv(nb, mv, "b");
+            const nf = calcFrz(nb);
+            const raw = abSearch(
+              nb,
+              depth - 1,
+              -Infinity,
+              Infinity,
+              "w",
+              nc,
+              nf.byW,
+              1,
+              null,
+              killers,
             );
             const sc =
-              (raw === null ? -Infinity : -raw) + (Math.random() * 2 - 1) * 25;
+              (raw === null ? -Infinity : -raw) +
+              (Math.random() * 2 - 1) * noise;
             if (sc > bestScore) {
               bestScore = sc;
               bestMove = mv;
             }
+            if (Date.now() - t > 12) {
+              setTimeout(doChunk, 0);
+              return;
+            }
           }
           postBotMove(bestMove);
-          return;
         }
-
-        // ── LEVEL 5: IMPOSSIBLE ─────────────────────────────────────────────────
-        // exactBestMove depth 4 — ~600ms, runs via setTimeout so UI can breathe first
-        // No deadline, no noise — always returns the true best move
-        const { move } = exactBestMove(brd, "b", castl, frzW, 4);
-        postBotMove(move || ms[0]);
+        doChunk();
       }
 
       function postBotMove(mv) {
@@ -3202,9 +4953,8 @@
             tc: q.tc,
             poss: [],
           };
-        } else {
+        } else
           PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1, poss: [] };
-        }
       }
       function pmAddStep(fr, fc, tr, tc, brdState, col) {
         const simBrd = brdSim(brdState, fr, fc, tr, tc);
@@ -3251,8 +5001,8 @@
         const p = brd[fr][fc];
         if (!p) return [];
         if (!col) col = p[0];
-        const type = p[1];
-        const sq = [];
+        const type = p[1],
+          sq = [];
         function ok(tr, tc) {
           if (tr < 0 || tr >= 8 || tc < 0 || tc >= 8) return false;
           const t = brd[tr][tc];
@@ -3358,6 +5108,7 @@
       }
       function isMyTurn() {
         if (G.over) return false;
+        if (BVB.on) return false; // no human in BvB
         if (NET.mode === "local") return true;
         if (NET.mode === "bot") return G.turn === "w";
         return G.turn === NET.myCol;
@@ -3410,8 +5161,8 @@
         }
         const bTopEl = document.querySelector(".b-top"),
           bBotEl = document.querySelector(".b-bot");
-        if (bTopEl) bTopEl.style.marginLeft = flipped ? "0" : "";
-        if (bBotEl) bBotEl.style.marginLeft = flipped ? "0" : "";
+        if (bTopEl) bTopEl.style.marginLeft = flipped ? "" : "";
+        if (bBotEl) bBotEl.style.marginLeft = flipped ? "" : "";
       }
       function render() {
         const bwrapEl = document.getElementById("bwrap");
@@ -3538,28 +5289,36 @@
         }
         const myCol = NET.myCol || "w",
           opCol = opp(myCol);
-        let topName, botName;
+        let topName, botDisplayName;
         if (NET.mode === "local") {
           const topCol = flipped ? "w" : "b",
             botCol = flipped ? "b" : "w";
           topName =
             (topCol === "w" ? "White" : "Black") +
             (topCol === "w" ? " ♔" : " ♚");
-          botName =
+          botDisplayName =
             (botCol === "w" ? "White" : "Black") +
             (botCol === "w" ? " ♔" : " ♚");
         } else if (NET.mode === "bot") {
-          topName = "Bot (Black)";
-          botName = "You (White)";
+          if (BVB.on) {
+            topName = botName(BVB.bLevel) + " (Black)";
+            botDisplayName = botName(BVB.wLevel) + " (White)";
+          } else {
+            topName = botName(botLevel) + " (Black)";
+            botDisplayName = "You (White)";
+          }
         } else {
           topName = (NET.oppName || "Opponent") + (opCol === "w" ? " ♔" : " ♚");
-          botName = (NET.myName || "You") + (myCol === "w" ? " ♔" : " ♚");
+          botDisplayName =
+            (NET.myName || "You") + (myCol === "w" ? " ♔" : " ♚");
         }
         const pTop = document.getElementById("pnmTop");
         if (pTop) pTop.textContent = topName;
         const pBot = document.getElementById("pnmBot");
-        if (pBot) pBot.textContent = botName;
+        if (pBot) pBot.textContent = botDisplayName;
         updMobile();
+        // Redraw best-move arrow (positions change if window resized/flipped)
+        if (BEST_ARROW.mv) setTimeout(() => drawBestArrow(BEST_ARROW.mv), 0);
       }
 
       // ═══════════════════════════════════════
@@ -3567,9 +5326,9 @@
       // ═══════════════════════════════════════
       function handleClick(r, c) {
         if (G.over) return;
-        const mc = myColor();
-        const p = G.brd[r][c];
-        const myTurn = isMyTurn();
+        const mc = myColor(),
+          p = G.brd[r][c],
+          myTurn = isMyTurn();
         if (myTurn) {
           pmClear();
           const frz = mc === "w" ? G.frz.byB : G.frz.byW;
@@ -3708,8 +5467,8 @@
       function startDrag(r, c, x, y) {
         const p = G.brd[r][c];
         if (!p) return false;
-        const mc = myColor();
-        const myTurn = isMyTurn();
+        const mc = myColor(),
+          myTurn = isMyTurn();
         if (!myTurn) return false;
         if (p[0] !== mc) return false;
         const frz = mc === "w" ? G.frz.byB : G.frz.byW;
@@ -3884,10 +5643,14 @@
         const turnLabel =
           NET.mode === "local"
             ? (G.turn === "w" ? "White" : "Black") + "'s turn"
-            : isMyTurnNow
-              ? "Your turn"
-              : NET.mode === "bot"
-                ? "Bot (Black)"
+            : NET.mode === "bot"
+              ? BVB.on
+                ? botName(G.turn === "w" ? BVB.wLevel : BVB.bLevel) + "'s turn"
+                : isMyTurnNow
+                  ? "Your turn"
+                  : "Bot (" + botName(botLevel) + ")'s turn"
+              : isMyTurnNow
+                ? "Your turn"
                 : NET.oppName + "'s turn";
         const dot =
           G.turn === "w"
@@ -3909,11 +5672,13 @@
           ? "Game Over"
           : NET.mode === "local"
             ? (G.turn === "w" ? "White" : "Black") + "'s turn"
-            : isMyTurnNow
-              ? "Your turn"
-              : NET.mode === "bot"
-                ? "Bot ♟"
-                : NET.oppName;
+            : NET.mode === "bot"
+              ? BVB.on
+                ? botName(G.turn === "w" ? BVB.wLevel : BVB.bLevel)
+                : isMyTurnNow
+                  ? "Your turn"
+                  : "Bot ♟"
+              : NET.oppName;
         if (!G.over && chk) st += " ⚠";
         if (!G.over && fz) st += " ❄" + fz;
         if (PREMOVE.active) st += " ⚡";
@@ -3935,7 +5700,7 @@
         document.getElementById("scB").textContent =
           bv > wv ? "+" + (bv - wv) : "";
       }
-      function setEval(score) {
+      function setEval(score, depth) {
         const brd = document.getElementById("board"),
           et = document.getElementById("evtrack");
         if (brd && et && window.innerWidth > 700) {
@@ -3948,8 +5713,8 @@
             ? 2000
             : -2000
           : Math.max(-2000, Math.min(2000, score));
-        const wp = Math.round(50 + (clamp / 2000) * 46);
-        const bp = 100 - wp;
+        const wp = Math.round(50 + (clamp / 2000) * 46),
+          bp = 100 - wp;
         const W = document.getElementById("evW"),
           B = document.getElementById("evB");
         const isMob = window.innerWidth <= 700;
@@ -3977,6 +5742,8 @@
           : (score >= 0 ? "+" : "") + (score / 100).toFixed(1);
         const sc = document.getElementById("evSc");
         if (sc) sc.textContent = txt;
+        const dp = document.getElementById("evDepth");
+        if (dp) dp.textContent = depth > 0 ? "d" + depth : "";
         const wAdv = score > 30,
           bAdv = score < -30;
         const lb = document.getElementById("evLblB"),
@@ -4009,20 +5776,15 @@
         if (t === "P") return cap ? FILES[fc] + "x" + to : to;
         return t + (cap ? "x" : "") + to;
       }
-      function addNote(n, col, idx, ri, showRt) {
+      function addNote(n, col, idx) {
         const el = document.getElementById("movesEl"),
           mn = Math.floor(idx / 2) + 1;
         const s = document.createElement("span");
         s.style.cssText = "white-space:nowrap;padding:1px 3px";
-        let icon = "";
-        if (showRt && ri !== null && ri !== undefined) {
-          const R = RTNG[ri];
-          icon = `<span class="${R.c}" style="font-size:.68rem;margin-left:1px" title="${R.l}">${R.s}</span>`;
-        }
         s.innerHTML =
           col === "w"
-            ? `<span class="mn">${mn}.</span><span class="mw"> ${n}</span>${icon}`
-            : `<span class="mb2"> ${n}</span>${icon}`;
+            ? `<span class="mn">${mn}.</span><span class="mw"> ${n}</span>`
+            : `<span class="mb2"> ${n}</span>`;
         el.appendChild(s);
         el.scrollTop = el.scrollHeight;
       }
@@ -4082,6 +5844,9 @@
         playSound("gameover");
         G.over = true;
         stopTimers();
+        _evalWorker.abort = true;
+        clearBestArrow();
+        TRAINER.busy = false;
         PMQUEUE = [];
         PMSEL = null;
         PREMOVE = { active: false, fr: -1, fc: -1, tr: -1, tc: -1, poss: [] };
@@ -4260,11 +6025,16 @@
       // ═══════════════════════════════════════
       function setLevel(n) {
         botLevel = n;
+        BVB.on = false; // switching level exits BvB mode
         document
           .querySelectorAll(".lb,.mpl")
           .forEach((b) =>
             b.classList.toggle("on", parseInt(b.dataset.l) === n),
           );
+        // Update player name display
+        const oppName = botName(n);
+        const pTop = document.getElementById("pnmTop");
+        if (pTop) pTop.textContent = oppName + " (Black)";
         if (!G.over && NET.mode === "bot") newGame();
       }
       document
@@ -4272,6 +6042,31 @@
         .forEach((b) =>
           b.addEventListener("click", () => setLevel(parseInt(b.dataset.l))),
         );
+
+      // ── BvB Start button ──────────────────────────────────────────────────────
+      document.getElementById("bvbStartBtn").addEventListener("click", () => {
+        BVB.on = true;
+        BVB.wLevel = parseInt(document.getElementById("bvbWhite").value);
+        BVB.bLevel = parseInt(document.getElementById("bvbBlack").value);
+        // Update display names
+        const wName = botName(BVB.wLevel),
+          bName = botName(BVB.bLevel);
+        const pTop = document.getElementById("pnmTop"),
+          pBot = document.getElementById("pnmBot");
+        if (pTop) pTop.textContent = bName + " (Black)";
+        if (pBot) pBot.textContent = wName + " (White)";
+        // Deselect single-player level buttons
+        document
+          .querySelectorAll(".lb,.mpl")
+          .forEach((b) => b.classList.remove("on"));
+        newGame();
+        // Kick off white bot immediately
+        if (!G.over) {
+          document.getElementById("thkEl").classList.add("on");
+          document.getElementById("mThk").classList.add("on");
+          setTimeout(() => runBotForColor("w", BVB.wLevel), 1200);
+        }
+      });
 
       // ═══════════════════════════════════════
       // GAME ACTIONS
@@ -4295,8 +6090,8 @@
           showMsg("Draw Offered", "Waiting for opponent…");
           return;
         }
-        const ev = -evalBoard(G.brd);
-        const evStr = (ev / 100).toFixed(1);
+        const ev = -evalBoard(G.brd),
+          evStr = (ev / 100).toFixed(1);
         if (ev > 200)
           showMsg("Declined", `Bot is winning (${evStr}) — won't accept.`);
         else if (ev > 50)
@@ -4637,6 +6432,33 @@
           showMsg("Rematch", "Waiting for opponent…");
         }
       });
+      document
+        .getElementById("togTrainer")
+        .addEventListener("change", function () {
+          TRAINER.on = this.checked;
+          if (!this.checked) {
+            clearBestArrow();
+          } else {
+            const body = document.getElementById("coachBody");
+            if (body) {
+              body.innerHTML = `<div class="coach-msg"><div class="coach-bubble" style="background:rgba(201,168,76,.06);border-color:rgba(201,168,76,.2);color:var(--dim);font-size:.74rem">✅ Coach is <b style="color:var(--grn)">ready</b> — make a move to receive instant analysis.</div></div>`;
+            }
+            coachSetStatus("Ready — make a move", false);
+          }
+        });
+      document.getElementById("coachBtn").addEventListener("click", () => {
+        const p = document.getElementById("coachPanel");
+        if (p) p.classList.toggle("open");
+      });
+      document.getElementById("coachClose").addEventListener("click", () => {
+        const p = document.getElementById("coachPanel");
+        if (p) p.classList.remove("open");
+      });
+      document.getElementById("coachClear").addEventListener("click", () => {
+        coachClearMessages();
+        coachSetStatus("Ready — play a move", false);
+      });
+
       document
         .getElementById("togEval")
         .addEventListener("change", function () {
@@ -5010,14 +6832,10 @@
             return;
           }
           playMove(d.mv, false, true).then?.().catch?.();
-          // Sync eval from sender
-          if (d.eval !== undefined && NET.showEval) {
+          if (d.eval !== undefined && NET.showEval)
             setTimeout(() => {
-              setEval(d.eval);
-              netSend({ type: "eval_sync", ev: d.eval });
-            }, 15);
-          }
-          // Sync rating from sender — both sides use same master engine so ratings match
+              setEval(d.eval, 0);
+            }, 5); // quick initial from sender's static eval
           if (d.ri !== undefined && NET.showRating) {
             const R = RTNG[d.ri] || RTNG[RTNG.length - 1];
             document.getElementById("ratingEl").innerHTML =
@@ -5031,7 +6849,7 @@
           renderDrawings();
         }
         if (d.type === "eval_sync") {
-          if (NET.showEval) setEval(d.ev);
+          if (NET.showEval) setEval(d.ev, d.depth || 0);
         }
         if (d.type === "gameover") {
           if (!G.over) endGame(d.reason, d.winner);
@@ -5306,8 +7124,8 @@
         const myCol = NET.mode === "bot" ? "w" : NET.myCol || "w";
         const gameDelta = eloGameDelta(reason, winner, myCol);
         const totalDelta = _eloMoveDeltaAccum + gameDelta;
-        const before = eloGet();
-        const after = Math.max(0, before + totalDelta);
+        const before = eloGet(),
+          after = Math.max(0, before + totalDelta);
         eloSet(after);
         const resultLabel =
           winner === myCol ? "Win" : !winner || winner === "" ? "Draw" : "Loss";
@@ -5418,6 +7236,33 @@
         if (tb) tb.style.display = "none";
         eloRenderHistory();
       }
+
+      // ═══════════════════════════════════════
+      // DYNAMIC BOARD SIZING
+      // ═══════════════════════════════════════
+      function recalcSq() {
+        const center = document.querySelector(".center");
+        if (!center) return;
+        const isMobile = window.innerWidth <= 700;
+        const lbl = isMobile ? 14 : 18;
+        document.documentElement.style.setProperty("--lbl", lbl + "px");
+        const aw = center.clientWidth - (isMobile ? 4 : 36); // evbar+margin on desktop
+        const ah = center.clientHeight - (isMobile ? 80 : 110); // pinfo bars + gaps
+        const sqFromW = (aw - lbl * 2) / 8;
+        const sqFromH = (ah - lbl * 2) / 8;
+        const sq = Math.max(
+          36,
+          Math.min(80, Math.floor(Math.min(sqFromW, sqFromH))),
+        );
+        document.documentElement.style.setProperty("--sq", sq + "px");
+      }
+      const _ro = new ResizeObserver(() => {
+        recalcSq();
+      });
+      const _centerEl = document.querySelector(".center");
+      if (_centerEl) _ro.observe(_centerEl);
+      window.addEventListener("resize", recalcSq);
+      recalcSq();
 
       // ═══════════════════════════════════════
       // INIT
