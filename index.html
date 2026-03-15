@@ -1801,73 +1801,6 @@
               >
                 ELO changes after game (celebs only)
               </div>
-              <div
-                style="
-                  font-size: 0.55rem;
-                  color: var(--dim);
-                  font-family: Cinzel, serif;
-                  letter-spacing: 0.08em;
-                  margin-bottom: 4px;
-                "
-              >
-                BOT vs BOT
-              </div>
-              <div
-                id="bvbPanel"
-                style="display: flex; flex-direction: column; gap: 3px"
-              >
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                    font-size: 0.62rem;
-                  "
-                >
-                  <span style="color: var(--txt); min-width: 32px">White:</span>
-                  <select
-                    id="bvbWhite"
-                    style="
-                      flex: 1;
-                      background: var(--sur);
-                      border: 1px solid var(--brd);
-                      border-radius: 4px;
-                      color: var(--txt);
-                      font-size: 0.58rem;
-                      padding: 2px 3px;
-                    "
-                  ></select>
-                </div>
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                    font-size: 0.62rem;
-                  "
-                >
-                  <span style="color: var(--txt); min-width: 32px">Black:</span>
-                  <select
-                    id="bvbBlack"
-                    style="
-                      flex: 1;
-                      background: var(--sur);
-                      border: 1px solid var(--brd);
-                      border-radius: 4px;
-                      color: var(--txt);
-                      font-size: 0.58rem;
-                      padding: 2px 3px;
-                    "
-                  ></select>
-                </div>
-                <button
-                  class="btn bgd"
-                  id="bvbStartBtn"
-                  style="font-size: 0.58rem; padding: 4px"
-                >
-                  ▶ Start Bot Match
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -2053,6 +1986,125 @@
         </div>
       </div>
     </div>
+    <!-- ── Bot vs Bot floating panel ──────────────────────────────── -->
+    <div
+      id="bvbFloatPanel"
+      style="
+        position: fixed;
+        bottom: 16px;
+        left: 16px;
+        z-index: 200;
+        background: var(--pan);
+        border: 1px solid var(--brd);
+        border-radius: 8px;
+        padding: 0;
+        min-width: 200px;
+        max-width: 240px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        font-family: &quot;Cinzel&quot;, serif;
+        display: none;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 7px 10px 6px;
+          border-bottom: 1px solid var(--brd);
+          cursor: pointer;
+        "
+        id="bvbFloatHeader"
+      >
+        <span
+          style="
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.08em;
+          "
+          >🤖 BOT vs BOT</span
+        >
+        <span id="bvbFloatToggle" style="font-size: 0.7rem; color: var(--dim)"
+          >▲</span
+        >
+      </div>
+      <div
+        id="bvbFloatBody"
+        style="
+          padding: 8px 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        "
+      >
+        <div style="display: flex; align-items: center; gap: 5px">
+          <span style="font-size: 0.58rem; color: var(--dim); min-width: 36px"
+            >♙ White</span
+          >
+          <select
+            id="bvbWhite"
+            style="
+              flex: 1;
+              background: var(--sur);
+              border: 1px solid var(--brd);
+              border-radius: 4px;
+              color: var(--txt);
+              font-size: 0.58rem;
+              padding: 2px 4px;
+            "
+          ></select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px">
+          <span style="font-size: 0.58rem; color: var(--dim); min-width: 36px"
+            >♟ Black</span
+          >
+          <select
+            id="bvbBlack"
+            style="
+              flex: 1;
+              background: var(--sur);
+              border: 1px solid var(--brd);
+              border-radius: 4px;
+              color: var(--txt);
+              font-size: 0.58rem;
+              padding: 2px 4px;
+            "
+          ></select>
+        </div>
+        <button
+          class="btn bgd"
+          id="bvbStartBtn"
+          style="font-size: 0.6rem; padding: 5px; margin-top: 2px"
+        >
+          ▶ Start Bot Match
+        </button>
+      </div>
+    </div>
+    <!-- ── BvB toggle button ──────────────────────────────────────── -->
+    <button
+      id="bvbOpenBtn"
+      style="
+        position: fixed;
+        bottom: 16px;
+        left: 16px;
+        z-index: 199;
+        background: var(--pan);
+        border: 1px solid var(--brd);
+        border-radius: 6px;
+        color: var(--gold);
+        font-family: &quot;Cinzel&quot;, serif;
+        font-size: 0.6rem;
+        font-weight: 700;
+        padding: 6px 10px;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        letter-spacing: 0.05em;
+      "
+    >
+      🤖 BvB
+    </button>
+
     <div class="toast" id="toast">
       <div class="tti" id="tTi"></div>
       <div class="tsu" id="tSu"></div>
@@ -4504,14 +4556,43 @@
 
         if (NET.mode === "bot" && !G.over) {
           if (BVB.on) {
-            // Bot vs Bot: add comfortable viewing delay (1.2-2s)
+            // Bot vs Bot: dynamic thinking time based on position complexity
             const nextLevel = G.turn === "w" ? BVB.wLevel : BVB.bLevel;
             document.getElementById("thkEl").classList.add("on");
             document.getElementById("mThk").classList.add("on");
-            // Base delay 1200ms + per-level thinking time
-            const delay =
-              1200 + [0, 200, 400, 600, 400, 600, 500, 700][nextLevel - 1] ||
-              1200;
+
+            // Compute position complexity for realistic thinking time
+            const nextFrzArr = G.turn === "w" ? G.frz.byW : G.frz.byB;
+            const nextFrz2 = new Set(nextFrzArr);
+            const legalMoves = allMoves(
+              G.brd,
+              G.turn,
+              G.castl,
+              nextFrz2,
+            ).length;
+            const inChk = inCheck(G.brd, G.turn);
+            const evalNow = Math.abs(G.prevEval || 0);
+            const frzPressure = G.frz.all.length;
+            const isEndgame = G.capW.length + G.capB.length > 10;
+
+            // Base: 800ms for easy bots, 1500ms for strong bots
+            const baseDelay =
+              nextLevel <= 3
+                ? 800
+                : nextLevel <= 5
+                  ? 1200
+                  : nextLevel <= 10
+                    ? 1500
+                    : 1800;
+            // Extra time for: many moves (complex), check (must find escape), equal position (hard decision)
+            const complexityBonus =
+              (legalMoves > 25 ? 400 : legalMoves > 18 ? 200 : 0) + // many legal moves = hard
+              (inChk ? 600 : 0) + // in check = must think carefully
+              (evalNow < 80 && !inChk ? 350 : 0) + // equal position = hard decision
+              (frzPressure >= 3 ? 250 : frzPressure >= 1 ? 100 : 0) + // many frozen pieces = complex
+              (isEndgame ? -300 : 0); // endgame = simpler positions
+
+            const delay = baseDelay + complexityBonus + Math.random() * 200; // slight randomness
             setTimeout(() => runBotForColor(G.turn, nextLevel), delay);
           } else if (G.turn === "b") {
             document.getElementById("thkEl").classList.add("on");
@@ -5078,6 +5159,220 @@
         PLAYERS[LEGEND_OFFSET + i] = { ...p, isLegend: true };
       });
 
+      // ── Active players at their PEAK rating (same 100 as Active tab) ──────────
+      // Peak ratings from Wikipedia "List of chess players by peak FIDE rating"
+      const PRIME_PLAYERS = [
+        { elo: 2882, name: "Magnus Carlsen", flag: "🇳🇴", style: "universal" },
+        { elo: 2844, name: "Fabiano Caruana", flag: "🇺🇸", style: "universal" },
+        { elo: 2830, name: "Levon Aronian", flag: "🇺🇸", style: "creative" },
+        { elo: 2822, name: "Wesley So", flag: "🇺🇸", style: "positional" },
+        {
+          elo: 2820,
+          name: "Shakhriyar Mamedyarov",
+          flag: "🇦🇿",
+          style: "dynamic",
+        },
+        {
+          elo: 2819,
+          name: "Maxime Vachier-Lagrave",
+          flag: "🇫🇷",
+          style: "tactical",
+        },
+        { elo: 2816, name: "Hikaru Nakamura", flag: "🇺🇸", style: "aggressive" },
+        {
+          elo: 2810,
+          name: "Alexander Grischuk",
+          flag: "🇷🇺",
+          style: "tactical",
+        },
+        {
+          elo: 2804,
+          name: "Alireza Firouzja",
+          flag: "🇫🇷",
+          style: "aggressive",
+        },
+        { elo: 2801, name: "Arjun Erigaisi", flag: "🇮🇳", style: "dynamic" },
+        { elo: 2798, name: "Anish Giri", flag: "🇳🇱", style: "solid" },
+        {
+          elo: 2795,
+          name: "Ian Nepomniachtchi",
+          flag: "🏳️",
+          style: "aggressive",
+        },
+        { elo: 2794, name: "Gukesh D", flag: "🇮🇳", style: "universal" },
+        { elo: 2793, name: "Teimour Radjabov", flag: "🇦🇿", style: "strategic" },
+        {
+          elo: 2785,
+          name: "Praggnanandhaa R",
+          flag: "🇮🇳",
+          style: "aggressive",
+        },
+        {
+          elo: 2783,
+          name: "Nodirbek Abdusattorov",
+          flag: "🇺🇿",
+          style: "dynamic",
+        },
+        { elo: 2777, name: "Boris Gelfand", flag: "🇮🇱", style: "strategic" },
+        { elo: 2776, name: "Vincent Keymer", flag: "🇩🇪", style: "positional" },
+        { elo: 2776, name: "Richard Rapport", flag: "🇭🇺", style: "creative" },
+        { elo: 2770, name: "Pentala Harikrishna", flag: "🇮🇳", style: "solid" },
+        { elo: 2769, name: "Peter Svidler", flag: "🏳️", style: "tactical" },
+        {
+          elo: 2768,
+          name: "Leinier Dominguez",
+          flag: "🇺🇸",
+          style: "universal",
+        },
+        { elo: 2765, name: "Yu Yangyi", flag: "🇨🇳", style: "solid" },
+        { elo: 2765, name: "Pavel Eljanov", flag: "🇺🇦", style: "solid" },
+        {
+          elo: 2764,
+          name: "Ruslan Ponomariov",
+          flag: "🇺🇦",
+          style: "universal",
+        },
+        { elo: 2763, name: "Wei Yi", flag: "🇨🇳", style: "tactical" },
+        { elo: 2763, name: "Wang Hao", flag: "🇨🇳", style: "positional" },
+        { elo: 2763, name: "Peter Leko", flag: "🇭🇺", style: "solid" },
+        {
+          elo: 2761,
+          name: "Vladislav Artemiev",
+          flag: "🇷🇺",
+          style: "aggressive",
+        },
+        { elo: 2761, name: "Michael Adams", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", style: "positional" },
+        { elo: 2760, name: "Jan-Krzysztof Duda", flag: "🇵🇱", style: "dynamic" },
+        { elo: 2751, name: "Nikita Vitiugov", flag: "🏳️", style: "solid" },
+        { elo: 2751, name: "David Navara", flag: "🇨🇿", style: "creative" },
+        { elo: 2750, name: "Radoslaw Wojtaszek", flag: "🇵🇱", style: "solid" },
+        {
+          elo: 2749,
+          name: "Aravindh Chithambaram",
+          flag: "🇮🇳",
+          style: "aggressive",
+        },
+        { elo: 2749, name: "Etienne Bacrot", flag: "🇫🇷", style: "solid" },
+        { elo: 2747, name: "Vidit Gujrathi", flag: "🇮🇳", style: "positional" },
+        { elo: 2743, name: "Dmitry Andreikin", flag: "🏳️", style: "solid" },
+        { elo: 2742, name: "Parham Maghsoodloo", flag: "🇮🇷", style: "dynamic" },
+        { elo: 2741, name: "Le Quang Liem", flag: "🇻🇳", style: "solid" },
+        {
+          elo: 2739,
+          name: "Vladimir Fedoseev",
+          flag: "🇸🇮",
+          style: "aggressive",
+        },
+        { elo: 2738, name: "Hans Niemann", flag: "🇺🇸", style: "tactical" },
+        { elo: 2732, name: "Ernesto Inarkiev", flag: "🇷🇺", style: "solid" },
+        { elo: 2731, name: "Bu Xiangzhi", flag: "🇨🇳", style: "solid" },
+        { elo: 2731, name: "Sam Shankland", flag: "🇺🇸", style: "positional" },
+        {
+          elo: 2729,
+          name: "Jorden Van Foreest",
+          flag: "🇳🇱",
+          style: "aggressive",
+        },
+        { elo: 2726, name: "Javokhir Sindarov", flag: "🇺🇿", style: "tactical" },
+        { elo: 2725, name: "Andrei Volokitin", flag: "🇺🇦", style: "tactical" },
+        {
+          elo: 2724,
+          name: "Francisco Vallejo Pons",
+          flag: "🇪🇸",
+          style: "universal",
+        },
+        { elo: 2723, name: "Andrey Esipenko", flag: "🏳️", style: "dynamic" },
+        { elo: 2716, name: "Nihal Sarin", flag: "🇮🇳", style: "tactical" },
+        { elo: 2714, name: "Awonder Liang", flag: "🇺🇸", style: "solid" },
+        { elo: 2712, name: "Daniil Dubov", flag: "🇷🇺", style: "aggressive" },
+        { elo: 2710, name: "Kirill Alekseenko", flag: "🇦🇹", style: "solid" },
+        {
+          elo: 2704,
+          name: "Rustam Kasimdzhanov",
+          flag: "🇺🇿",
+          style: "universal",
+        },
+        { elo: 2700, name: "Amin Tabatabaei", flag: "🇮🇷", style: "solid" },
+        { elo: 2700, name: "Ivan Saric", flag: "🇭🇷", style: "tactical" },
+        { elo: 2699, name: "A.R. Saleh Salem", flag: "🇦🇪", style: "solid" },
+        { elo: 2698, name: "Matthias Bluebaum", flag: "🇩🇪", style: "tactical" },
+        { elo: 2697, name: "Lu Shanglei", flag: "🇨🇳", style: "solid" },
+        { elo: 2695, name: "Alexander Donchenko", flag: "🇩🇪", style: "solid" },
+        { elo: 2695, name: "Maksim Chigaev", flag: "🏳️", style: "solid" },
+        { elo: 2693, name: "Nils Grandelius", flag: "🇸🇪", style: "dynamic" },
+        {
+          elo: 2692,
+          name: "David Anton Guijarro",
+          flag: "🇪🇸",
+          style: "dynamic",
+        },
+        { elo: 2690, name: "Gawain Jones", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", style: "aggressive" },
+        { elo: 2688, name: "Samuel Sevian", flag: "🇺🇸", style: "solid" },
+        { elo: 2688, name: "Jeffery Xiong", flag: "🇺🇸", style: "tactical" },
+        { elo: 2688, name: "Rauf Mamedov", flag: "🇦🇿", style: "tactical" },
+        {
+          elo: 2687,
+          name: "Yagiz Kaan Erdogmus",
+          flag: "🇹🇷",
+          style: "aggressive",
+        },
+        { elo: 2686, name: "Nodirbek Yakubboev", flag: "🇺🇿", style: "dynamic" },
+        { elo: 2686, name: "Loek Van Wely", flag: "🇳🇱", style: "aggressive" },
+        { elo: 2683, name: "Alexey Sarana", flag: "🇷🇸", style: "tactical" },
+        { elo: 2683, name: "Ray Robson", flag: "🇺🇸", style: "tactical" },
+        { elo: 2682, name: "Igor Kovalenko", flag: "🇺🇦", style: "solid" },
+        { elo: 2681, name: "Raunak Sadhwani", flag: "🇮🇳", style: "dynamic" },
+        { elo: 2679, name: "Grigoriy Oparin", flag: "🇺🇸", style: "dynamic" },
+        { elo: 2677, name: "Eltaj Safarli", flag: "🇦🇿", style: "dynamic" },
+        { elo: 2672, name: "Shant Sargsyan", flag: "🇦🇲", style: "solid" },
+        { elo: 2671, name: "Ivan Cheparinov", flag: "🇧🇬", style: "aggressive" },
+        {
+          elo: 2669,
+          name: "Bogdan-Daniel Deac",
+          flag: "🇷🇴",
+          style: "aggressive",
+        },
+        { elo: 2668, name: "David Howell", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", style: "solid" },
+        { elo: 2667, name: "Aryan Chopra", flag: "🇮🇳", style: "dynamic" },
+        { elo: 2665, name: "Murali Karthikeyan", flag: "🇮🇳", style: "solid" },
+        { elo: 2663, name: "Abhimanyu Mishra", flag: "🇺🇸", style: "tactical" },
+        { elo: 2657, name: "Pranesh M", flag: "🇮🇳", style: "aggressive" },
+        {
+          elo: 2656,
+          name: "Jose Martinez Alcantara",
+          flag: "🇲🇽",
+          style: "dynamic",
+        },
+        {
+          elo: 2656,
+          name: "Johan-Sebastian Christiansen",
+          flag: "🇳🇴",
+          style: "dynamic",
+        },
+        { elo: 2656, name: "Volodar Murzin", flag: "🏳️", style: "dynamic" },
+        { elo: 2654, name: "Aryan Tari", flag: "🇳🇴", style: "dynamic" },
+        { elo: 2653, name: "Aydin Suleymanli", flag: "🇦🇿", style: "tactical" },
+        { elo: 2653, name: "Benjamin Gledura", flag: "🇭🇺", style: "solid" },
+        { elo: 2645, name: "Frederik Svane", flag: "🇩🇪", style: "solid" },
+        { elo: 2641, name: "V Pranav", flag: "🇮🇳", style: "tactical" },
+        { elo: 2639, name: "Nikolas Theodorou", flag: "🇬🇷", style: "dynamic" },
+        {
+          elo: 2639,
+          name: "Shamsiddin Vokhidov",
+          flag: "🇺🇿",
+          style: "dynamic",
+        },
+        { elo: 2635, name: "Ediz Gurel", flag: "🇹🇷", style: "dynamic" },
+        { elo: 2634, name: "Thai Dai Van Nguyen", flag: "🇨🇿", style: "solid" },
+        { elo: 2631, name: "Andy Woodward", flag: "🇺🇸", style: "dynamic" },
+        { elo: 2627, name: "Aram Hakobyan", flag: "🇦🇲", style: "solid" },
+        { elo: 2621, name: "Aleksey Grebnev", flag: "🏳️", style: "dynamic" },
+      ];
+      const PRIME_OFFSET = LEGEND_OFFSET + LEGENDS_LIST.length;
+      PRIME_PLAYERS.forEach((p, i) => {
+        PLAYERS[PRIME_OFFSET + i] = { ...p, isPrime: true };
+      });
+
       function botName(level) {
         if (PLAYERS[level]) return PLAYERS[level].name;
         return (
@@ -5088,15 +5383,11 @@
       }
 
       function playerEloLabel(level) {
-        if (PLAYERS[level])
-          return (
-            PLAYERS[level].flag +
-            " " +
-            PLAYERS[level].name +
-            " (" +
-            PLAYERS[level].elo +
-            ")"
-          );
+        if (PLAYERS[level]) {
+          const p = PLAYERS[level];
+          const primeTag = p.isPrime ? " 🔥" : "";
+          return p.flag + " " + p.name + " (" + p.elo + primeTag + ")";
+        }
         return botName(level);
       }
 
@@ -5125,22 +5416,27 @@
           // Create tab header
           listEl.innerHTML = `
       <div style="display:flex;gap:0;border-bottom:1px solid var(--brd);margin-bottom:2px;flex-shrink:0">
-        <button id="tabActive" onclick="showTab('active')" style="flex:1;padding:3px 0;font-size:.58rem;font-family:Cinzel,serif;background:var(--sur);border:none;border-bottom:2px solid var(--gold);color:var(--gold);cursor:pointer">🏆 Active (${ACTIVE_PLAYERS.length})</button>
-        <button id="tabLegends" onclick="showTab('legends')" style="flex:1;padding:3px 0;font-size:.58rem;font-family:Cinzel,serif;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--dim);cursor:pointer">👑 Legends (${LEGENDS_LIST.length})</button>
+        <button id="tabActive" onclick="showTab('active')" style="flex:1;padding:3px 0;font-size:.55rem;font-family:Cinzel,serif;background:var(--sur);border:none;border-bottom:2px solid var(--gold);color:var(--gold);cursor:pointer">🏆 Active (${ACTIVE_PLAYERS.length})</button>
+        <button id="tabPrime" onclick="showTab('prime')" style="flex:1;padding:3px 0;font-size:.55rem;font-family:Cinzel,serif;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--dim);cursor:pointer">🔥 Prime (${PRIME_PLAYERS.length})</button>
+        <button id="tabLegends" onclick="showTab('legends')" style="flex:1;padding:3px 0;font-size:.55rem;font-family:Cinzel,serif;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--dim);cursor:pointer">👑 Legends (${LEGENDS_LIST.length})</button>
       </div>
       <div id="listActive" style="overflow-y:auto;overflow-x:hidden;flex:1;touch-action:pan-y;-webkit-overflow-scrolling:touch"></div>
+      <div id="listPrime" style="overflow-y:auto;overflow-x:hidden;flex:1;display:none;touch-action:pan-y;-webkit-overflow-scrolling:touch"></div>
       <div id="listLegends" style="overflow-y:auto;overflow-x:hidden;flex:1;display:none;touch-action:pan-y;-webkit-overflow-scrolling:touch"></div>
     `;
           listEl.style.cssText =
             "display:flex;flex-direction:column;gap:0;max-height:240px;overflow:hidden;border:1px solid var(--brd);border-radius:5px;";
 
-          const fillList = (container, list, offset) => {
+          const fillList = (container, list, offset, isPrime = false) => {
             list.forEach((p, i) => {
               const lvl = offset + i;
               const row = document.createElement("div");
               row.className = "player-row";
               row.dataset.l = lvl;
-              row.innerHTML = `<span style="color:var(--dim);font-size:.5rem;min-width:22px">#${i + 1}</span><span>${p.flag}</span><span style="flex:1;font-size:.62rem">${p.name}</span><span style="color:var(--dim);font-size:.55rem">${p.elo}</span>`;
+              const eloDisplay = isPrime
+                ? `<span style="color:var(--gold);font-size:.55rem">${p.elo} 🔥</span>`
+                : `<span style="color:var(--dim);font-size:.55rem">${p.elo}</span>`;
+              row.innerHTML = `<span style="color:var(--dim);font-size:.5rem;min-width:22px">#${i + 1}</span><span>${p.flag}</span><span style="flex:1;font-size:.62rem">${p.name}</span>${eloDisplay}`;
               row.style.cssText =
                 "display:flex;align-items:center;gap:5px;padding:3px 6px;cursor:pointer;border-radius:3px;transition:background .12s";
               row.onmouseenter = () =>
@@ -5155,6 +5451,12 @@
           };
           fillList(document.getElementById("listActive"), ACTIVE_PLAYERS, 6);
           fillList(
+            document.getElementById("listPrime"),
+            PRIME_PLAYERS,
+            PRIME_OFFSET,
+            true,
+          );
+          fillList(
             document.getElementById("listLegends"),
             LEGENDS_LIST,
             LEGEND_OFFSET,
@@ -5162,10 +5464,27 @@
         }
 
         // BvB selects
+        const diffOpts = [
+          { v: 1, l: "Trivial" },
+          { v: 2, l: "Easy" },
+          { v: 3, l: "Medium" },
+          { v: 4, l: "Hard" },
+          { v: 5, l: "Impossible" },
+        ];
         ["bvbWhite", "bvbBlack"].forEach((id) => {
           const sel = document.getElementById(id);
           if (!sel) return;
-          while (sel.options.length > 5) sel.remove(5);
+          sel.innerHTML = ""; // clear all first
+          // Add difficulty options
+          const dg = document.createElement("optgroup");
+          dg.label = "Difficulty";
+          diffOpts.forEach((d) => {
+            const o = document.createElement("option");
+            o.value = d.v;
+            o.textContent = d.l;
+            dg.appendChild(o);
+          });
+          sel.appendChild(dg);
           const addGroup = (label, list, offset) => {
             const g = document.createElement("optgroup");
             g.label = label;
@@ -5178,6 +5497,7 @@
             sel.appendChild(g);
           };
           addGroup("🏆 Active Players", ACTIVE_PLAYERS, 6);
+          addGroup("🔥 In Prime", PRIME_PLAYERS, PRIME_OFFSET);
           addGroup("👑 Legends", LEGENDS_LIST, LEGEND_OFFSET);
         });
       }
@@ -5185,12 +5505,18 @@
       function showTab(tab) {
         document.getElementById("listActive").style.display =
           tab === "active" ? "block" : "none";
+        document.getElementById("listPrime").style.display =
+          tab === "prime" ? "block" : "none";
         document.getElementById("listLegends").style.display =
           tab === "legends" ? "block" : "none";
-        document.getElementById("tabActive").style.cssText =
-          `flex:1;padding:3px 0;font-size:.58rem;font-family:Cinzel,serif;background:${tab === "active" ? "var(--sur)" : "transparent"};border:none;border-bottom:2px solid ${tab === "active" ? "var(--gold)" : "transparent"};color:${tab === "active" ? "var(--gold)" : "var(--dim)"};cursor:pointer`;
-        document.getElementById("tabLegends").style.cssText =
-          `flex:1;padding:3px 0;font-size:.58rem;font-family:Cinzel,serif;background:${tab === "legends" ? "var(--sur)" : "transparent"};border:none;border-bottom:2px solid ${tab === "legends" ? "var(--gold)" : "transparent"};color:${tab === "legends" ? "var(--gold)" : "var(--dim)"};cursor:pointer`;
+        const tabs = ["active", "prime", "legends"];
+        tabs.forEach((t) => {
+          const el = document.getElementById(
+            "tab" + t.charAt(0).toUpperCase() + t.slice(1),
+          );
+          if (el)
+            el.style.cssText = `flex:1;padding:3px 0;font-size:.55rem;font-family:Cinzel,serif;background:${tab === t ? "var(--sur)" : "transparent"};border:none;border-bottom:2px solid ${tab === t ? "var(--gold)" : "transparent"};color:${tab === t ? "var(--gold)" : "var(--dim)"};cursor:pointer`;
+        });
       }
 
       // ── Celebrity/player bot personalities ───────────────────────────────────
@@ -6031,11 +6357,13 @@
             (botCol === "w" ? "White" : "Black") +
             (botCol === "w" ? " ♔" : " ♚");
         } else if (NET.mode === "bot") {
+          const primeTag = (lvl) => (PLAYERS[lvl]?.isPrime ? " 🔥" : "");
           if (BVB.on) {
-            topName = botName(BVB.bLevel) + " (Black)";
-            botDisplayName = botName(BVB.wLevel) + " (White)";
+            topName = botName(BVB.bLevel) + primeTag(BVB.bLevel) + " (Black)";
+            botDisplayName =
+              botName(BVB.wLevel) + primeTag(BVB.wLevel) + " (White)";
           } else {
-            topName = botName(botLevel) + " (Black)";
+            topName = botName(botLevel) + primeTag(botLevel) + " (Black)";
             botDisplayName = "You (White)";
           }
         } else {
@@ -6843,7 +7171,7 @@
         if (n >= 6) {
           // Celebrity — ask ranked/casual first
           showRankedModal(
-            `Play vs ${botName(n)} (${PLAYERS[n]?.elo || "?"}) — ranked or casual?`,
+            `Play vs ${botName(n)} (${PLAYERS[n]?.elo || "?"}${PLAYERS[n]?.isPrime ? " 🔥" : ""}) — ranked or casual?`,
             () => {
               RANKED.on = true;
               applyVisibility();
@@ -6872,25 +7200,53 @@
         BVB.on = true;
         BVB.wLevel = parseInt(document.getElementById("bvbWhite").value);
         BVB.bLevel = parseInt(document.getElementById("bvbBlack").value);
-        // Update display names
         const wName = botName(BVB.wLevel),
           bName = botName(BVB.bLevel);
         const pTop = document.getElementById("pnmTop"),
           pBot = document.getElementById("pnmBot");
         if (pTop) pTop.textContent = bName + " (Black)";
         if (pBot) pBot.textContent = wName + " (White)";
-        // Deselect single-player level buttons
         document
           .querySelectorAll(".lb,.mpl")
           .forEach((b) => b.classList.remove("on"));
         newGame();
-        // Kick off white bot immediately
         if (!G.over) {
           document.getElementById("thkEl").classList.add("on");
           document.getElementById("mThk").classList.add("on");
           setTimeout(() => runBotForColor("w", BVB.wLevel), 1200);
         }
+        // Collapse panel after starting
+        document.getElementById("bvbFloatBody").style.display = "none";
+        document.getElementById("bvbFloatToggle").textContent = "▼";
       });
+
+      // BvB floating panel toggle
+      (function () {
+        const openBtn = document.getElementById("bvbOpenBtn");
+        const panel = document.getElementById("bvbFloatPanel");
+        const header = document.getElementById("bvbFloatHeader");
+        const body = document.getElementById("bvbFloatBody");
+        const tog = document.getElementById("bvbFloatToggle");
+
+        openBtn.addEventListener("click", () => {
+          panel.style.display = "block";
+          openBtn.style.display = "none";
+          body.style.display = "flex";
+          tog.textContent = "▲";
+        });
+        header.addEventListener("click", () => {
+          const collapsed = body.style.display === "none";
+          body.style.display = collapsed ? "flex" : "none";
+          tog.textContent = collapsed ? "▲" : "▼";
+          if (!collapsed) {
+            // fully hide panel, show button
+            setTimeout(() => {
+              panel.style.display = "none";
+              openBtn.style.display = "";
+            }, 200);
+          }
+        });
+      })();
 
       // ═══════════════════════════════════════
       // GAME ACTIONS
