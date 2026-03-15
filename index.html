@@ -136,7 +136,7 @@
         align-items: stretch;
         width: 14px;
         flex-shrink: 0;
-        align-self: center;
+        align-self: stretch;
         background: transparent;
         border: none;
         position: relative;
@@ -145,10 +145,12 @@
       }
       .evtrack {
         width: 100%;
+        flex: 1;
         position: relative;
         overflow: hidden;
         border-radius: 3px;
         border: 1px solid rgba(255, 255, 255, 0.08);
+        min-height: 60px;
       }
       .evb {
         position: absolute;
@@ -500,6 +502,7 @@
         padding: 5px;
         overflow-y: auto;
         background: var(--bg);
+        min-width: 120px;
       }
       .rpanel::-webkit-scrollbar {
         width: 2px;
@@ -1401,17 +1404,6 @@
         border-color: var(--gold);
         color: var(--gold);
       }
-      @media (max-width: 700px) {
-        #coachPanel {
-          width: calc(100vw - 20px);
-          top: auto;
-          bottom: 60px;
-          max-height: 45vh;
-        }
-        #coachBtn {
-          display: block !important;
-        }
-      }
       .best-arrow-svg {
         position: absolute;
         inset: 0;
@@ -1434,6 +1426,54 @@
       .bvb-mode .pnm {
         color: var(--acc) !important;
       }
+      #playerList {
+        scrollbar-width: thin;
+        scrollbar-color: var(--brd) transparent;
+      }
+      #playerList::-webkit-scrollbar {
+        width: 4px;
+      }
+      #playerList::-webkit-scrollbar-thumb {
+        background: var(--brd);
+        border-radius: 2px;
+      }
+      .player-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 8px;
+        cursor: pointer;
+        font-size: 0.68rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        transition: background 0.12s;
+        color: var(--txt);
+        user-select: none;
+      }
+      .player-row:hover {
+        background: rgba(255, 255, 255, 0.07);
+      }
+      .player-row.on {
+        background: rgba(201, 168, 76, 0.12);
+        color: var(--gold);
+      }
+      .pr-rank {
+        color: var(--dim);
+        font-size: 0.55rem;
+        min-width: 22px;
+        font-family: Cinzel, serif;
+      }
+      .pr-flag {
+        font-size: 0.8rem;
+      }
+      .pr-name {
+        flex: 1;
+      }
+      .pr-elo {
+        color: var(--gold);
+        font-size: 0.6rem;
+        font-family: Cinzel, serif;
+        font-weight: 700;
+      }
       /* Trainer styles */
       .trainer-label {
         font-size: 0.58rem;
@@ -1442,167 +1482,58 @@
         font-weight: 700;
         margin-bottom: 3px;
       }
-      @media (max-width: 700px) {
-        html,
-        body {
-          height: 100dvh;
-          overflow: hidden;
+      /* Mobile: same layout as desktop, just scaled down */
+      @media (max-width: 900px) {
+        .rpanel {
+          width: 160px;
+        }
+        .lb {
+          font-size: 0.55rem;
+          padding: 2px 5px;
+        }
+        .btn {
+          font-size: 0.55rem;
+        }
+        .chdr {
+          font-size: 0.55rem;
+          padding: 5px 8px;
+        }
+        .sbody {
+          font-size: 0.68rem;
+        }
+        .rbody {
+          font-size: 0.72rem;
+        }
+        .coach-bubble {
+          font-size: 0.82rem;
+        }
+        .coach-move-label {
+          font-size: 0.65rem;
+        }
+      }
+      @media (max-width: 600px) {
+        .rpanel {
+          width: 130px;
+        }
+        .lb {
+          font-size: 0.48rem;
+          padding: 1px 4px;
+        }
+        .chdr {
+          font-size: 0.48rem;
+          padding: 4px 6px;
         }
         header {
           padding: 3px 8px;
-          min-height: 0;
         }
         .logo {
-          font-size: 0.75rem;
+          font-size: 0.8rem;
         }
         .htip {
           display: none;
         }
-        .hbtn:not(#mOnlineBtn) {
-          display: none;
-        }
-        #mOnlineBtn {
-          display: block;
-        }
-        .wrap {
-          flex-direction: column;
-          align-items: center;
-        }
-        .evbar {
-          flex-direction: row;
-          width: 100%;
-          height: 18px;
-          padding: 0 8px;
-          gap: 6px;
-          border-right: none;
-          border-bottom: 1px solid var(--brd);
-          flex-shrink: 0;
-          justify-content: center;
-          align-items: center;
-          background: var(--sur);
-        }
-        .evtrack {
-          flex: 1;
-          width: auto;
-          height: 7px;
-          min-height: 0;
-          border-radius: 4px;
-          overflow: hidden;
-          background: #111;
-          position: relative;
-        }
-        .evw {
-          position: absolute;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          height: 100% !important;
-          width: 50%;
-          border-radius: 0 3px 3px 0;
-          background: linear-gradient(to right, #ccc, #eee);
-          transition: width 0.4s;
-        }
-        .evb {
-          position: absolute;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          height: 100% !important;
-          width: 50%;
-          border-radius: 3px 0 0 3px;
-          background: linear-gradient(to left, #444, #1a1a1a);
-          transition: width 0.4s;
-        }
-        .evmid {
-          left: 50%;
-          top: 0;
-          bottom: 0;
-          right: auto;
-          width: 1px;
-          height: auto;
-        }
-        .evlbl-w,
-        .evlbl-b {
-          display: none;
-        }
-        .evsc {
-          font-size: 0.5rem;
-          min-width: 22px;
-          text-align: center;
-          left: 13px;
-        }
-        .rpanel {
-          display: none;
-        }
-        .center {
-          flex: 1;
-          min-height: 0;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 2px 0;
-          gap: 1px;
-          overflow: hidden;
-          width: 100%;
-        }
-        :root {
-          --lbl: 14px;
-        }
-        .board {
-          border-width: 1px;
-          box-shadow: none;
-        }
-        .pinfo {
-          width: calc(var(--sq) * 8 + var(--lbl) * 2 + 4px);
-          max-width: calc(100vw - 4px);
-          padding: 1px 5px;
-          flex-shrink: 0;
-        }
-        .pnm {
-          font-size: 0.52rem;
-        }
-        .caps {
-          font-size: 0.58rem;
-          max-width: 100px;
-        }
-        .psc {
-          font-size: 0.5rem;
-        }
-        .timer {
+        .coach-bubble {
           font-size: 0.72rem;
-          min-width: 44px;
-        }
-        .blbl {
-          font-size: 0.52rem;
-        }
-        #mbar {
-          display: flex;
-          flex-shrink: 0;
-        }
-        .toast {
-          bottom: auto;
-          top: 50%;
-          right: 50%;
-          min-width: 160px;
-          transform: translate(50%, -50%) translateY(14px);
-        }
-        .toast.on {
-          transform: translate(50%, -50%) translateY(0);
-        }
-        .lbox {
-          padding: 14px 12px;
-          gap: 8px;
-          width: min(400px, 95vw);
-        }
-        .lplayer {
-          min-width: 70px;
-          padding: 6px 8px;
-        }
-      }
-      @media (max-width: 380px) {
-        :root {
-          --lbl: 12px;
         }
       }
     </style>
@@ -1695,7 +1626,9 @@
             </button>
           </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 0; flex-shrink: 0">
+        <div
+          style="display: flex; align-items: stretch; gap: 0; flex-shrink: 0"
+        >
           <div class="evbar" id="evbar">
             <div class="evtrack" id="evtrack">
               <div class="evb" id="evB" style="height: 50%"></div>
@@ -1784,20 +1717,27 @@
         </div>
         <div class="card">
           <div class="chdr" id="hB">🤖 Opponent <i class="arr">▼</i></div>
-          <div class="cbody" id="bB">
-            <div class="dwrap" style="flex-direction: column; gap: 6px">
+          <div class="cbody" id="bB" style="padding: 0">
+            <div style="padding: 6px 8px 4px">
               <div
                 style="
-                  font-size: 0.58rem;
+                  font-size: 0.55rem;
                   color: var(--dim);
                   font-family: Cinzel, serif;
                   letter-spacing: 0.08em;
-                  padding: 2px 0;
+                  margin-bottom: 4px;
                 "
               >
                 DIFFICULTY
               </div>
-              <div style="display: flex; gap: 3px; flex-wrap: wrap">
+              <div
+                style="
+                  display: flex;
+                  gap: 3px;
+                  flex-wrap: wrap;
+                  margin-bottom: 8px;
+                "
+              >
                 <button class="lb" data-l="1">Trivial</button>
                 <button class="lb on" data-l="2">Easy</button>
                 <button class="lb" data-l="3">Medium</button>
@@ -1806,69 +1746,85 @@
               </div>
               <div
                 style="
-                  font-size: 0.58rem;
+                  font-size: 0.55rem;
                   color: var(--dim);
                   font-family: Cinzel, serif;
                   letter-spacing: 0.08em;
-                  padding: 2px 0;
-                  margin-top: 2px;
+                  margin-bottom: 4px;
                 "
               >
-                CELEBRITY BOTS
+                FIDE TOP PLAYERS
+                <span style="color: var(--gold)">(ELO ranked)</span>
               </div>
-              <div style="display: flex; gap: 3px; flex-wrap: wrap">
-                <button
-                  class="lb lb-celeb"
-                  data-l="6"
-                  title="Magnus Carlsen — positional genius, seeks endgame dominance"
-                >
-                  ♔ Magnus Carlsen
+            </div>
+            <div
+              id="playerList"
+              style="
+                overflow-y: auto;
+                overflow-x: hidden;
+                max-height: 220px;
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-y;
+                overscroll-behavior: contain;
+                border-top: 1px solid var(--brd);
+                border-bottom: 1px solid var(--brd);
+              "
+            ></div>
+            <div style="padding: 6px 8px 4px">
+              <div
+                style="
+                  font-size: 0.55rem;
+                  color: var(--dim);
+                  font-family: Cinzel, serif;
+                  letter-spacing: 0.08em;
+                  margin: 4px 0;
+                "
+              >
+                RANKED / CASUAL
+              </div>
+              <div style="display: flex; gap: 6px; margin-bottom: 3px">
+                <button class="lb on" id="btnRanked" style="flex: 1">
+                  🏆 Ranked
                 </button>
-                <button
-                  class="lb lb-celeb"
-                  data-l="7"
-                  title="Hikaru Nakamura — aggressive tactician, speed & chaos"
-                >
-                  ⚡ Hikaru Nakamura
-                </button>
-                <button
-                  class="lb lb-celeb"
-                  data-l="8"
-                  title="Jan-Krzysztof Duda — dynamic attacker, risks everything"
-                >
-                  🔥 J-K Duda
+                <button class="lb" id="btnCasual" style="flex: 1">
+                  🎮 Casual
                 </button>
               </div>
               <div
                 style="
-                  font-size: 0.58rem;
+                  font-size: 0.55rem;
+                  color: var(--dim);
+                  font-style: italic;
+                  margin-bottom: 6px;
+                "
+                id="rankedDesc"
+              >
+                ELO changes after game (celebs only)
+              </div>
+              <div
+                style="
+                  font-size: 0.55rem;
                   color: var(--dim);
                   font-family: Cinzel, serif;
                   letter-spacing: 0.08em;
-                  padding: 2px 0;
-                  margin-top: 2px;
+                  margin-bottom: 4px;
                 "
               >
                 BOT vs BOT
               </div>
               <div
                 id="bvbPanel"
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  gap: 4px;
-                  padding: 4px 0;
-                "
+                style="display: flex; flex-direction: column; gap: 3px"
               >
                 <div
                   style="
                     display: flex;
                     align-items: center;
-                    gap: 6px;
-                    font-size: 0.68rem;
+                    gap: 4px;
+                    font-size: 0.62rem;
                   "
                 >
-                  <span style="color: var(--txt); min-width: 38px">White:</span>
+                  <span style="color: var(--txt); min-width: 32px">White:</span>
                   <select
                     id="bvbWhite"
                     style="
@@ -1877,29 +1833,20 @@
                       border: 1px solid var(--brd);
                       border-radius: 4px;
                       color: var(--txt);
-                      font-size: 0.65rem;
-                      padding: 2px 4px;
+                      font-size: 0.58rem;
+                      padding: 2px 3px;
                     "
-                  >
-                    <option value="1">Trivial</option>
-                    <option value="2" selected>Easy</option>
-                    <option value="3">Medium</option>
-                    <option value="4">Hard</option>
-                    <option value="5">Impossible</option>
-                    <option value="6">♔ Magnus Carlsen</option>
-                    <option value="7">⚡ Hikaru Nakamura</option>
-                    <option value="8">🔥 J-K Duda</option>
-                  </select>
+                  ></select>
                 </div>
                 <div
                   style="
                     display: flex;
                     align-items: center;
-                    gap: 6px;
-                    font-size: 0.68rem;
+                    gap: 4px;
+                    font-size: 0.62rem;
                   "
                 >
-                  <span style="color: var(--txt); min-width: 38px">Black:</span>
+                  <span style="color: var(--txt); min-width: 32px">Black:</span>
                   <select
                     id="bvbBlack"
                     style="
@@ -1908,24 +1855,15 @@
                       border: 1px solid var(--brd);
                       border-radius: 4px;
                       color: var(--txt);
-                      font-size: 0.65rem;
-                      padding: 2px 4px;
+                      font-size: 0.58rem;
+                      padding: 2px 3px;
                     "
-                  >
-                    <option value="1">Trivial</option>
-                    <option value="2">Easy</option>
-                    <option value="3">Medium</option>
-                    <option value="4">Hard</option>
-                    <option value="5" selected>Impossible</option>
-                    <option value="6">♔ Magnus Carlsen</option>
-                    <option value="7">⚡ Hikaru Nakamura</option>
-                    <option value="8">🔥 J-K Duda</option>
-                  </select>
+                  ></select>
                 </div>
                 <button
                   class="btn bgd"
                   id="bvbStartBtn"
-                  style="margin-top: 2px; font-size: 0.6rem"
+                  style="font-size: 0.58rem; padding: 4px"
                 >
                   ▶ Start Bot Match
                 </button>
@@ -1987,17 +1925,25 @@
               <div class="rl">
                 <span class="ri">❄</span
                 ><span
-                  ><b>Freeze:</b> After your move, enemy pieces attacked by a
-                  higher-value piece of yours are frozen next turn. Kings &
-                  pawns never freeze.
-                  <b>A frozen piece loses its own freezing power</b>.</span
+                  ><b>Freeze:</b> After any piece moves, all opponent pieces it
+                  now attacks are frozen — they cannot move. Kings & pawns are
+                  never frozen.
+                  <b>A frozen piece cannot freeze others.</b> Freezing is
+                  permanent as long as the attack holds.</span
                 >
               </div>
               <div class="rl">
                 <span class="ri">🚫</span
                 ><span
                   ><b>No same-adj:</b> Pieces (not pawns/kings) can't land
-                  adjacent to same-type ally.</span
+                  adjacent to a same-type ally.</span
+                >
+              </div>
+              <div class="rl">
+                <span class="ri">⚔</span
+                ><span
+                  ><b>No same-capture:</b> Can't capture a piece of the same
+                  type. Exception: pawns can capture pawns.</span
                 >
               </div>
               <div class="rl">
@@ -2005,13 +1951,6 @@
                 ><span
                   ><b>Draws:</b> Stalemate, agreement, 50-move rule, threefold
                   repetition, insufficient material.</span
-                >
-              </div>
-              <div class="rl">
-                <span class="ri">⚔</span
-                ><span
-                  ><b>No same-capture:</b> Can't capture same type. Exception:
-                  pawns can capture pawns.</span
                 >
               </div>
               <div class="rl">
@@ -2048,6 +1987,16 @@
                 ><input type="checkbox" id="togLocal" /> 👥 Local 2-player (same
                 screen)</label
               >
+              <div
+                style="
+                  font-size: 0.58rem;
+                  color: var(--dim);
+                  margin-top: 2px;
+                  font-style: italic;
+                "
+              >
+                Eval & ratings hidden in online multiplayer
+              </div>
             </div>
           </div>
         </div>
@@ -2061,7 +2010,7 @@
         </div>
       </div>
     </div>
-    <div id="mbar">
+    <div id="mbar" style="display: none !important">
       <div class="mr">
         <span class="mst" id="mSt">Your turn</span>
         <span class="mrt" id="mRt"></span>
@@ -2081,9 +2030,6 @@
           <button class="mpl" data-l="3">Medium</button>
           <button class="mpl" data-l="4">Hard</button>
           <button class="mpl" data-l="5">Impossible</button>
-          <button class="mpl" data-l="6">♔ M.Carlsen</button>
-          <button class="mpl" data-l="7">⚡ Nakamura</button>
-          <button class="mpl" data-l="8">🔥 Duda</button>
         </div>
         <button class="mbtn" id="mFlip">⇄</button>
         <button class="mbtn" id="mNew">New</button>
@@ -2153,8 +2099,8 @@
             maxlength="20"
           />
         </div>
-        <div class="lsec" id="lOptsSec">
-          <div class="llabel">Visibility options (host decides)</div>
+        <div class="lsec" id="lOptsSec" style="display: none">
+          <div class="llabel">Visibility options</div>
           <div class="lopts" style="margin-top: 4px">
             <label class="ltoggle"
               ><input type="checkbox" id="optEval" checked /> 📊 Eval bar</label
@@ -2163,6 +2109,36 @@
               ><input type="checkbox" id="optRating" checked /> ★ Move
               ratings</label
             >
+          </div>
+        </div>
+        <div class="lsec" id="lRankedSec" style="display: none">
+          <div class="llabel">Game Type</div>
+          <div style="display: flex; gap: 6px; margin-top: 4px">
+            <button
+              class="btn bgd"
+              id="lBtnRanked"
+              style="flex: 1; font-size: 0.6rem; padding: 5px"
+            >
+              🏆 Ranked
+            </button>
+            <button
+              class="btn bsc"
+              id="lBtnCasual"
+              style="flex: 1; font-size: 0.6rem; padding: 5px"
+            >
+              🎮 Casual
+            </button>
+          </div>
+          <div
+            style="
+              font-size: 0.55rem;
+              color: var(--dim);
+              margin-top: 3px;
+              font-style: italic;
+            "
+            id="lRankedDesc"
+          >
+            ELO changes after this game
           </div>
         </div>
         <div class="lplayers">
@@ -2252,6 +2228,38 @@
       </div>
     </div>
 
+    <!-- ── RANKED CHOICE MODAL ────────────────── -->
+    <div class="modal" id="rankedModal">
+      <div class="mbox" style="gap: 14px; min-width: 300px">
+        <div class="mbt">⚔ Game Type</div>
+        <div class="mbs" id="rankedModalDesc">
+          Choose how this game affects your ELO rating
+        </div>
+        <div style="display: flex; gap: 10px; width: 100%">
+          <button
+            class="mbb y"
+            id="rankedYes"
+            style="flex: 1; padding: 10px; font-size: 0.72rem"
+          >
+            🏆 Ranked<br /><span
+              style="font-size: 0.58rem; font-weight: 400; opacity: 0.8"
+              >ELO changes</span
+            >
+          </button>
+          <button
+            class="mbb n"
+            id="rankedNo"
+            style="flex: 1; padding: 10px; font-size: 0.72rem"
+          >
+            🎮 Casual<br /><span
+              style="font-size: 0.58rem; font-weight: 400; opacity: 0.8"
+              >No ELO change</span
+            >
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── COACH PANEL ───────────────────────────── -->
     <div id="coachPanel">
       <div class="coach-header" id="coachDragHandle">
@@ -2285,6 +2293,9 @@
       <div class="coach-footer">
         <label class="coach-toggle-label">
           <input type="checkbox" id="togTrainer" /> Enable coach analysis
+        </label>
+        <label class="coach-toggle-label" style="margin-left: 8px">
+          <input type="checkbox" id="togArrow" checked /> Show arrow
         </label>
         <button class="coach-clear" id="coachClear">Clear</button>
       </div>
@@ -2350,23 +2361,27 @@
       const FILES = "abcdefgh",
         RANKS = "87654321";
       const RTNG = [
-        { l: "Genius!!!", s: "!!!", c: "br", mn: 500 },
-        { l: "Brilliant!!", s: "!!", c: "br", mn: 300 },
-        { l: "Great!", s: "!", c: "gr", mn: 100 },
-        { l: "Best", s: "★", c: "be", mn: 40 },
-        { l: "Excellent", s: "✓", c: "ex", mn: 15 },
-        { l: "Good", s: "·", c: "go", mn: 3 },
-        { l: "Book", s: "=", c: "ok", mn: -3 },
-        { l: "Okay", s: "○", c: "ok", mn: -20 },
-        { l: "Inaccuracy", s: "?!", c: "in", mn: -50 },
-        { l: "Mistake", s: "?", c: "mi", mn: -120 },
-        { l: "Blunder", s: "??", c: "bl", mn: -250 },
-        { l: "Catastrophe", s: "???", c: "ct", mn: -500 },
+        { l: "Genius!!!", s: "!!!", c: "br", mn: 50 },
+        { l: "Brilliant!!", s: "!!", c: "br", mn: 20 },
+        { l: "Great!", s: "!", c: "gr", mn: 8 },
+        { l: "Best", s: "★", c: "be", mn: -2 },
+        { l: "Excellent", s: "✓", c: "ex", mn: -15 },
+        { l: "Good", s: "·", c: "go", mn: -30 },
+        { l: "Book", s: "=", c: "ok", mn: -50 },
+        { l: "Okay", s: "○", c: "ok", mn: -80 },
+        { l: "Inaccuracy", s: "?!", c: "in", mn: -150 },
+        { l: "Mistake", s: "?", c: "mi", mn: -300 },
+        { l: "Blunder", s: "??", c: "bl", mn: -600 },
+        { l: "Catastrophe", s: "???", c: "ct", mn: -1200 },
         { l: "Losing", s: "✗", c: "ct", mn: -9999 },
       ];
       RTNG.sort((a, b) => b.mn - a.mn);
 
-      const cp = (b) => b.map((r) => [...r]);
+      function cp(b) {
+        const n = new Array(8);
+        for (let i = 0; i < 8; i++) n[i] = b[i].slice();
+        return n;
+      }
       const opp = (c) => (c === "w" ? "b" : "w");
 
       function adj8(r, c) {
@@ -2482,78 +2497,112 @@
             Math.abs(tc - ac) <= 1 &&
             (tr !== ar || tc !== ac)
           );
+        const dR = tr - ar,
+          dC = tc - ac,
+          adR = dR < 0 ? -dR : dR,
+          adC = dC < 0 ? -dC : dC;
         if (type === "B") {
-          if (Math.abs(tr - ar) !== Math.abs(tc - ac)) return false;
-          const dr = Math.sign(tr - ar),
-            dc = Math.sign(tc - ac);
-          let r = ar + dr,
-            c = ac + dc;
-          while (r !== tr || c !== tc) {
+          if (adR !== adC) return false;
+          const sr = dR > 0 ? 1 : -1,
+            sc = dC > 0 ? 1 : -1;
+          for (
+            let r = ar + sr, c = ac + sc;
+            r !== tr || c !== tc;
+            r += sr, c += sc
+          )
             if (brd[r][c]) return false;
-            r += dr;
-            c += dc;
-          }
           return true;
         }
         if (type === "R") {
-          if (tr !== ar && tc !== ac) return false;
-          const dr = Math.sign(tr - ar),
-            dc = Math.sign(tc - ac);
-          let r = ar + dr,
-            c = ac + dc;
-          while (r !== tr || c !== tc) {
+          if (dR !== 0 && dC !== 0) return false;
+          const sr = dR === 0 ? 0 : dR > 0 ? 1 : -1,
+            sc = dC === 0 ? 0 : dC > 0 ? 1 : -1;
+          for (
+            let r = ar + sr, c = ac + sc;
+            r !== tr || c !== tc;
+            r += sr, c += sc
+          )
             if (brd[r][c]) return false;
-            r += dr;
-            c += dc;
-          }
           return true;
         }
-        if (type === "Q")
-          return (
-            reach(brd, ar, ac, tr, tc, "B") || reach(brd, ar, ac, tr, tc, "R")
-          );
+        if (type === "Q") {
+          if (adR !== adC && dR !== 0 && dC !== 0) return false; // not diagonal nor straight
+          return reach(brd, ar, ac, tr, tc, adR === adC ? "B" : "R");
+        }
         return false;
       }
-      function frozenBy(brd, atkCol, prevFrzAtk) {
-        const def = opp(atkCol),
-          res = [];
-        for (let tr = 0; tr < 8; tr++)
-          for (let tc = 0; tc < 8; tc++) {
-            const tgt = brd[tr][tc];
-            if (!tgt || tgt[0] !== def || tgt[1] === "K" || tgt[1] === "P")
-              continue;
-            const tgtVal = VAL[tgt[1]] || 0;
-            let best = 0;
-            for (let ar = 0; ar < 8; ar++)
-              for (let ac = 0; ac < 8; ac++) {
-                const a = brd[ar][ac];
-                if (
-                  !a ||
-                  a[0] !== atkCol ||
-                  a[1] === tgt[1] ||
-                  a[1] === "P" ||
-                  a[1] === "K"
-                )
-                  continue;
-                if (prevFrzAtk && prevFrzAtk.has(ar * 8 + ac)) continue;
-                const av = VAL[a[1]] || 0;
-                if (
-                  av > tgtVal &&
-                  reach(brd, ar, ac, tr, tc, a[1]) &&
-                  av > best
-                )
-                  best = av;
-              }
-            if (best > 0) res.push(tr * 8 + tc);
+      // ── Freeze rules (optimized) ──────────────────────────────────────────────
+      function calcFrz(brd) {
+        const frozen = new Set();
+
+        // Pre-collect non-P/K pieces by color for fast iteration
+        const wAtk = [],
+          bAtk = []; // attacker candidates
+        const wTgt = [],
+          bTgt = []; // target candidates
+        for (let r = 0; r < 8; r++)
+          for (let c = 0; c < 8; c++) {
+            const p = brd[r][c];
+            if (!p) continue;
+            if (p[1] === "P" || p[1] === "K") continue;
+            const sq = r * 8 + c;
+            if (p[0] === "w") {
+              wAtk.push(sq);
+              wTgt.push(sq);
+            } else {
+              bAtk.push(sq);
+              bTgt.push(sq);
+            }
           }
-        return res;
-      }
-      function calcFrz(brd, prevFrz) {
-        const prevFrzW = prevFrz ? new Set(prevFrz.byW) : null;
-        const prevFrzB = prevFrz ? new Set(prevFrz.byB) : null;
-        const byW = frozenBy(brd, "w", prevFrzW),
-          byB = frozenBy(brd, "b", prevFrzB);
-        return { byW, byB, all: [...new Set([...byW, ...byB])] };
+
+        // Iterative until stable
+        let changed = true;
+        while (changed) {
+          changed = false;
+          // Check white targets (attacked by black attackers)
+          for (const tsq of wTgt) {
+            if (frozen.has(tsq)) continue;
+            const tr = tsq >> 3,
+              tc = tsq & 7;
+            for (const asq of bAtk) {
+              if (frozen.has(asq)) continue;
+              const ar = asq >> 3,
+                ac = asq & 7;
+              if (reach(brd, ar, ac, tr, tc, brd[ar][ac][1])) {
+                frozen.add(tsq);
+                changed = true;
+                break;
+              }
+            }
+          }
+          // Check black targets (attacked by white attackers)
+          for (const tsq of bTgt) {
+            if (frozen.has(tsq)) continue;
+            const tr = tsq >> 3,
+              tc = tsq & 7;
+            for (const asq of wAtk) {
+              if (frozen.has(asq)) continue;
+              const ar = asq >> 3,
+                ac = asq & 7;
+              if (reach(brd, ar, ac, tr, tc, brd[ar][ac][1])) {
+                frozen.add(tsq);
+                changed = true;
+                break;
+              }
+            }
+          }
+        }
+
+        const byW = [],
+          byB = [];
+        for (const sq of frozen) {
+          const p = brd[sq >> 3][sq & 7];
+          if (p) {
+            if (p[0] === "w") byW.push(sq);
+            else byB.push(sq);
+          }
+        }
+        return { byW, byB, all: [...frozen] };
       }
       function movesFrom(brd, r, c, castl, frozenArr) {
         const p = brd[r][c];
@@ -2561,8 +2610,9 @@
         const col = p[0],
           type = p[1],
           en = opp(col);
-        if (type !== "P" && type !== "K" && frozenArr.includes(r * 8 + c))
-          return [];
+        const frozenSet =
+          frozenArr instanceof Set ? frozenArr : new Set(frozenArr);
+        if (type !== "P" && type !== "K" && frozenSet.has(r * 8 + c)) return [];
         const mvs = [];
         function push(tr, tc, flag) {
           if (tr < 0 || tr >= 8 || tc < 0 || tc >= 8) return;
@@ -2631,7 +2681,7 @@
               !brd[rk][6] &&
               !ea.has(rk * 8 + 5) &&
               !ea.has(rk * 8 + 6) &&
-              !frozenArr.includes(rk * 8 + 7)
+              !frozenSet.has(rk * 8 + 7)
             ) {
               const nb = cp(brd);
               nb[rk][6] = p;
@@ -2648,7 +2698,7 @@
               !brd[rk][1] &&
               !ea.has(rk * 8 + 3) &&
               !ea.has(rk * 8 + 2) &&
-              !frozenArr.includes(rk * 8 + 0)
+              !frozenSet.has(rk * 8 + 0)
             ) {
               const nb = cp(brd);
               nb[rk][2] = p;
@@ -2775,20 +2825,6 @@
               idx = col === "w" ? r * 8 + c : (7 - r) * 8 + c;
             s += (col === "w" ? 1 : -1) * (VAL[t] + ((PST[t] || [])[idx] || 0));
           }
-        const frz = calcFrz(brd, null);
-        for (const k of frz.byW) {
-          const r = Math.floor(k / 8),
-            c = k % 8;
-          const p = brd[r][c];
-          if (p && p[0] === "w") s -= VAL[p[1]] * 0.4;
-        }
-        for (const k of frz.byB) {
-          const r = Math.floor(k / 8),
-            c = k % 8;
-          const p = brd[r][c];
-          if (p && p[0] === "b") s += VAL[p[1]] * 0.4;
-        }
-        // King safety
         s += kingMobilityPenalty(brd, "w");
         s -= kingMobilityPenalty(brd, "b");
         return s;
@@ -2905,7 +2941,8 @@
           if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
           applyMv(nb, mv, col);
           const nf = calcFrz(nb);
-          const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
+          // Pass as Set for O(1) lookup in movesFrom
+          const nfrz = opp(col) === "w" ? new Set(nf.byW) : new Set(nf.byB);
           const sc = -abSearch(
             nb,
             depth - 1,
@@ -2965,7 +3002,7 @@
           if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
           applyMv(nb, mv, col);
           const nf = calcFrz(nb);
-          const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
+          const nfrz = opp(col) === "w" ? new Set(nf.byW) : new Set(nf.byB);
           // Use full [-INF,+INF] window so every root move gets exact score
           const sc = -abSearch(
             nb,
@@ -3044,7 +3081,7 @@
             if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
             applyMv(nb, mv, col);
             const nf = calcFrz(nb);
-            const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
+            const nfrz = opp(col) === "w" ? new Set(nf.byW) : new Set(nf.byB);
             const sc = -abSearch(
               nb,
               depth - 1,
@@ -3134,7 +3171,7 @@
             if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
             applyMv(nb, mv, col);
             const nf = calcFrz(nb);
-            const nfrz = opp(col) === "w" ? nf.byB : nf.byW;
+            const nfrz = opp(col) === "w" ? new Set(nf.byW) : new Set(nf.byB);
             const sc = -abSearch(
               nb,
               depth - 1,
@@ -3169,59 +3206,88 @@
         setTimeout(doDepth, 0);
       }
 
-      // ── Rate a move: compare vs best move score ───────────────────────────────
-      // Uses deeper search than before for accuracy
+      // ── Rate a move: compare vs best possible move ───────────────────────────
       function rateMoveDeep(
         snapBrd,
         mv,
         movingCol,
         snapCastl,
         snapFrz,
-        bestBefore,
+        _unused,
         isCheckmate,
       ) {
         if (isCheckmate) return 0;
-        // Apply the move
-        const afterBrd = cp(snapBrd);
-        const nc = { ...snapCastl };
-        const p = snapBrd[mv.fr][mv.fc];
-        if (p === "wK") {
-          nc.wK = false;
-          nc.wQ = false;
-        }
-        if (p === "bK") {
-          nc.bK = false;
-          nc.bQ = false;
-        }
-        if (mv.fr === 7 && mv.fc === 7) nc.wK = false;
-        if (mv.fr === 7 && mv.fc === 0) nc.wQ = false;
-        if (mv.fr === 0 && mv.fc === 7) nc.bK = false;
-        if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
-        applyMv(afterBrd, mv, movingCol);
-        const nf = calcFrz(afterBrd);
+        const killers = Array.from({ length: 6 }, () => [null, null]);
+        const deadline = Date.now() + 3000;
         const oppCol = opp(movingCol);
-        const nextFrz = oppCol === "w" ? nf.byB : nf.byW;
+        const sign = movingCol === "w" ? 1 : -1;
 
-        // Score after this move (opponent's best response) — depth 3
-        const deadline = Date.now() + 600;
-        const sc = abSearch(
-          afterBrd,
-          3,
-          -Infinity,
-          Infinity,
-          oppCol,
-          nc,
-          nextFrz,
-          1,
-          deadline,
-          null,
+        // Score a move: apply it, then do depth-2 search from opponent's perspective
+        function scoreMove(m) {
+          const nb = cp(snapBrd),
+            nc = { ...snapCastl },
+            p = snapBrd[m.fr][m.fc];
+          if (p === "wK") {
+            nc.wK = false;
+            nc.wQ = false;
+          }
+          if (p === "bK") {
+            nc.bK = false;
+            nc.bQ = false;
+          }
+          if (m.fr === 7 && m.fc === 7) nc.wK = false;
+          if (m.fr === 7 && m.fc === 0) nc.wQ = false;
+          if (m.fr === 0 && m.fc === 7) nc.bK = false;
+          if (m.fr === 0 && m.fc === 0) nc.bQ = false;
+          applyMv(nb, m, movingCol);
+          const nf = calcFrz(nb);
+          const nfrz = oppCol === "w" ? new Set(nf.byW) : new Set(nf.byB);
+          const sc = abSearch(
+            nb,
+            4,
+            -Infinity,
+            Infinity,
+            oppCol,
+            nc,
+            nfrz,
+            1,
+            deadline,
+            killers,
+          );
+          // sc = best score for opponent; negate = score for movingCol
+          return sc === null ? evalBoard(nb) * sign : -sc;
+        }
+
+        // Get all legal moves and find the best
+        const ms = allMoves(snapBrd, movingCol, snapCastl, snapFrz);
+        if (!ms.length) return 0;
+        ms.sort(
+          (a, b) =>
+            scoreMvOrder(snapBrd, b, killers, 0) -
+            scoreMvOrder(snapBrd, a, killers, 0),
         );
-        const scoreActual =
-          sc === null
-            ? evalBoard(afterBrd) * (movingCol === "w" ? 1 : -1)
-            : -(sc || 0);
 
-        const delta = scoreActual - (bestBefore || 0);
+        let bestScore = -Infinity;
+        let actualScore = null;
+        for (const m of ms) {
+          if (Date.now() > deadline) break;
+          const s = scoreMove(m);
+          if (s > bestScore) bestScore = s;
+          if (
+            m.fr === mv.fr &&
+            m.fc === mv.fc &&
+            m.tr === mv.tr &&
+            m.tc === mv.tc
+          )
+            actualScore = s;
+        }
+        // If we ran out of time before scoring the actual move, score it now
+        if (actualScore === null) {
+          actualScore = scoreMove(mv);
+          if (actualScore > bestScore) bestScore = actualScore;
+        }
+
+        const delta = actualScore - bestScore; // 0=best, negative=worse
         let ri = RTNG.length - 1;
         for (let i = 0; i < RTNG.length; i++) {
           if (delta >= RTNG[i].mn) {
@@ -3239,7 +3305,11 @@
       let BEST_ARROW = { mv: null, gen: 0 };
 
       function trainerEnabled() {
-        return TRAINER.on && NET.mode === "bot";
+        if (!TRAINER.on) return false;
+        if (NET.mode === "host" || NET.mode === "guest") return false; // never online
+        if (NET.mode === "bot" && RANKED.on && botLevel >= 6 && !BVB.on)
+          return false; // not in ranked
+        return true;
       }
 
       // ── Draggable panel ───────────────────
@@ -3376,10 +3446,13 @@
         const from = sq(mv.fr, mv.fc),
           to = sq(mv.tr, mv.tc);
         const evDiff = evalAfter - evalBefore;
-        const evStr = (v) =>
-          Math.abs(v) > 9000
-            ? "Mate"
-            : (v >= 0 ? "+" : "") + (v / 100).toFixed(1);
+        const evStr = (v) => {
+          if (Math.abs(v) > 9000) {
+            const n = Math.ceil((19000 - Math.abs(v)) / 2 + 1);
+            return (v > 0 ? "M" : "-M") + n;
+          }
+          return (v >= 0 ? "+" : "") + (v / 100).toFixed(1);
+        };
         const isWhite = movingCol === "w";
         const actor = isWhite ? "You" : "The bot";
         const opp_actor = isWhite ? "The bot" : "You";
@@ -3548,15 +3621,6 @@
           }
 
           // Freeze mechanic
-          if (frzCount > 0) {
-            parts.push(
-              pick([
-                `After this move, ${frzCount} opponent piece${frzCount > 1 ? "s are" : " is"} frozen — they cannot move next turn, which is the unique strength of Control Chess.`,
-                `The freeze mechanic activates: ${frzCount} enemy piece${frzCount > 1 ? "s" : ""} is paralysed until ${isWhite ? "the bot" : "you"} respond${isWhite ? "s" : ""}.`,
-                `This position freezes ${frzCount} piece${frzCount > 1 ? "s" : ""}. Use that paralysis to advance without opposition next turn.`,
-              ]),
-            );
-          }
 
           // Eval context
           if (Math.abs(evalAfter) > 9000) {
@@ -3665,7 +3729,10 @@
               : "♟ " + botName(botLevel) + " (Black)";
         let html = `<div class="coach-move-label">${who} — <b>${note}</b> <span class="${R?.c || "ok"}">${R?.s || ""} ${R?.l || ""}</span></div>`;
         html += `<div style="line-height:1.6">${comment}</div>`;
-        if (bestMv && !isBest)
+        const showArrow =
+          !document.getElementById("togArrow") ||
+          document.getElementById("togArrow").checked;
+        if (bestMv && !isBest && showArrow)
           html += `<div class="coach-best-hint">💡 Engine best: <b>${bestNote}</b></div>`;
         coachAddMessage(html);
         coachSetStatus(colorName(movingCol) + " — " + note, false);
@@ -3681,6 +3748,12 @@
       function drawBestArrow(mv) {
         if (!mv) return;
         BEST_ARROW.mv = mv;
+        const tog = document.getElementById("togArrow");
+        if (tog && !tog.checked) {
+          clearBestArrow();
+          BEST_ARROW.mv = mv;
+          return;
+        } // store but don't draw
         const svg = document.getElementById("bestSvg");
         if (!svg) return;
         svg.innerHTML = "";
@@ -3693,7 +3766,6 @@
         const bx = bRect.left - sRect.left,
           by = bRect.top - sRect.top;
 
-        // Adjust for flip
         let fr = mv.fr,
           fc = mv.fc,
           tr = mv.tr,
@@ -3709,75 +3781,26 @@
           y1 = by + (fr + 0.5) * sqH;
         const x2 = bx + (tc + 0.5) * sqW,
           y2 = by + (tr + 0.5) * sqH;
-
         const dx = x2 - x1,
           dy = y2 - y1,
           len = Math.sqrt(dx * dx + dy * dy);
         if (len < 5) return;
 
         const color = "#00e5ff";
-        const hw = sqW * 0.2,
-          hl = sqW * 0.32,
-          sw = sqW * 0.1,
-          ux = dx / len,
+        const sw = sqW * 0.09,
+          hw = sqW * 0.18,
+          hl = sqW * 0.28;
+        const ux = dx / len,
           uy = dy / len;
-        const ex = x2 - ux * hl * 0.5,
-          ey = y2 - uy * hl * 0.5;
+        const ex = x2 - ux * hl * 0.6,
+          ey = y2 - uy * hl * 0.6;
+        const px = -uy * hw,
+          py = ux * hw;
 
+        // Simple static arrow — no filter, no animation
         const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("opacity", "0.85");
 
-        // Glow filter
-        const defs = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "defs",
-        );
-        const filter = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "filter",
-        );
-        filter.setAttribute("id", "bestglow");
-        const blur = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "feGaussianBlur",
-        );
-        blur.setAttribute("stdDeviation", "3");
-        blur.setAttribute("result", "blur");
-        filter.appendChild(blur);
-        defs.appendChild(filter);
-        svg.appendChild(defs);
-
-        // Shadow arrow
-        const gs = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        gs.setAttribute("filter", "url(#bestglow)");
-        gs.setAttribute("opacity", "0.6");
-        const ls = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "line",
-        );
-        ls.setAttribute("x1", x1);
-        ls.setAttribute("y1", y1);
-        ls.setAttribute("x2", ex);
-        ls.setAttribute("y2", ey);
-        ls.setAttribute("stroke", color);
-        ls.setAttribute("stroke-width", sw * 2);
-        ls.setAttribute("stroke-linecap", "round");
-        gs.appendChild(ls);
-        const px = -uy * hw * 1.2,
-          py = ux * hw * 1.2;
-        const polys = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "polygon",
-        );
-        polys.setAttribute(
-          "points",
-          `${x2},${y2} ${ex + px},${ey + py} ${ex - px},${ey - py}`,
-        );
-        polys.setAttribute("fill", color);
-        gs.appendChild(polys);
-        svg.appendChild(gs);
-
-        // Main arrow
-        g.setAttribute("opacity", "0.92");
         const line = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "line",
@@ -3790,41 +3813,30 @@
         line.setAttribute("stroke-width", sw);
         line.setAttribute("stroke-linecap", "round");
         g.appendChild(line);
-        const px2 = -uy * hw,
-          py2 = ux * hw;
-        const pts = `${x2},${y2} ${ex + px2},${ey + py2} ${ex - px2},${ey - py2}`;
+
         const poly = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "polygon",
         );
-        poly.setAttribute("points", pts);
+        poly.setAttribute(
+          "points",
+          `${x2},${y2} ${ex + px},${ey + py} ${ex - px},${ey - py}`,
+        );
         poly.setAttribute("fill", color);
         g.appendChild(poly);
 
-        // Pulse animation on source square
+        // Simple static circle on source square — no animation
         const circle = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "circle",
         );
         circle.setAttribute("cx", x1);
         circle.setAttribute("cy", y1);
-        circle.setAttribute("r", sqW * 0.35);
+        circle.setAttribute("r", sqW * 0.28);
         circle.setAttribute("fill", "none");
         circle.setAttribute("stroke", color);
-        circle.setAttribute("stroke-width", sw * 0.7);
+        circle.setAttribute("stroke-width", sw * 0.6);
         circle.setAttribute("opacity", "0.5");
-        const anim = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "animate",
-        );
-        anim.setAttribute("attributeName", "r");
-        anim.setAttribute(
-          "values",
-          `${sqW * 0.25};${sqW * 0.42};${sqW * 0.25}`,
-        );
-        anim.setAttribute("dur", "1.4s");
-        anim.setAttribute("repeatCount", "indefinite");
-        circle.appendChild(anim);
         g.appendChild(circle);
 
         svg.appendChild(g);
@@ -3832,7 +3844,8 @@
       let G = {},
         botLevel = 2,
         flipped = false;
-      let BVB = { on: false, wLevel: 2, bLevel: 5, paused: false }; // Bot vs Bot mode
+      let BVB = { on: false, wLevel: 2, bLevel: 5, paused: false };
+      let RANKED = { on: true }; // ranked by default
       let promoOk = null;
       let animH = [],
         animC = [],
@@ -3864,6 +3877,7 @@
         oppName: "Bot",
         showEval: true,
         showRating: true,
+        isRanked: true,
         timeCtrl: null,
         timers: { w: 0, b: 0 },
         timerInterval: null,
@@ -3932,7 +3946,7 @@
           capW: [],
           capB: [],
           castl: { wK: true, wQ: true, bK: true, bQ: true },
-          frz: calcFrz(brd, null),
+          frz: calcFrz(brd),
           prevFrz: null,
           over: false,
           lastMv: null,
@@ -3942,6 +3956,7 @@
           bestEvalBefore: null,
           lastEngineBest: null,
           nextEngineBest: null,
+          _analysisGen: 0,
         };
         document.getElementById("toast").classList.remove("on");
         document.getElementById("movesEl").innerHTML = "";
@@ -4060,8 +4075,17 @@
         // Snapshot for rating
         const snapBrd = cp(G.brd),
           snapCastl = { ...G.castl };
-        const snapFrz = movingCol === "w" ? G.frz.byB : G.frz.byW;
+        const snapFrz =
+          movingCol === "w" ? new Set(G.frz.byW) : new Set(G.frz.byB);
+        // bestEvalBefore = best score for movingCol from last masterBestMove computation
+        // G.nextEngineBest has the score from when opponent computed their best last turn
+        // We use it as reference: if player plays that exact move = Best
         const evalBefore = G.bestEvalBefore;
+        // Snapshot the best score available for this player right now
+        const _playerBestScore =
+          G.nextEngineBest && G.nextEngineBest.col === movingCol
+            ? G.bestEvalBefore
+            : G.bestEvalBefore;
 
         if (NET.timeCtrl) {
           stopTimers();
@@ -4112,19 +4136,23 @@
         }
         G.lastMv = { fr, fc, tr, tc };
         G.prevFrz = G.frz;
-        G.frz = calcFrz(G.brd, G.prevFrz);
+        // Pass which piece moved and where — only that piece freezes opponents it attacks
+        // prevFrozen = squares that were frozen last turn (those pieces can't freeze now)
+        G.frz = calcFrz(G.brd);
         G.prevEval = evalBoard(G.brd);
 
         const oppCol = opp(movingCol);
-        const nextFrz = oppCol === "w" ? G.frz.byB : G.frz.byW;
+        const nextFrz =
+          oppCol === "w" ? new Set(G.frz.byW) : new Set(G.frz.byB);
         const nextMs = allMoves(G.brd, oppCol, G.castl, nextFrz);
         const isCheckmate = nextMs.length === 0 && inCheck(G.brd, oppCol);
         const isStalemate = nextMs.length === 0 && !inCheck(G.brd, oppCol);
 
-        // ── MOVE RATING (deep, async after render) ────────────────────────────────
+        // ── MOVE RATING + TRAINER ────────────────────────────────────────────────
         let ri = RTNG.length - 1;
-        // Always clear best-move arrow when someone plays
         clearBestArrow();
+        // Only increment analysisGen for human moves — bot moves shouldn't cancel player's analysis
+        const _analysisGen = isBot ? G._analysisGen : ++G._analysisGen;
 
         if (!fromNet) {
           if (isCheckmate) {
@@ -4137,125 +4165,29 @@
                 `<span class="${R.c}">${R.s}</span>`;
             }
           } else {
-            const _snapBrd2 = cp(snapBrd),
+            const _snap = cp(snapBrd),
               _mv2 = { ...mv },
-              _movingCol2 = movingCol,
-              _snapCastl2 = { ...snapCastl },
-              _snapFrz2 = [...snapFrz],
-              _evalBefore2 = evalBefore,
-              _histLen = G.hist.length;
-            const _note2 = note,
+              _col2 = movingCol,
+              _sc2 = { ...snapCastl },
+              _sf2 = [...snapFrz],
+              _eb2 = evalBefore,
+              _hl = G.hist.length,
+              _note2 = note,
               _cap2 = cap,
-              _isCheck2 = inCheck(G.brd, oppCol),
-              _frzCount2 = G.frz.all.length;
-            setTimeout(() => {
-              if (G.over) return;
-              const rIdx = rateMoveDeep(
-                _snapBrd2,
-                _mv2,
-                _movingCol2,
-                _snapCastl2,
-                _snapFrz2,
-                _evalBefore2,
-                false,
-              );
-              const R = RTNG[rIdx];
-              const showRt = NET.showRating;
-              if (showRt) {
-                let html = `<span class="${R.c}">${R.s} ${R.l}</span>`;
-                if (_isCheck2) html += ` <span class="ck">Check!</span>`;
-                // Label whose move it was
-                const lbl = BVB.on
-                  ? botName(_movingCol2 === "w" ? BVB.wLevel : BVB.bLevel) +
-                    ": "
-                  : _movingCol2 === "w"
-                    ? "<b>You:</b> "
-                    : "<b>Bot:</b> ";
-                document.getElementById("ratingEl").innerHTML = lbl + html;
-                document.getElementById("mRt").innerHTML =
-                  `<span class="${R.c}">${R.s}</span>`;
-              }
-              // Add icon to move history
-              const moveSpans = document.getElementById("movesEl").children;
-              if (_histLen < moveSpans.length) {
-                const sp = moveSpans[_histLen];
-                if (!sp.querySelector(".ri-icon") && showRt) {
-                  const icon = document.createElement("span");
-                  icon.className = `${R.c} ri-icon`;
-                  icon.style.cssText = "font-size:.68rem;margin-left:1px";
-                  icon.title = R.l;
-                  icon.textContent = R.s;
-                  sp.appendChild(icon);
-                }
-              }
-              // ELO only for player moves
-              if (!isBot) eloOnMove(rIdx);
+              _chk2 = inCheck(G.brd, oppCol);
+            // frzCount = opponent pieces frozen BY the moving player (not all frozen pieces)
+            // movingCol="w" → white just moved → count black pieces frozen by white = G.frz.byW
+            // movingCol="b" → black just moved → count white pieces frozen by black = G.frz.byB
+            const _frzByMover = _col2 === "w" ? G.frz.byW : G.frz.byB;
+            const _frz2 = _frzByMover.length;
 
-              // ── TRAINER + BEST ARROW — both player AND bot moves, including BvB ──
-              if (trainerEnabled() && !G.over) {
-                let bestMv2, bestNote2;
-                const cached = G.lastEngineBest;
-                const cacheValid =
-                  cached &&
-                  cached.col === _movingCol2 &&
-                  cached.brd &&
-                  _snapBrd2.every((row, r) =>
-                    row.every((v, c) => v === cached.brd[r][c]),
-                  );
-                if (cacheValid && cached.move) {
-                  bestMv2 = cached.move;
-                  bestNote2 =
-                    cached.note || buildNote(_snapBrd2, bestMv2, _movingCol2);
-                } else {
-                  // Full engine search — same quality as single player
-                  const bResult = masterBestMove(
-                    cp(_snapBrd2),
-                    _movingCol2,
-                    _snapCastl2,
-                    _snapFrz2,
-                    800,
-                    5,
-                  );
-                  bestMv2 = bResult.move;
-                  bestNote2 = bestMv2
-                    ? buildNote(_snapBrd2, bestMv2, _movingCol2)
-                    : "?";
-                }
-                const evAfter =
-                  evalBoard(G.brd) * (_movingCol2 === "w" ? 1 : -1);
-                const isBest2 =
-                  !bestMv2 ||
-                  (bestMv2.fr === _mv2.fr &&
-                    bestMv2.fc === _mv2.fc &&
-                    bestMv2.tr === _mv2.tr &&
-                    bestMv2.tc === _mv2.tc);
-                if (!isBest2 && bestMv2) drawBestArrow(bestMv2);
-                runTrainer(
-                  _snapBrd2,
-                  _mv2,
-                  _movingCol2,
-                  _note2,
-                  rIdx,
-                  bestMv2,
-                  bestNote2,
-                  _evalBefore2 || 0,
-                  evAfter,
-                  false,
-                  _isCheck2,
-                  _frzCount2,
-                  _cap2,
-                  _histLen,
-                );
-                G.lastEngineBest = null;
-              }
-            }, 0);
-            // Quick initial display
+            // Quick initial rating (instant, from static eval delta)
             ri = RTNG.length - 1;
-            if (evalBefore !== null && evalBefore !== undefined) {
-              const quickDelta =
+            if (evalBefore != null) {
+              const qd =
                 evalBoard(G.brd) * (movingCol === "w" ? 1 : -1) - evalBefore;
               for (let i = 0; i < RTNG.length; i++) {
-                if (quickDelta >= RTNG[i].mn) {
+                if (qd >= RTNG[i].mn) {
                   ri = i;
                   break;
                 }
@@ -4273,11 +4205,134 @@
               document.getElementById("mRt").innerHTML =
                 `<span class="${R.c}">${R.s}</span>`;
             }
+
+            // Deep analysis deferred — skip if new move arrives before timeout fires
+            setTimeout(() => {
+              if (G.over || G._analysisGen !== _analysisGen) return; // stale, skip
+              // Deep rating (skip in online)
+              const isOnline = NET.mode === "host" || NET.mode === "guest";
+              const rIdx = isOnline
+                ? ri
+                : rateMoveDeep(_snap, _mv2, _col2, _sc2, _sf2, _eb2, false);
+              const R = RTNG[rIdx];
+              if (NET.showRating) {
+                const lbl = BVB.on
+                  ? botName(_col2 === "w" ? BVB.wLevel : BVB.bLevel) + ": "
+                  : _col2 === "w"
+                    ? "<b>You:</b> "
+                    : "<b>Bot:</b> ";
+                let html = `<span class="${R.c}">${R.s} ${R.l}</span>`;
+                if (_chk2) html += ` <span class="ck">Check!</span>`;
+                document.getElementById("ratingEl").innerHTML = lbl + html;
+                document.getElementById("mRt").innerHTML =
+                  `<span class="${R.c}">${R.s}</span>`;
+                // History icon
+                const sp = document.getElementById("movesEl").children[_hl];
+                if (sp && !sp.querySelector(".ri-icon")) {
+                  const icon = document.createElement("span");
+                  icon.className = `${R.c} ri-icon`;
+                  icon.style.cssText = "font-size:.68rem;margin-left:1px";
+                  icon.title = R.l;
+                  icon.textContent = R.s;
+                  sp.appendChild(icon);
+                }
+              }
+              if (!isBot) eloOnMove(rIdx);
+
+              // Trainer + best arrow (offline only, skip online)
+              if (trainerEnabled() && !G.over && !isOnline) {
+                let bestMv2, bestNote2;
+                const cached = G.lastEngineBest;
+                const cv =
+                  cached &&
+                  cached.col === _col2 &&
+                  cached.brd &&
+                  _snap.every((row, r) =>
+                    row.every((v, c) => v === cached.brd[r][c]),
+                  );
+                if (cv && cached.move) {
+                  bestMv2 = cached.move;
+                  bestNote2 = cached.note || buildNote(_snap, bestMv2, _col2);
+                } else {
+                  const br = masterBestMove(
+                    cp(_snap),
+                    _col2,
+                    _sc2,
+                    _sf2,
+                    600,
+                    4,
+                  );
+                  bestMv2 = br.move;
+                  bestNote2 = bestMv2 ? buildNote(_snap, bestMv2, _col2) : "?";
+                }
+                if (G._analysisGen === _analysisGen) {
+                  // still current
+                  const evA = evalBoard(G.brd) * (_col2 === "w" ? 1 : -1);
+                  const isBest2 =
+                    !bestMv2 ||
+                    (bestMv2.fr === _mv2.fr &&
+                      bestMv2.fc === _mv2.fc &&
+                      bestMv2.tr === _mv2.tr &&
+                      bestMv2.tc === _mv2.tc);
+                  // If engine says a different move was best, you can't get "Best" or better
+                  let finalRIdx = rIdx;
+                  if (!isBest2) {
+                    // Find index of "Excellent" and cap at that
+                    const excellentIdx = RTNG.findIndex(
+                      (r) => r.l === "Excellent",
+                    );
+                    const bestIdx = RTNG.findIndex((r) => r.l === "Best");
+                    if (excellentIdx >= 0 && finalRIdx <= bestIdx)
+                      finalRIdx = excellentIdx;
+                  }
+                  if (!isBest2 && bestMv2) drawBestArrow(bestMv2);
+                  runTrainer(
+                    _snap,
+                    _mv2,
+                    _col2,
+                    _note2,
+                    finalRIdx,
+                    bestMv2,
+                    bestNote2,
+                    _eb2 || 0,
+                    evA,
+                    false,
+                    _chk2,
+                    _frz2,
+                    _cap2,
+                    _hl,
+                  );
+                  // Also update display if rating changed
+                  if (finalRIdx !== rIdx && NET.showRating) {
+                    const R2 = RTNG[finalRIdx];
+                    const lbl2 = BVB.on
+                      ? botName(_col2 === "w" ? BVB.wLevel : BVB.bLevel) + ": "
+                      : _col2 === "w"
+                        ? "<b>You:</b> "
+                        : "<b>Bot:</b> ";
+                    document.getElementById("ratingEl").innerHTML =
+                      lbl2 + `<span class="${R2.c}">${R2.s} ${R2.l}</span>`;
+                    document.getElementById("mRt").innerHTML =
+                      `<span class="${R2.c}">${R2.s}</span>`;
+                    const sp = document.getElementById("movesEl").children[_hl];
+                    if (sp) {
+                      const icon = sp.querySelector(".ri-icon");
+                      if (icon) {
+                        icon.className = `${R2.c} ri-icon`;
+                        icon.title = R2.l;
+                        icon.textContent = R2.s;
+                      }
+                    }
+                  }
+                }
+                G.lastEngineBest = null;
+              }
+            }, 0);
           }
         }
 
-        // ── PROGRESSIVE EVAL BAR ─────────────────────────────────────────────────
-        if (NET.showEval) {
+        // ── PROGRESSIVE EVAL BAR — skip in online multiplayer ───────────────────
+        if (NET.showEval && NET.mode === "bot") {
           setEval(evalBoard(G.brd), 0);
           startProgressiveEval(
             G.brd,
@@ -4287,8 +4342,6 @@
             (evWhite, depth) => {
               if (G.over) return;
               setEval(evWhite, depth);
-              if (NET.conn && NET.showEval)
-                netSend({ type: "eval_sync", ev: evWhite, depth });
             },
           );
         }
@@ -4386,7 +4439,8 @@
             const pm = PMQUEUE.shift();
             PMSEL = null;
             pmSync();
-            const myFrz2 = G.turn === "w" ? G.frz.byB : G.frz.byW;
+            const myFrz2 =
+              G.turn === "w" ? new Set(G.frz.byW) : new Set(G.frz.byB);
             const pieceAtPm = G.brd[pm.fr][pm.fc];
             if (pieceAtPm && pieceAtPm[0] === G.turn) {
               const validMoves = movesFrom(
@@ -4472,42 +4526,661 @@
       let _botAbort = false,
         _botGeneration = 0;
 
-      // ── Celebrity bot name helper ─────────────────────────────────────────────
+      // 150+ real chess players sorted by ELO descending (levels 6+)
+      // ── ACTIVE PLAYERS: FIDE Top 100, March 2026 ─────────────────────────────
+      const ACTIVE_PLAYERS = [
+        // ── FIDE March 2026 Top 100 ──────────────────────────────────────────────
+        { elo: 2840, name: "Magnus Carlsen", flag: "🇳🇴", style: "universal" }, // 1  - Complete player, unmatched endgame+positional
+        { elo: 2810, name: "Hikaru Nakamura", flag: "🇺🇸", style: "aggressive" }, // 2  - Tactical fireworks, speed specialist
+        { elo: 2795, name: "Fabiano Caruana", flag: "🇺🇸", style: "universal" }, // 3  - Deep prep, tactical+positional balance
+        { elo: 2776, name: "Vincent Keymer", flag: "🇩🇪", style: "positional" }, // 4  - Calm, deep strategic understanding
+        {
+          elo: 2771,
+          name: "Nodirbek Abdusattorov",
+          flag: "🇺🇿",
+          style: "dynamic",
+        }, // 5  - Tata Steel winner, fearless attacker
+        {
+          elo: 2759,
+          name: "Alireza Firouzja",
+          flag: "🇫🇷",
+          style: "aggressive",
+        }, // 6  - Razor-sharp, sacrificial play
+        { elo: 2754, name: "Wei Yi", flag: "🇨🇳", style: "tactical" }, // 7  - Complex tactical battles
+        { elo: 2753, name: "Anish Giri", flag: "🇳🇱", style: "solid" }, // 8  - Rock-solid, fortress builder
+        { elo: 2753, name: "Wesley So", flag: "🇺🇸", style: "positional" }, // 9  - Precise, clean positional play
+        { elo: 2748, name: "Gukesh D", flag: "🇮🇳", style: "universal" }, // 10 - World Champion, well-rounded
+        { elo: 2745, name: "Arjun Erigaisi", flag: "🇮🇳", style: "dynamic" }, // 11 - Sharp tactical complications
+        { elo: 2745, name: "Javokhir Sindarov", flag: "🇺🇿", style: "tactical" }, // 12 - Fearless youth, tactical fearlessness
+        {
+          elo: 2741,
+          name: "Praggnanandhaa R",
+          flag: "🇮🇳",
+          style: "aggressive",
+        }, // 13 - Candidates qualifier, sharp attacker
+        { elo: 2739, name: "Jan-Krzysztof Duda", flag: "🇵🇱", style: "dynamic" }, // 14 - Active piece play
+        {
+          elo: 2738,
+          name: "Leinier Dominguez",
+          flag: "🇺🇸",
+          style: "universal",
+        }, // 15 - Experienced, versatile
+        { elo: 2738, name: "Richard Rapport", flag: "🇭🇺", style: "creative" }, // 16 - Unorthodox openings, unpredictable
+        { elo: 2735, name: "Hans Niemann", flag: "🇺🇸", style: "tactical" }, // 17 - Aggressive, sharp openings
+        { elo: 2731, name: "Le Quang Liem", flag: "🇻🇳", style: "solid" }, // 18 - Solid, reliable
+        {
+          elo: 2729,
+          name: "Jorden Van Foreest",
+          flag: "🇳🇱",
+          style: "aggressive",
+        }, // 19 - Attacking specialist, Tata Steel +24
+        { elo: 2729, name: "Levon Aronian", flag: "🇺🇸", style: "creative" }, // 20 - Intuitive, imaginative piece play
+        {
+          elo: 2723,
+          name: "Ian Nepomniachtchi",
+          flag: "🏳️",
+          style: "aggressive",
+        }, // 21 - Two-time Candidates winner, sharp
+        {
+          elo: 2720,
+          name: "Maxime Vachier-Lagrave",
+          flag: "🇫🇷",
+          style: "tactical",
+        }, // 22 - Najdorf expert, tactical genius
+        { elo: 2717, name: "Yu Yangyi", flag: "🇨🇳", style: "solid" }, // 23 - Solid Chinese school
+        { elo: 2716, name: "Nihal Sarin", flag: "🇮🇳", style: "tactical" }, // 24 - Speed specialist, creative tactician
+        { elo: 2714, name: "Awonder Liang", flag: "🇺🇸", style: "solid" }, // 25 - Steady, positional
+        {
+          elo: 2713,
+          name: "Shakhriyar Mamedyarov",
+          flag: "🇦🇿",
+          style: "dynamic",
+        }, // 26 - Gambit player, dynamic complications
+        { elo: 2710, name: "Dmitry Andreikin", flag: "🏳️", style: "solid" }, // 27 - Deep theoretical knowledge
+        {
+          elo: 2708,
+          name: "Vladimir Fedoseev",
+          flag: "🇸🇮",
+          style: "aggressive",
+        }, // 28 - Sharp, attacking
+        { elo: 2708, name: "Parham Maghsoodloo", flag: "🇮🇷", style: "dynamic" }, // 29 - Creative, complex positions
+        { elo: 2708, name: "Vidit Gujrathi", flag: "🇮🇳", style: "positional" }, // 30 - Strategic, solid positional player
+        { elo: 2700, name: "Amin Tabatabaei", flag: "🇮🇷", style: "solid" }, // 31 - Solid, theoretical
+        { elo: 2698, name: "Andrey Esipenko", flag: "🏳️", style: "dynamic" }, // 32 - Candidates qualifier, dynamic
+        { elo: 2698, name: "Matthias Bluebaum", flag: "🇩🇪", style: "tactical" }, // 33 - Tata Steel +14, sharp tactician
+        {
+          elo: 2689,
+          name: "Aravindh Chithambaram",
+          flag: "🇮🇳",
+          style: "aggressive",
+        }, // 34 - Attacking style
+        { elo: 2689, name: "Teimour Radjabov", flag: "🇦🇿", style: "strategic" }, // 35 - Deep strategic, King's Indian expert
+        { elo: 2688, name: "Samuel Sevian", flag: "🇺🇸", style: "solid" }, // 36 - Technical, precise
+        {
+          elo: 2687,
+          name: "Yagiz Kaan Erdogmus",
+          flag: "🇹🇷",
+          style: "aggressive",
+        }, // 37 - 14yo prodigy, tactical fearlessness
+        { elo: 2686, name: "Nodirbek Yakubboev", flag: "🇺🇿", style: "dynamic" }, // 38 - Active Uzbek school
+        { elo: 2684, name: "Wang Hao", flag: "🇨🇳", style: "positional" }, // 39 - Solid positional Chinese style
+        { elo: 2683, name: "Alexey Sarana", flag: "🇷🇸", style: "tactical" }, // 40 - Sharp openings
+        { elo: 2682, name: "Peter Svidler", flag: "🏳️", style: "tactical" }, // 41 - Grünfeld expert, creative
+        { elo: 2682, name: "Igor Kovalenko", flag: "🇺🇦", style: "solid" }, // 42 - Solid, reliable
+        { elo: 2676, name: "Peter Leko", flag: "🇭🇺", style: "solid" }, // 43 - Technical, endgame specialist
+        { elo: 2676, name: "Pentala Harikrishna", flag: "🇮🇳", style: "solid" }, // 44 - Experienced, solid
+        { elo: 2672, name: "Daniil Dubov", flag: "🇷🇺", style: "aggressive" }, // 45 - Top-10 blitz, ultra-aggressive
+        { elo: 2668, name: "David Howell", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", style: "solid" }, // 46 - Commentator GM, solid
+        {
+          elo: 2668,
+          name: "Rustam Kasimdzhanov",
+          flag: "🇺🇿",
+          style: "universal",
+        }, // 47 - Former FIDE champion
+        { elo: 2667, name: "Nikita Vitiugov", flag: "🏳️", style: "solid" }, // 48 - Deep opening prep
+        { elo: 2666, name: "Radoslaw Wojtaszek", flag: "🇵🇱", style: "solid" }, // 49 - Solid Polish style
+        { elo: 2666, name: "Nils Grandelius", flag: "🇸🇪", style: "dynamic" }, // 50 - Active, dynamic Scandinavian
+        {
+          elo: 2666,
+          name: "David Anton Guijarro",
+          flag: "🇪🇸",
+          style: "dynamic",
+        }, // 51 - Modern dynamic Spanish
+        { elo: 2666, name: "Bu Xiangzhi", flag: "🇨🇳", style: "solid" }, // 52 - Experienced solid Chinese
+        { elo: 2661, name: "Ivan Saric", flag: "🇭🇷", style: "tactical" }, // 53 - Sharp Croatian
+        { elo: 2659, name: "Pavel Eljanov", flag: "🇺🇦", style: "solid" }, // 54 - Solid Ukrainian
+        { elo: 2658, name: "Grigoriy Oparin", flag: "🇺🇸", style: "dynamic" }, // 55 - Dynamic
+        { elo: 2656, name: "Jeffery Xiong", flag: "🇺🇸", style: "tactical" }, // 56 - Tactical American
+        {
+          elo: 2656,
+          name: "Jose Martinez Alcantara",
+          flag: "🇲🇽",
+          style: "dynamic",
+        }, // 57 - Active Mexican
+        { elo: 2656, name: "Shant Sargsyan", flag: "🇦🇲", style: "solid" }, // 58 - Armenian school
+        {
+          elo: 2656,
+          name: "Johan-Sebastian Christiansen",
+          flag: "🇳🇴",
+          style: "dynamic",
+        }, // 59 - Norwegian dynamic
+        {
+          elo: 2655,
+          name: "Bogdan-Daniel Deac",
+          flag: "🇷🇴",
+          style: "aggressive",
+        }, // 60 - Young aggressive Romanian
+        { elo: 2653, name: "Aydin Suleymanli", flag: "🇦🇿", style: "tactical" }, // 61 - Young Azerbaijani tactician
+        { elo: 2653, name: "Benjamin Gledura", flag: "🇭🇺", style: "solid" }, // 62 - Hungarian solid
+        { elo: 2653, name: "Ernesto Inarkiev", flag: "🇷🇺", style: "solid" }, // 63 - Russian solid
+        { elo: 2652, name: "Kirill Alekseenko", flag: "🇦🇹", style: "solid" }, // 64 - Solid technical
+        { elo: 2651, name: "Sam Shankland", flag: "🇺🇸", style: "positional" }, // 65 - US Champion, classical positional
+        { elo: 2650, name: "Volodar Murzin", flag: "🏳️", style: "dynamic" }, // 66 - Young Russian dynamic
+        { elo: 2650, name: "Ray Robson", flag: "🇺🇸", style: "tactical" }, // 67 - American tactical
+        { elo: 2648, name: "Eltaj Safarli", flag: "🇦🇿", style: "dynamic" }, // 68 - Active Azerbaijani
+        { elo: 2648, name: "Murali Karthikeyan", flag: "🇮🇳", style: "solid" }, // 69 - Solid Indian
+        { elo: 2645, name: "Frederik Svane", flag: "🇩🇪", style: "solid" }, // 70 - German solid
+        {
+          elo: 2645,
+          name: "Alexander Grischuk",
+          flag: "🇷🇺",
+          style: "tactical",
+        }, // 71 - Time trouble specialist, sharp
+        {
+          elo: 2644,
+          name: "Francisco Vallejo Pons",
+          flag: "🇪🇸",
+          style: "universal",
+        }, // 72 - Experienced Spanish
+        { elo: 2643, name: "Alexander Donchenko", flag: "🇩🇪", style: "solid" }, // 73 - German solid
+        { elo: 2642, name: "Lu Shanglei", flag: "🇨🇳", style: "solid" }, // 74 - Chinese solid
+        { elo: 2642, name: "Aryan Tari", flag: "🇳🇴", style: "dynamic" }, // 75 - Norwegian dynamic
+        { elo: 2641, name: "Raunak Sadhwani", flag: "🇮🇳", style: "dynamic" }, // 76 - Young Indian dynamic
+        {
+          elo: 2641,
+          name: "Vladislav Artemiev",
+          flag: "🇷🇺",
+          style: "aggressive",
+        }, // 77 - Blitz wizard, sharp
+        { elo: 2641, name: "V Pranav", flag: "🇮🇳", style: "tactical" }, // 78 - Young Indian tactical
+        { elo: 2640, name: "A.R. Saleh Salem", flag: "🇦🇪", style: "solid" }, // 79 - UAE solid
+        { elo: 2639, name: "Nikolas Theodorou", flag: "🇬🇷", style: "dynamic" }, // 80 - Greek dynamic
+        {
+          elo: 2639,
+          name: "Shamsiddin Vokhidov",
+          flag: "🇺🇿",
+          style: "dynamic",
+        }, // 81 - Young Uzbek dynamic
+        { elo: 2637, name: "Maksim Chigaev", flag: "🏳️", style: "solid" }, // 82 - Solid
+        { elo: 2636, name: "Rauf Mamedov", flag: "🇦🇿", style: "tactical" }, // 83 - Azerbaijani tactical
+        { elo: 2635, name: "Ediz Gurel", flag: "🇹🇷", style: "dynamic" }, // 84 - 17yo Turkish prodigy, aggressive
+        { elo: 2635, name: "Gawain Jones", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", style: "aggressive" }, // 85 - King's Indian attacker
+        { elo: 2635, name: "Boris Gelfand", flag: "🇮🇱", style: "strategic" }, // 86 - Positional legend, deep prep
+        { elo: 2634, name: "Thai Dai Van Nguyen", flag: "🇨🇿", style: "solid" }, // 87 - Solid Czech
+        { elo: 2633, name: "Pranesh M", flag: "🇮🇳", style: "aggressive" }, // 88 - Young Indian attacker
+        { elo: 2631, name: "Andy Woodward", flag: "🇺🇸", style: "dynamic" }, // 89 - 15yo Tata Steel Challengers winner
+        {
+          elo: 2631,
+          name: "Ruslan Ponomariov",
+          flag: "🇺🇦",
+          style: "universal",
+        }, // 90 - Former FIDE champion
+        { elo: 2631, name: "Aryan Chopra", flag: "🇮🇳", style: "dynamic" }, // 91 - Indian dynamic
+        { elo: 2631, name: "Etienne Bacrot", flag: "🇫🇷", style: "solid" }, // 92 - French veteran solid
+        { elo: 2629, name: "Abhimanyu Mishra", flag: "🇺🇸", style: "tactical" }, // 93 - Youngest GM ever, tactical
+        { elo: 2629, name: "Michael Adams", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", style: "positional" }, // 94 - English solid positional legend
+        { elo: 2629, name: "Loek Van Wely", flag: "🇳🇱", style: "aggressive" }, // 95 - Dutch attacker
+        { elo: 2627, name: "Ivan Cheparinov", flag: "🇧🇬", style: "aggressive" }, // 96 - Sharp Bulgarian
+        { elo: 2627, name: "Andrei Volokitin", flag: "🇺🇦", style: "tactical" }, // 97 - Ukrainian tactical
+        { elo: 2627, name: "Aram Hakobyan", flag: "🇦🇲", style: "solid" }, // 98 - Armenian solid
+        { elo: 2626, name: "David Navara", flag: "🇨🇿", style: "creative" }, // 99 - Unorthodox, creative Czech
+        { elo: 2625, name: "Aleksey Grebnev", flag: "🏳️", style: "dynamic" }, // 100 - Young Russian dynamic
+        // 101-150 (approx. FIDE March 2026)
+        { elo: 2625, name: "Ihor Samunenkov", flag: "🇺🇦", style: "dynamic" },
+        {
+          elo: 2624,
+          name: "Bharath Subramaniyam H",
+          flag: "🇮🇳",
+          style: "tactical",
+        },
+        { elo: 2623, name: "Mukhiddin Madaminov", flag: "🇺🇿", style: "solid" },
+        { elo: 2622, name: "Pranav Anand", flag: "🇮🇳", style: "tactical" },
+        {
+          elo: 2621,
+          name: "Martín Sieiro González",
+          flag: "🇪🇸",
+          style: "solid",
+        },
+        {
+          elo: 2620,
+          name: "Mircea-Emilian Parligras",
+          flag: "🇷🇴",
+          style: "solid",
+        },
+        { elo: 2619, name: "Kateryna Lagno", flag: "🇺🇦", style: "solid" },
+        { elo: 2618, name: "Luca Moroni", flag: "🇮🇹", style: "dynamic" },
+        { elo: 2617, name: "Hou Yifan", flag: "🇨🇳", style: "universal" },
+        { elo: 2616, name: "Sanan Sjugirov", flag: "🇷🇺", style: "solid" },
+        { elo: 2615, name: "Kacper Piorun", flag: "🇵🇱", style: "solid" },
+        { elo: 2614, name: "Gabriel Sargissian", flag: "🇦🇲", style: "solid" },
+        { elo: 2613, name: "Nijat Abasov", flag: "🇦🇿", style: "dynamic" },
+        { elo: 2612, name: "Vadim Zvjaginsev", flag: "🇷🇺", style: "creative" },
+        { elo: 2611, name: "Liang Awonder", flag: "🇺🇸", style: "solid" },
+        { elo: 2610, name: "Daniil Yuffa", flag: "🇷🇺", style: "tactical" },
+        { elo: 2609, name: "Evgeny Najer", flag: "🇷🇺", style: "solid" },
+        { elo: 2608, name: "Georg Meier", flag: "🇩🇪", style: "solid" },
+        { elo: 2607, name: "Maxim Rodshtein", flag: "🇮🇱", style: "dynamic" },
+        { elo: 2606, name: "Dariusz Swiercz", flag: "🇺🇸", style: "solid" },
+        { elo: 2605, name: "Nikita Petrov", flag: "🇷🇺", style: "solid" },
+        { elo: 2604, name: "Yuri Kuzubov", flag: "🇺🇦", style: "tactical" },
+        { elo: 2603, name: "Arjun Erigaisi", flag: "🇮🇳", style: "dynamic" },
+        { elo: 2602, name: "Gata Kamsky", flag: "🇺🇸", style: "grind" },
+        { elo: 2601, name: "Anton Korobov", flag: "🇺🇦", style: "solid" },
+        { elo: 2600, name: "Igor Lysyj", flag: "🇷🇺", style: "solid" },
+        { elo: 2599, name: "Sarana Alexei", flag: "🇷🇸", style: "tactical" },
+        {
+          elo: 2598,
+          name: "Surya Shekhar Ganguly",
+          flag: "🇮🇳",
+          style: "solid",
+        },
+        {
+          elo: 2597,
+          name: "Krishnan Sasikiran",
+          flag: "🇮🇳",
+          style: "strategic",
+        },
+        { elo: 2596, name: "Lorenzo Lodici", flag: "🇮🇹", style: "solid" },
+        { elo: 2595, name: "Tigran L. Petrosian", flag: "🇦🇲", style: "solid" },
+        {
+          elo: 2594,
+          name: "Denis Khismatullin",
+          flag: "🇷🇺",
+          style: "tactical",
+        },
+        { elo: 2593, name: "Alexander Motylev", flag: "🇷🇺", style: "solid" },
+        {
+          elo: 2592,
+          name: "Vugar Gashimov (memorial)",
+          flag: "🇦🇿",
+          style: "aggressive",
+        },
+        { elo: 2591, name: "Alexandr Fier", flag: "🇧🇷", style: "dynamic" },
+        { elo: 2590, name: "Jorge Cori", flag: "🇵🇪", style: "dynamic" },
+        { elo: 2589, name: "Mikhail Kobalia", flag: "🇷🇺", style: "solid" },
+        { elo: 2588, name: "Sebastien Maze", flag: "🇫🇷", style: "solid" },
+        { elo: 2587, name: "Alexander Riazantsev", flag: "🇷🇺", style: "solid" },
+        { elo: 2586, name: "Aleksandr Lenderman", flag: "🇺🇸", style: "solid" },
+        { elo: 2585, name: "Emil Sutovsky", flag: "🇮🇱", style: "aggressive" },
+        { elo: 2584, name: "Ivan Popov", flag: "🇷🇺", style: "solid" },
+        { elo: 2583, name: "Alexei Fedorov", flag: "🇧🇾", style: "tactical" },
+        { elo: 2582, name: "Levan Pantsulaia", flag: "🇬🇪", style: "solid" },
+        { elo: 2581, name: "Borki Predojević", flag: "🇧🇦", style: "solid" },
+        { elo: 2580, name: "David Howell", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", style: "solid" },
+        {
+          elo: 2579,
+          name: "Arkadij Naiditsch",
+          flag: "🇦🇿",
+          style: "aggressive",
+        },
+        { elo: 2578, name: "Viktor Erdos", flag: "🇭🇺", style: "tactical" },
+        { elo: 2577, name: "Baadur Jobava", flag: "🇬🇪", style: "aggressive" },
+        { elo: 2576, name: "Robert Hovhannisyan", flag: "🇦🇲", style: "solid" },
+      ];
+
+      // ── LEGENDS: All-time greats sorted by peak ELO ───────────────────────────
+      const LEGENDS_LIST = [
+        { elo: 2851, name: "Garry Kasparov", flag: "🇷🇺", style: "aggressive" },
+        { elo: 2830, name: "Bobby Fischer", flag: "🇺🇸", style: "universal" },
+        {
+          elo: 2820,
+          name: "Viswanathan Anand",
+          flag: "🇮🇳",
+          style: "universal",
+        },
+        { elo: 2817, name: "Vladimir Kramnik", flag: "🇷🇺", style: "strategic" },
+        { elo: 2812, name: "Levon Aronian", flag: "🇦🇲", style: "creative" },
+        { elo: 2810, name: "Sergey Karjakin", flag: "🇷🇺", style: "defensive" },
+        {
+          elo: 2804,
+          name: "Shakhriyar Mamedyarov",
+          flag: "🇦🇿",
+          style: "sharp",
+        },
+        { elo: 2800, name: "Anatoly Karpov", flag: "🇷🇺", style: "positional" },
+        {
+          elo: 2798,
+          name: "Alexander Grischuk",
+          flag: "🇷🇺",
+          style: "tactical",
+        },
+        { elo: 2795, name: "Vassily Ivanchuk", flag: "🇺🇦", style: "creative" },
+        { elo: 2793, name: "Gata Kamsky", flag: "🇺🇸", style: "grind" },
+        { elo: 2792, name: "Boris Gelfand", flag: "🇮🇱", style: "strategic" },
+        { elo: 2790, name: "Peter Leko", flag: "🇭🇺", style: "solid" },
+        {
+          elo: 2788,
+          name: "Ruslan Ponomariov",
+          flag: "🇺🇦",
+          style: "universal",
+        },
+        { elo: 2786, name: "Teimour Radjabov", flag: "🇦🇿", style: "strategic" },
+        { elo: 2785, name: "Michael Adams", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", style: "solid" },
+        { elo: 2784, name: "Alexei Shirov", flag: "🇱🇻", style: "aggressive" },
+        {
+          elo: 2783,
+          name: "Alexander Morozevich",
+          flag: "🇷🇺",
+          style: "creative",
+        },
+        { elo: 2781, name: "Péter Lékó", flag: "🇭🇺", style: "solid" },
+        { elo: 2779, name: "Peter Svidler", flag: "🇷🇺", style: "tactical" },
+        { elo: 2778, name: "Veselin Topalov", flag: "🇧🇬", style: "aggressive" },
+        { elo: 2775, name: "Etienne Bacrot", flag: "🇫🇷", style: "solid" },
+        { elo: 2773, name: "Pentala Harikrishna", flag: "🇮🇳", style: "solid" },
+        { elo: 2772, name: "Judit Polgar", flag: "🇭🇺", style: "aggressive" },
+        {
+          elo: 2771,
+          name: "Rustam Kasimdzhanov",
+          flag: "🇺🇿",
+          style: "universal",
+        },
+        { elo: 2769, name: "Nikita Vitiugov", flag: "🇷🇺", style: "solid" },
+        { elo: 2767, name: "Radoslaw Wojtaszek", flag: "🇵🇱", style: "solid" },
+        { elo: 2766, name: "Pavel Eljanov", flag: "🇺🇦", style: "solid" },
+        {
+          elo: 2763,
+          name: "Francisco Vallejo Pons",
+          flag: "🇪🇸",
+          style: "universal",
+        },
+        { elo: 2762, name: "Daniil Dubov", flag: "🇷🇺", style: "aggressive" },
+        { elo: 2761, name: "Bu Xiangzhi", flag: "🇨🇳", style: "solid" },
+        { elo: 2759, name: "Wang Hao", flag: "🇨🇳", style: "strategic" },
+        { elo: 2757, name: "Alexander Beliavsky", flag: "🇸🇮", style: "solid" },
+        { elo: 2755, name: "Loek Van Wely", flag: "🇳🇱", style: "aggressive" },
+        { elo: 2753, name: "Ivan Cheparinov", flag: "🇧🇬", style: "aggressive" },
+        { elo: 2751, name: "Sergei Movsesian", flag: "🇦🇲", style: "tactical" },
+        { elo: 2750, name: "Boris Spassky", flag: "🇷🇺", style: "universal" },
+        { elo: 2748, name: "David Navara", flag: "🇨🇿", style: "creative" },
+        { elo: 2747, name: "Tigran Petrosian", flag: "🇦🇲", style: "defensive" },
+        { elo: 2745, name: "Vasily Smyslov", flag: "🇷🇺", style: "positional" },
+        { elo: 2742, name: "Mikhail Tal", flag: "🇱🇻", style: "aggressive" },
+        { elo: 2740, name: "Viktor Korchnoi", flag: "🇨🇭", style: "universal" },
+        { elo: 2738, name: "Efim Geller", flag: "🇷🇺", style: "aggressive" },
+        { elo: 2735, name: "David Bronstein", flag: "🇷🇺", style: "creative" },
+        { elo: 2732, name: "Mark Taimanov", flag: "🇷🇺", style: "solid" },
+        {
+          elo: 2730,
+          name: "Mikhail Botvinnik",
+          flag: "🇷🇺",
+          style: "strategic",
+        },
+        { elo: 2727, name: "Lev Polugaevsky", flag: "🇷🇺", style: "tactical" },
+        { elo: 2724, name: "Pal Benko", flag: "🇺🇸", style: "strategic" },
+        { elo: 2720, name: "Paul Keres", flag: "🇪🇪", style: "tactical" },
+        {
+          elo: 2718,
+          name: "Isaac Boleslavsky",
+          flag: "🇷🇺",
+          style: "strategic",
+        },
+        { elo: 2715, name: "Lev Psakhis", flag: "🇮🇱", style: "solid" },
+        { elo: 2713, name: "Bent Larsen", flag: "🇩🇰", style: "aggressive" },
+        { elo: 2710, name: "Samuel Reshevsky", flag: "🇺🇸", style: "solid" },
+        { elo: 2708, name: "Yuri Averbakh", flag: "🇷🇺", style: "positional" },
+        { elo: 2705, name: "Svetozar Gligoric", flag: "🇷🇸", style: "solid" },
+        { elo: 2702, name: "José Capablanca", flag: "🇨🇺", style: "positional" },
+        { elo: 2700, name: "Reuben Fine", flag: "🇺🇸", style: "universal" },
+        { elo: 2697, name: "Lajos Portisch", flag: "🇭🇺", style: "solid" },
+        {
+          elo: 2694,
+          name: "Alexander Alekhine",
+          flag: "🇷🇺",
+          style: "aggressive",
+        },
+        { elo: 2690, name: "Boris Gulko", flag: "🇺🇸", style: "solid" },
+        { elo: 2687, name: "Miguel Najdorf", flag: "🇦🇷", style: "aggressive" },
+        { elo: 2684, name: "Mikhail Euwe", flag: "🇳🇱", style: "universal" },
+        { elo: 2682, name: "Lev Alburt", flag: "🇺🇸", style: "tactical" },
+        { elo: 2679, name: "Yasser Seirawan", flag: "🇺🇸", style: "solid" },
+        { elo: 2676, name: "Boris Geller", flag: "🇷🇺", style: "tactical" },
+        { elo: 2673, name: "Wolfgang Uhlmann", flag: "🇩🇪", style: "strategic" },
+        { elo: 2670, name: "Emanuel Lasker", flag: "🇩🇪", style: "universal" },
+        {
+          elo: 2667,
+          name: "Viktor Kupreichik",
+          flag: "🇧🇾",
+          style: "aggressive",
+        },
+        { elo: 2664, name: "Lev Gutman", flag: "🇩🇪", style: "solid" },
+        { elo: 2661, name: "Nigel Short", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", style: "tactical" },
+        { elo: 2658, name: "Jan Timman", flag: "🇳🇱", style: "creative" },
+        { elo: 2655, name: "Zoltan Ribli", flag: "🇭🇺", style: "solid" },
+        { elo: 2652, name: "Tony Miles", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", style: "solid" },
+        { elo: 2650, name: "Frank Marshall", flag: "🇺🇸", style: "aggressive" },
+        { elo: 2647, name: "Gyula Sax", flag: "🇭🇺", style: "tactical" },
+        { elo: 2644, name: "Andras Adorjan", flag: "🇭🇺", style: "solid" },
+        { elo: 2641, name: "Lev Bronstein", flag: "🇷🇺", style: "creative" },
+        { elo: 2638, name: "Henrique Mecking", flag: "🇧🇷", style: "solid" },
+        {
+          elo: 2635,
+          name: "Dragoljub Velimirovic",
+          flag: "🇷🇸",
+          style: "aggressive",
+        },
+        { elo: 2632, name: "Ratmir Kholmov", flag: "🇷🇺", style: "solid" },
+        { elo: 2629, name: "Mihai Suba", flag: "🇷🇴", style: "creative" },
+        { elo: 2626, name: "Vladimir Tukmakov", flag: "🇺🇦", style: "solid" },
+        { elo: 2623, name: "Julio Bolbochan", flag: "🇦🇷", style: "solid" },
+        {
+          elo: 2620,
+          name: "Akiba Rubinstein",
+          flag: "🇵🇱",
+          style: "positional",
+        },
+        {
+          elo: 2617,
+          name: "Savielly Tartakower",
+          flag: "🇵🇱",
+          style: "creative",
+        },
+        {
+          elo: 2614,
+          name: "Siegbert Tarrasch",
+          flag: "🇩🇪",
+          style: "positional",
+        },
+        {
+          elo: 2611,
+          name: "Aaron Nimzowitsch",
+          flag: "🇩🇰",
+          style: "strategic",
+        },
+        { elo: 2608, name: "Richard Reti", flag: "🇨🇿", style: "universal" },
+        { elo: 2605, name: "Ernst Gruenfeld", flag: "🇦🇹", style: "solid" },
+        { elo: 2602, name: "Harry Pillsbury", flag: "🇺🇸", style: "aggressive" },
+        { elo: 2599, name: "Georg Rotlewi", flag: "🇵🇱", style: "tactical" },
+        { elo: 2596, name: "Oldrich Duras", flag: "🇨🇿", style: "solid" },
+        {
+          elo: 2593,
+          name: "Rudolf Spielmann",
+          flag: "🇦🇹",
+          style: "aggressive",
+        },
+        { elo: 2590, name: "Carl Schlechter", flag: "🇦🇹", style: "solid" },
+        { elo: 2587, name: "David Janowski", flag: "🇫🇷", style: "aggressive" },
+        { elo: 2584, name: "Géza Maróczy", flag: "🇭🇺", style: "positional" },
+        { elo: 2581, name: "Jacques Mieses", flag: "🇩🇪", style: "tactical" },
+        { elo: 2578, name: "Frederick Yates", flag: "🇬🇧", style: "solid" },
+        { elo: 2575, name: "Amos Burn", flag: "🇬🇧", style: "solid" },
+        { elo: 2572, name: "Efim Bogoljubov", flag: "🇩🇪", style: "aggressive" },
+        { elo: 2569, name: "Milan Vidmar", flag: "🇸🇮", style: "positional" },
+        { elo: 2566, name: "Osip Bernstein", flag: "🇷🇺", style: "universal" },
+        {
+          elo: 2563,
+          name: "Mikhail Chigorin",
+          flag: "🇷🇺",
+          style: "aggressive",
+        },
+        { elo: 2560, name: "Wilhelm Steinitz", flag: "🇦🇹", style: "strategic" },
+        { elo: 2555, name: "Paul Morphy", flag: "🇺🇸", style: "aggressive" },
+        { elo: 2550, name: "Adolf Anderssen", flag: "🇩🇪", style: "aggressive" },
+        { elo: 2545, name: "Howard Staunton", flag: "🇬🇧", style: "solid" },
+        {
+          elo: 2540,
+          name: "Louis-Charles Mahé de La Bourdonnais",
+          flag: "🇫🇷",
+          style: "aggressive",
+        },
+      ];
+
+      // PLAYERS = union of active (level 6+) then legends (level 6+len+1 onward)
+      const PLAYERS = {};
+      ACTIVE_PLAYERS.forEach((p, i) => {
+        PLAYERS[i + 6] = { ...p, isLegend: false };
+      });
+      const LEGEND_OFFSET = 6 + ACTIVE_PLAYERS.length;
+      LEGENDS_LIST.forEach((p, i) => {
+        PLAYERS[LEGEND_OFFSET + i] = { ...p, isLegend: true };
+      });
+
       function botName(level) {
+        if (PLAYERS[level]) return PLAYERS[level].name;
         return (
-          {
-            1: "Trivial",
-            2: "Easy",
-            3: "Medium",
-            4: "Hard",
-            5: "Impossible",
-            6: "Magnus Carlsen",
-            7: "Hikaru Nakamura",
-            8: "Jan-Krzysztof Duda",
-          }[level] || "Bot"
+          { 1: "Trivial", 2: "Easy", 3: "Medium", 4: "Hard", 5: "Impossible" }[
+            level
+          ] || "Bot"
         );
       }
 
-      // ── Celebrity bot personalities ───────────────────────────────────────────
-      // Each celebrity bot modifies move scoring to simulate their style
+      function playerEloLabel(level) {
+        if (PLAYERS[level])
+          return (
+            PLAYERS[level].flag +
+            " " +
+            PLAYERS[level].name +
+            " (" +
+            PLAYERS[level].elo +
+            ")"
+          );
+        return botName(level);
+      }
+
+      // Map player ELO to search depth + noise
+      function playerToStrength(level) {
+        const p = PLAYERS[level];
+        if (!p) return { depth: 2, noise: 20 };
+        const elo = p.elo;
+        if (elo >= 2800) return { depth: 4, noise: 0 };
+        if (elo >= 2750) return { depth: 4, noise: 5 };
+        if (elo >= 2700) return { depth: 3, noise: 10 };
+        if (elo >= 2650) return { depth: 3, noise: 20 };
+        if (elo >= 2600) return { depth: 2, noise: 30 };
+        if (elo >= 2550) return { depth: 2, noise: 45 };
+        if (elo >= 2500) return { depth: 2, noise: 65 };
+        if (elo >= 2400) return { depth: 1, noise: 80 };
+        if (elo >= 2300) return { depth: 1, noise: 110 };
+        if (elo >= 2200) return { depth: 1, noise: 150 };
+        return { depth: 1, noise: 200 };
+      }
+
+      // Build player UI: two scrollable tabs (Active / Legends)
+      function buildPlayerUI() {
+        const listEl = document.getElementById("playerList");
+        if (listEl) {
+          // Create tab header
+          listEl.innerHTML = `
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--brd);margin-bottom:2px;flex-shrink:0">
+        <button id="tabActive" onclick="showTab('active')" style="flex:1;padding:3px 0;font-size:.58rem;font-family:Cinzel,serif;background:var(--sur);border:none;border-bottom:2px solid var(--gold);color:var(--gold);cursor:pointer">🏆 Active (${ACTIVE_PLAYERS.length})</button>
+        <button id="tabLegends" onclick="showTab('legends')" style="flex:1;padding:3px 0;font-size:.58rem;font-family:Cinzel,serif;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--dim);cursor:pointer">👑 Legends (${LEGENDS_LIST.length})</button>
+      </div>
+      <div id="listActive" style="overflow-y:auto;overflow-x:hidden;flex:1;touch-action:pan-y;-webkit-overflow-scrolling:touch"></div>
+      <div id="listLegends" style="overflow-y:auto;overflow-x:hidden;flex:1;display:none;touch-action:pan-y;-webkit-overflow-scrolling:touch"></div>
+    `;
+          listEl.style.cssText =
+            "display:flex;flex-direction:column;gap:0;max-height:240px;overflow:hidden;border:1px solid var(--brd);border-radius:5px;";
+
+          const fillList = (container, list, offset) => {
+            list.forEach((p, i) => {
+              const lvl = offset + i;
+              const row = document.createElement("div");
+              row.className = "player-row";
+              row.dataset.l = lvl;
+              row.innerHTML = `<span style="color:var(--dim);font-size:.5rem;min-width:22px">#${i + 1}</span><span>${p.flag}</span><span style="flex:1;font-size:.62rem">${p.name}</span><span style="color:var(--dim);font-size:.55rem">${p.elo}</span>`;
+              row.style.cssText =
+                "display:flex;align-items:center;gap:5px;padding:3px 6px;cursor:pointer;border-radius:3px;transition:background .12s";
+              row.onmouseenter = () =>
+                (row.style.background = "rgba(201,168,76,.1)");
+              row.onmouseleave = () => {
+                if (row.classList.contains("on")) return;
+                row.style.background = "";
+              };
+              row.addEventListener("click", () => setLevel(lvl));
+              container.appendChild(row);
+            });
+          };
+          fillList(document.getElementById("listActive"), ACTIVE_PLAYERS, 6);
+          fillList(
+            document.getElementById("listLegends"),
+            LEGENDS_LIST,
+            LEGEND_OFFSET,
+          );
+        }
+
+        // BvB selects
+        ["bvbWhite", "bvbBlack"].forEach((id) => {
+          const sel = document.getElementById(id);
+          if (!sel) return;
+          while (sel.options.length > 5) sel.remove(5);
+          const addGroup = (label, list, offset) => {
+            const g = document.createElement("optgroup");
+            g.label = label;
+            list.forEach((p, i) => {
+              const o = document.createElement("option");
+              o.value = offset + i;
+              o.textContent = `#${i + 1} ${p.flag} ${p.name} (${p.elo})`;
+              g.appendChild(o);
+            });
+            sel.appendChild(g);
+          };
+          addGroup("🏆 Active Players", ACTIVE_PLAYERS, 6);
+          addGroup("👑 Legends", LEGENDS_LIST, LEGEND_OFFSET);
+        });
+      }
+
+      function showTab(tab) {
+        document.getElementById("listActive").style.display =
+          tab === "active" ? "block" : "none";
+        document.getElementById("listLegends").style.display =
+          tab === "legends" ? "block" : "none";
+        document.getElementById("tabActive").style.cssText =
+          `flex:1;padding:3px 0;font-size:.58rem;font-family:Cinzel,serif;background:${tab === "active" ? "var(--sur)" : "transparent"};border:none;border-bottom:2px solid ${tab === "active" ? "var(--gold)" : "transparent"};color:${tab === "active" ? "var(--gold)" : "var(--dim)"};cursor:pointer`;
+        document.getElementById("tabLegends").style.cssText =
+          `flex:1;padding:3px 0;font-size:.58rem;font-family:Cinzel,serif;background:${tab === "legends" ? "var(--sur)" : "transparent"};border:none;border-bottom:2px solid ${tab === "legends" ? "var(--gold)" : "transparent"};color:${tab === "legends" ? "var(--gold)" : "var(--dim)"};cursor:pointer`;
+      }
+
+      // ── Celebrity/player bot personalities ───────────────────────────────────
       function celebBotMove(brd, castl, frzW, persona, gen) {
         if (_botAbort || G.over || NET.mode !== "bot" || gen !== _botGeneration)
           return;
-        const col = G.turn; // supports both colors in BvB
-        const frz = col === "w" ? G.frz.byB : G.frz.byW; // frozen for col
+        const col = G.turn;
+        const frz = col === "w" ? new Set(G.frz.byW) : new Set(G.frz.byB);
         const ms = allMoves(brd, col, castl, frz);
         if (!ms.length) {
           postBotMoveColor(null, col);
           return;
         }
 
+        const { depth, noise } = playerToStrength(persona);
+        const style = PLAYERS[persona]?.style || "universal";
         const killers = Array.from({ length: 8 }, () => [null, null]);
         ms.sort(
           (a, b) =>
             scoreMvOrder(brd, b, killers, 0) - scoreMvOrder(brd, a, killers, 0),
         );
 
-        // Score each move with personality modifier
+        const dl = Date.now() + 2000;
         const scoredMoves = ms.map((mv) => {
           const nb = cp(brd),
             nc = { ...castl },
@@ -4526,11 +5199,10 @@
           if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
           applyMv(nb, mv, col);
           const nf = calcFrz(nb);
-          const oppFrz = opp(col) === "w" ? nf.byB : nf.byW;
-          const dl = Date.now() + 800;
+          const oppFrz = opp(col) === "w" ? new Set(nf.byW) : new Set(nf.byB);
           const raw = abSearch(
             nb,
-            2,
+            depth - 1,
             -Infinity,
             Infinity,
             opp(col),
@@ -4542,15 +5214,14 @@
           );
           const base =
             raw === null ? evalBoard(nb) * (col === "w" ? 1 : -1) : -(raw || 0);
-          let bonus = 0;
           const piece = brd[mv.fr][mv.fc];
           const pt = piece ? piece[1] : "P";
-          const toRank = parseInt(RANKS[mv.tr]);
           const cap = brd[mv.tr][mv.tc];
+          const frzAfter = calcFrz(nb);
+          let bonus = 0;
 
-          if (persona === 6) {
-            // Magnus — positional mastery, endgame strength, minimal risk
-            // Loves central control, king safety, long-term structure
+          if (style === "positional") {
+            // Magnus style: endgame, centralization, freeze exploitation
             if (
               pt === "N" &&
               mv.tr >= 2 &&
@@ -4558,60 +5229,73 @@
               mv.tc >= 2 &&
               mv.tc <= 5
             )
-              bonus += 35; // central knights
-            if (pt === "P" && mv.tr === mv.fr - 1) bonus += 8; // steady pawn moves
-            if (mv.flag === "cs" || mv.flag === "cl") bonus += 25; // always castles
-            if (cap && VAL[cap[1]] > VAL[pt]) bonus += 60; // favors winning exchanges
-            if (pt === "K") bonus -= 40; // king safety paramount
-            // Freeze exploitation — Magnus loves paralyzing opponent
-            const frzAfter = calcFrz(nb, null);
-            bonus += frzAfter.all.length * 20;
-            // Slight noise for variety
-            bonus += (Math.random() - 0.5) * 15;
-          } else if (persona === 7) {
-            // Hikaru — aggressive speed chess, tactics, chaos, sacrifices
-            // Loves sacrifices, checks, open positions
-            if (inCheck(nb, opp(col))) bonus += 80; // LOVE checks
-            if (cap) bonus += VAL[cap[1]] * 0.15; // aggressive captures
-            if (pt === "Q") bonus += 30; // queen activity
-            if (
-              pt === "R" &&
-              (mv.tc === 0 || mv.tc === 7 || mv.tr === 0 || mv.tr === 7)
-            )
-              bonus -= 10;
-            if (pt === "P" && (col === "w" ? toRank <= 4 : toRank >= 5))
-              bonus += 25; // push pawns
-            // Hikaru loves to sacrifice for attack
-            if (cap && VAL[cap[1]] < VAL[pt]) bonus += 30; // piece sacrifices
-            // Open files and diagonals
-            if (pt === "B" || pt === "Q") {
-              const dx = Math.abs(mv.tc - mv.fc) + Math.abs(mv.tr - mv.fr);
-              bonus += dx * 4;
-            }
-            bonus += (Math.random() - 0.5) * 30; // more chaotic
-          } else if (persona === 8) {
-            // Duda — dynamic attacker, knight lover, risks for initiative
-            if (pt === "N") bonus += 40; // knight SPECIALIST
-            if (pt === "N" && mv.tr >= 2 && mv.tr <= 5) bonus += 25;
-            if (inCheck(nb, opp(col))) bonus += 60;
-            if (cap) bonus += 25;
-            // Duda loves initiative even at material cost
-            const frzAfter = calcFrz(nb, null);
+              bonus += 35;
+            if (mv.flag === "cs" || mv.flag === "cl") bonus += 25;
+            if (cap && VAL[cap[1]] > VAL[pt]) bonus += 60;
             bonus += frzAfter.all.length * 25;
-            if (pt === "P" && Math.abs(mv.tc - mv.fc) === 0)
-              bonus += (col === "w" ? 6 - mv.tr : mv.tr - 1) * 12; // pawn storms
-            if (mv.flag === "cs" || mv.flag === "cl") bonus -= 10; // Duda often skips castling
-            bonus += (Math.random() - 0.5) * 25;
+            if (pt === "K") bonus -= 40;
+          } else if (
+            style === "tactical" ||
+            style === "aggressive" ||
+            style === "sharp"
+          ) {
+            // Hikaru/MVL: checks, captures, chaos
+            if (inCheck(nb, opp(col))) bonus += 90;
+            if (cap) bonus += VAL[cap[1]] * 0.2;
+            if (pt === "Q") bonus += 30;
+            if (cap && VAL[cap[1]] < VAL[pt]) bonus += 35;
+            if (pt === "B" || pt === "Q") {
+              bonus += (Math.abs(mv.tc - mv.fc) + Math.abs(mv.tr - mv.fr)) * 4;
+            }
+          } else if (style === "dynamic" || style === "attacking") {
+            // Duda/Nepomniachtchi: knights, pawn storms, initiative
+            if (pt === "N") bonus += 50;
+            if (pt === "N" && mv.tr >= 2 && mv.tr <= 5) bonus += 25;
+            if (inCheck(nb, opp(col))) bonus += 70;
+            bonus += frzAfter.all.length * 30;
+            if (cap) bonus += 25;
+          } else if (
+            style === "solid" ||
+            style === "defensive" ||
+            style === "grind"
+          ) {
+            // Giri/So/Karjakin: safe, no blunders, king safety
+            if (mv.flag === "cs" || mv.flag === "cl") bonus += 40;
+            if (pt === "K") bonus -= 60;
+            if (cap && VAL[cap[1]] < VAL[pt]) bonus -= 50; // avoid hanging pieces
+            if (pt === "N" && mv.tr >= 2 && mv.tr <= 5) bonus += 20;
+          } else if (
+            style === "universal" ||
+            style === "strategic" ||
+            style === "creative"
+          ) {
+            // Caruana/Anand/Aronian: balanced, adapts
+            if (inCheck(nb, opp(col))) bonus += 40;
+            if (cap) bonus += VAL[cap[1]] * 0.1;
+            if (mv.flag === "cs" || mv.flag === "cl") bonus += 20;
+            bonus += frzAfter.all.length * 15;
           }
+
+          // Add calibrated noise based on ELO
+          bonus += (Math.random() - 0.5) * noise * 2;
           return { mv, score: base + bonus };
         });
 
         scoredMoves.sort((a, b) => b.score - a.score);
-        // Take best move, with small chance of second-best for variety
-        const pick =
-          Math.random() < 0.85
-            ? scoredMoves[0]
-            : scoredMoves[Math.min(1, scoredMoves.length - 1)];
+        // Higher ELO = more likely to pick top move
+        const pickIdx =
+          noise <= 5
+            ? 0
+            : noise <= 15
+              ? Math.random() < 0.9
+                ? 0
+                : 1
+              : Math.random() < 0.8
+                ? 0
+                : Math.random() < 0.7
+                  ? 1
+                  : 2;
+        const pick = scoredMoves[Math.min(pickIdx, scoredMoves.length - 1)];
         postBotMoveColor(pick.mv, col);
       }
 
@@ -4630,7 +5314,7 @@
         const gen = _botGeneration;
         const brd = cp(G.brd),
           castl = { ...G.castl };
-        const frz = col === "w" ? G.frz.byB : G.frz.byW;
+        const frz = col === "w" ? new Set(G.frz.byW) : new Set(G.frz.byB);
         const ms = allMoves(brd, col, castl, frz);
         if (!ms.length) {
           postBotMoveColor(null, col);
@@ -4660,7 +5344,7 @@
           return;
         }
         if (level >= 6) {
-          // Celebrity bot
+          // All chess player bots (levels 6-20)
           setTimeout(() => celebBotMove(brd, castl, frz, level, gen), 0);
           return;
         }
@@ -4700,7 +5384,7 @@
             if (mv.fr === 0 && mv.fc === 0) nc.bQ = false;
             applyMv(nb, mv, col);
             const nf = calcFrz(nb);
-            const oppFrz = opp(col) === "w" ? nf.byB : nf.byW;
+            const oppFrz = opp(col) === "w" ? new Set(nf.byW) : new Set(nf.byB);
             const raw = abSearch(
               nb,
               depth - 1,
@@ -4743,10 +5427,16 @@
         const gen = _botGeneration;
         const level = botLevel;
         if (level >= 6) {
-          // Celebrity bot for single-player (black)
+          // All chess player bots
           setTimeout(
             () =>
-              celebBotMove(cp(G.brd), { ...G.castl }, G.frz.byW, level, gen),
+              celebBotMove(
+                cp(G.brd),
+                { ...G.castl },
+                new Set(G.frz.byB),
+                level,
+                gen,
+              ),
             0,
           );
           return;
@@ -4756,7 +5446,7 @@
             _doBotMove(
               cp(G.brd),
               { ...G.castl },
-              G.frz.byW.slice(),
+              new Set(G.frz.byB),
               level,
               gen,
             ),
@@ -4854,7 +5544,7 @@
               Infinity,
               "w",
               nc,
-              nf.byW,
+              new Set(nf.byW),
               1,
               df,
               kf,
@@ -4904,7 +5594,7 @@
               Infinity,
               "w",
               nc,
-              nf.byW,
+              new Set(nf.byW),
               1,
               null,
               killers,
@@ -5331,7 +6021,7 @@
           myTurn = isMyTurn();
         if (myTurn) {
           pmClear();
-          const frz = mc === "w" ? G.frz.byB : G.frz.byW;
+          const frz = mc === "w" ? new Set(G.frz.byW) : new Set(G.frz.byB);
           if (G.sel) {
             const mv = G.poss.find((m) => m.tr === r && m.tc === c);
             if (mv) {
@@ -5341,8 +6031,7 @@
               return;
             }
             if (p && p[0] === mc) {
-              const isFrz =
-                p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
+              const isFrz = p[1] !== "P" && p[1] !== "K" && frz.has(r * 8 + c);
               if (!isFrz) {
                 G.sel = { r, c };
                 G.poss = movesFrom(G.brd, r, c, G.castl, frz);
@@ -5356,8 +6045,7 @@
             return;
           }
           if (p && p[0] === mc) {
-            const isFrz =
-              p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
+            const isFrz = p[1] !== "P" && p[1] !== "K" && frz.has(r * 8 + c);
             if (isFrz) return;
             G.sel = { r, c };
             G.poss = movesFrom(G.brd, r, c, G.castl, frz);
@@ -5471,8 +6159,8 @@
           myTurn = isMyTurn();
         if (!myTurn) return false;
         if (p[0] !== mc) return false;
-        const frz = mc === "w" ? G.frz.byB : G.frz.byW;
-        const isFrz = p[1] !== "P" && p[1] !== "K" && frz.includes(r * 8 + c);
+        const frz = mc === "w" ? new Set(G.frz.byW) : new Set(G.frz.byB);
+        const isFrz = p[1] !== "P" && p[1] !== "K" && frz.has(r * 8 + c);
         if (isFrz) return false;
         const poss = movesFrom(G.brd, r, c, G.castl, frz);
         const gh = document.createElement("span");
@@ -5684,9 +6372,10 @@
         if (PREMOVE.active) st += " ⚡";
         document.getElementById("mSt").textContent = st;
         const ev = G.prevEval;
+        const _mn = Math.ceil((19000 - Math.abs(ev)) / 2 + 1);
         document.getElementById("mEv").textContent =
           Math.abs(ev) > 9000
-            ? "M"
+            ? (ev > 0 ? "M" : "-M") + _mn
             : (ev >= 0 ? "+" : "") + (ev / 100).toFixed(1);
       }
       function updCaps() {
@@ -5701,45 +6390,32 @@
           bv > wv ? "+" + (bv - wv) : "";
       }
       function setEval(score, depth) {
-        const brd = document.getElementById("board"),
-          et = document.getElementById("evtrack");
-        if (brd && et && window.innerWidth > 700) {
-          const h = brd.getBoundingClientRect().height;
-          if (h > 0) et.style.height = h + "px";
-        }
         const isMate = Math.abs(score) > 9000;
         const clamp = isMate
           ? score > 0
             ? 2000
             : -2000
           : Math.max(-2000, Math.min(2000, score));
-        const wp = Math.round(50 + (clamp / 2000) * 46),
-          bp = 100 - wp;
+        const wp = Math.round(50 + (clamp / 2000) * 46);
+        const bp = 100 - wp;
         const W = document.getElementById("evW"),
           B = document.getElementById("evB");
-        const isMob = window.innerWidth <= 700;
-        if (isMob) {
-          if (W) {
-            W.style.width = wp + "%";
-            W.style.height = "100%";
-          }
-          if (B) {
-            B.style.width = bp + "%";
-            B.style.height = "100%";
-          }
-        } else {
-          if (W) {
-            W.style.height = wp + "%";
-            W.style.width = "100%";
-          }
-          if (B) {
-            B.style.height = bp + "%";
-            B.style.width = "100%";
-          }
+        if (W) {
+          W.style.height = wp + "%";
+          W.style.width = "100%";
         }
-        const txt = isMate
-          ? "M"
-          : (score >= 0 ? "+" : "") + (score / 100).toFixed(1);
+        if (B) {
+          B.style.height = bp + "%";
+          B.style.width = "100%";
+        }
+        // Mate in N: score is ±(19000-ply), so movesToMate = ceil((19000-abs(score))/2)+1
+        let txt;
+        if (isMate) {
+          const movesToMate = Math.ceil((19000 - Math.abs(score)) / 2) + 1;
+          txt = (score > 0 ? "M" : "-M") + movesToMate;
+        } else {
+          txt = (score >= 0 ? "+" : "") + (score / 100).toFixed(1);
+        }
         const sc = document.getElementById("evSc");
         if (sc) sc.textContent = txt;
         const dp = document.getElementById("evDepth");
@@ -5751,13 +6427,13 @@
         if (lb)
           lb.textContent = bAdv
             ? isMate
-              ? "M"
+              ? "-M" + Math.ceil((19000 - Math.abs(score)) / 2 + 1)
               : (-score / 100).toFixed(1)
             : "";
         if (lw)
           lw.textContent = wAdv
             ? isMate
-              ? "M"
+              ? "M" + Math.ceil((19000 - Math.abs(score)) / 2 + 1)
               : (score / 100).toFixed(1)
             : "";
       }
@@ -6023,19 +6699,126 @@
       // ═══════════════════════════════════════
       // LEVEL
       // ═══════════════════════════════════════
+      // ── Ranked modal helper ───────────────────────────────────────────────────
+      function showRankedModal(desc, onRanked, onCasual) {
+        const modal = document.getElementById("rankedModal");
+        const descEl = document.getElementById("rankedModalDesc");
+        if (descEl)
+          descEl.textContent =
+            desc || "Choose how this game affects your ELO rating";
+        if (!modal) return;
+        modal.classList.add("on");
+        const yes = document.getElementById("rankedYes"),
+          no = document.getElementById("rankedNo");
+        const cleanup = () => {
+          modal.classList.remove("on");
+          yes.onclick = null;
+          no.onclick = null;
+        };
+        yes.onclick = () => {
+          cleanup();
+          onRanked && onRanked();
+        };
+        no.onclick = () => {
+          cleanup();
+          onCasual && onCasual();
+        };
+      }
+
+      // ── Apply ranked/casual visibility rules ─────────────────────────────────
+      function applyVisibility() {
+        const isOnline = NET.mode === "host" || NET.mode === "guest";
+        const isRankedGame =
+          (isOnline && NET.isRanked) ||
+          (NET.mode === "bot" && RANKED.on && botLevel >= 6 && !BVB.on);
+
+        // Eval bar: hide if ranked or online
+        const showEval = !isRankedGame && !isOnline;
+        NET.showEval = showEval;
+        document.getElementById("evbar").style.display = showEval ? "" : "none";
+        const mev = document.getElementById("mEv");
+        if (mev) mev.style.display = showEval ? "" : "none";
+        const te = document.getElementById("togEval");
+        if (te) te.checked = showEval;
+
+        // Move ratings: hide if ranked or online
+        const showRating = !isRankedGame && !isOnline;
+        NET.showRating = showRating;
+        const tr = document.getElementById("togRating");
+        if (tr) tr.checked = showRating;
+        const rCard = document.getElementById("bR");
+        if (rCard && rCard.parentElement)
+          rCard.parentElement.style.display = showRating ? "" : "none";
+
+        // Hide the toggle buttons themselves when not applicable:
+        // — always hidden in online
+        // — hidden in ranked offline
+        const showToggles = !isOnline && !isRankedGame;
+        const togEvalLabel = document
+          .getElementById("togEval")
+          ?.closest("label");
+        const togRatingLabel = document
+          .getElementById("togRating")
+          ?.closest("label");
+        if (togEvalLabel)
+          togEvalLabel.style.display = showToggles ? "" : "none";
+        if (togRatingLabel)
+          togRatingLabel.style.display = showToggles ? "" : "none";
+
+        // Coach: hide if ranked OR online
+        const coachAllowed = !isRankedGame && !isOnline;
+        if (!coachAllowed) {
+          TRAINER.on = false;
+          const tog = document.getElementById("togTrainer");
+          if (tog) tog.checked = false;
+          clearBestArrow();
+          const panel = document.getElementById("coachPanel");
+          if (panel) panel.classList.remove("open");
+        }
+        const coachBtn = document.getElementById("coachBtn");
+        if (coachBtn) coachBtn.style.display = isOnline ? "none" : "";
+        const togLabel = document.querySelector(".coach-toggle-label");
+        if (togLabel) togLabel.style.opacity = coachAllowed ? "1" : "0.35";
+        const togInput = document.getElementById("togTrainer");
+        if (togInput) togInput.disabled = !coachAllowed;
+      }
+
       function setLevel(n) {
         botLevel = n;
-        BVB.on = false; // switching level exits BvB mode
+        BVB.on = false;
         document
           .querySelectorAll(".lb,.mpl")
           .forEach((b) =>
             b.classList.toggle("on", parseInt(b.dataset.l) === n),
           );
-        // Update player name display
-        const oppName = botName(n);
+        document
+          .querySelectorAll(".player-row")
+          .forEach((r) =>
+            r.classList.toggle("on", parseInt(r.dataset.l) === n),
+          );
         const pTop = document.getElementById("pnmTop");
-        if (pTop) pTop.textContent = oppName + " (Black)";
-        if (!G.over && NET.mode === "bot") newGame();
+        if (pTop && NET.mode === "bot")
+          pTop.textContent = botName(n) + " (Black)";
+        if (n >= 6) {
+          // Celebrity — ask ranked/casual first
+          showRankedModal(
+            `Play vs ${botName(n)} (${PLAYERS[n]?.elo || "?"}) — ranked or casual?`,
+            () => {
+              RANKED.on = true;
+              applyVisibility();
+              if (!G.over && NET.mode === "bot") newGame();
+            },
+            () => {
+              RANKED.on = false;
+              applyVisibility();
+              if (!G.over && NET.mode === "bot") newGame();
+            },
+          );
+        } else {
+          RANKED.on = false; // non-celeb bots never ranked
+          applyVisibility();
+          if (!G.over && NET.mode === "bot") newGame();
+        }
       }
       document
         .querySelectorAll(".lb,.mpl")
@@ -6446,6 +7229,18 @@
             coachSetStatus("Ready — make a move", false);
           }
         });
+      document
+        .getElementById("togArrow")
+        .addEventListener("change", function () {
+          if (this.checked) {
+            // Redraw if we have a stored arrow
+            if (BEST_ARROW.mv) drawBestArrow(BEST_ARROW.mv);
+          } else {
+            // Clear SVG but keep BEST_ARROW.mv so it can be restored
+            const svg = document.getElementById("bestSvg");
+            if (svg) svg.innerHTML = "";
+          }
+        });
       document.getElementById("coachBtn").addEventListener("click", () => {
         const p = document.getElementById("coachPanel");
         if (p) p.classList.toggle("open");
@@ -6457,6 +7252,24 @@
       document.getElementById("coachClear").addEventListener("click", () => {
         coachClearMessages();
         coachSetStatus("Ready — play a move", false);
+      });
+
+      // ── Ranked / Casual toggle ────────────────────────────────────────────────
+      document.getElementById("btnRanked").addEventListener("click", () => {
+        RANKED.on = true;
+        document.getElementById("btnRanked").classList.add("on");
+        document.getElementById("btnCasual").classList.remove("on");
+        document.getElementById("rankedDesc").textContent =
+          "ELO changes after this game";
+        applyVisibility();
+      });
+      document.getElementById("btnCasual").addEventListener("click", () => {
+        RANKED.on = false;
+        document.getElementById("btnCasual").classList.add("on");
+        document.getElementById("btnRanked").classList.remove("on");
+        document.getElementById("rankedDesc").textContent =
+          "No ELO change (casual game)";
+        applyVisibility();
       });
 
       document
@@ -6620,6 +7433,8 @@
             document.getElementById("lpGuest").classList.add("joined");
             document.getElementById("lKick").style.display = "";
             document.getElementById("lTimeSec").style.display = "";
+            document.getElementById("lRankedSec").style.display = "";
+            setLobbyRanked(true);
             lmsg("Guest connected! Choose a time control, then start.");
             if (selectedTC !== null)
               document.getElementById("lStart").style.display = "";
@@ -6763,7 +7578,7 @@
         _tcDeclineCount = 0;
         _tcHostFree = false;
         _declinedIdxs = new Set();
-        ["lLinkSec", "lTimeSec", "lStart"].forEach((id) => {
+        ["lLinkSec", "lTimeSec", "lStart", "lRankedSec"].forEach((id) => {
           const e = document.getElementById(id);
           if (e) e.style.display = "none";
         });
@@ -6804,20 +7619,22 @@
         NET.myElo = eloGet();
         NET.oppElo =
           myRole === "host" ? cfg.guestElo || 500 : cfg.hostElo || 500;
-        NET.showEval = cfg.showEval;
-        NET.showRating = cfg.showRating;
+        NET.showEval = false;
+        NET.showRating = false;
+        NET.isRanked = cfg.isRanked !== false;
         NET.timeCtrl = cfg.timeCtrl || null;
         NET.rematchTime = cfg.timeCtrl || null;
         NET.conn = P.conn;
         NET.gameStarted = true;
         const te = document.getElementById("togEval");
-        if (te) te.checked = cfg.showEval;
+        if (te) te.checked = false;
         const tr = document.getElementById("togRating");
-        if (tr) tr.checked = cfg.showRating;
+        if (tr) tr.checked = false;
         flipped = myRole === "guest";
         const bc = document.getElementById("hB");
         if (bc && bc.parentElement) bc.parentElement.style.display = "none";
         document.getElementById("newBtn").style.display = "none";
+        applyVisibility(); // hide/show based on ranked + online
         newGame(cfg.timeCtrl);
         if (cfg.timeCtrl && myRole === "host") startTurnTimer("w");
         eloShowOnlinePinfo();
@@ -6880,21 +7697,47 @@
           });
         if (d.type === "rematch_accept") doRematch();
         if (d.type === "timer_sync") NET.timers = d.timers;
+        if (d.type === "elo_update") {
+          NET.oppElo = d.elo;
+          eloShowOnlinePinfo();
+        }
       }
       function doRematch() {
         document.getElementById("toast").classList.remove("on");
         flipped = NET.myCol === "b";
+        // Update my ELO before rematch (may have changed from last game)
+        NET.myElo = eloGet();
+        netSend({ type: "elo_update", elo: NET.myElo });
         newGame(NET.rematchTime);
         if (NET.rematchTime && NET.myCol === "w") startTurnTimer("w");
         eloShowOnlinePinfo();
       }
+      // ── Online lobby ranked/casual ────────────────────────────────────────────
+      let _lobbyIsRanked = true;
+      function setLobbyRanked(r) {
+        _lobbyIsRanked = r;
+        document.getElementById("lBtnRanked").className =
+          "btn " + (r ? "bgd" : "bsc");
+        document.getElementById("lBtnCasual").className =
+          "btn " + (r ? "bsc" : "bgd");
+        document.getElementById("lRankedDesc").textContent = r
+          ? "ELO changes after this game"
+          : "No ELO change (casual)";
+      }
+      document
+        .getElementById("lBtnRanked")
+        .addEventListener("click", () => setLobbyRanked(true));
+      document
+        .getElementById("lBtnCasual")
+        .addEventListener("click", () => setLobbyRanked(false));
+
       document.getElementById("lKick").addEventListener("click", () => {
         netSend({ type: "kick" });
         guestJoined = false;
         document.getElementById("lpGuestNm").textContent = "Waiting…";
         document.getElementById("lpGuestSt").textContent = "No one yet";
         document.getElementById("lpGuest").classList.remove("joined");
-        ["lKick", "lTimeSec", "lStart"].forEach(
+        ["lKick", "lTimeSec", "lStart", "lRankedSec"].forEach(
           (id) => (document.getElementById(id).style.display = "none"),
         );
         lmsg("Guest removed.");
@@ -6914,8 +7757,9 @@
           guestName,
           hostElo: eloGet(),
           guestElo,
-          showEval: document.getElementById("optEval").checked,
-          showRating: document.getElementById("optRating").checked,
+          showEval: false,
+          showRating: false,
+          isRanked: _lobbyIsRanked,
           timeCtrl: TIME_CTRLS[selectedTC],
         };
         netSend(cfg);
@@ -7099,10 +7943,13 @@
       function eloGameStart() {
         _eloMoveDeltaAccum = 0;
         _eloMoveLog = [];
-        _eloEligible =
-          (NET.mode === "bot" && botLevel >= 4) ||
-          NET.mode === "host" ||
-          NET.mode === "guest";
+        // Offline: only celebs (level 6+) + RANKED.on
+        const offlineEligible =
+          NET.mode === "bot" && RANKED.on && botLevel >= 6 && !BVB.on;
+        // Online: respect isRanked flag chosen in lobby
+        const onlineEligible =
+          (NET.mode === "host" || NET.mode === "guest") && NET.isRanked;
+        _eloEligible = offlineEligible || onlineEligible;
         const te = document.getElementById("tEloResult");
         if (te) te.style.display = "none";
         const tb = document.getElementById("tEloBreakdown");
@@ -7130,7 +7977,7 @@
         const resultLabel =
           winner === myCol ? "Win" : !winner || winner === "" ? "Draw" : "Loss";
         const oppName =
-          NET.mode === "bot" ? `Bot L${botLevel}` : NET.oppName || "Opponent";
+          NET.mode === "bot" ? botName(botLevel) : NET.oppName || "Opponent";
         const entry = {
           date: new Date().toLocaleDateString("en-GB"),
           result: resultLabel,
@@ -7199,12 +8046,13 @@
         if (NET.mode !== "host" && NET.mode !== "guest") return;
         const botEl = document.getElementById("eloBot"),
           topEl = document.getElementById("eloTop");
+        const tag = NET.isRanked ? "🏆" : "🎮";
         if (botEl) {
-          botEl.textContent = `ELO: ${eloGet()}`;
+          botEl.textContent = `${tag} ELO: ${eloGet()}`;
           botEl.style.display = "block";
         }
         if (topEl) {
-          topEl.textContent = `ELO: ${NET.oppElo || "?"}`;
+          topEl.textContent = `${tag} ELO: ${NET.oppElo || "?"}`;
           topEl.style.display = "block";
         }
       }
@@ -7243,15 +8091,15 @@
       function recalcSq() {
         const center = document.querySelector(".center");
         if (!center) return;
-        const isMobile = window.innerWidth <= 700;
-        const lbl = isMobile ? 14 : 18;
+        // Always desktop layout — evbar (~20px) on left, rpanel on right (already excluded from center)
+        const lbl = 18;
         document.documentElement.style.setProperty("--lbl", lbl + "px");
-        const aw = center.clientWidth - (isMobile ? 4 : 36); // evbar+margin on desktop
-        const ah = center.clientHeight - (isMobile ? 80 : 110); // pinfo bars + gaps
+        const aw = center.clientWidth - 36; // evbar+margin
+        const ah = center.clientHeight - 110; // pinfo bars + gaps
         const sqFromW = (aw - lbl * 2) / 8;
         const sqFromH = (ah - lbl * 2) / 8;
         const sq = Math.max(
-          36,
+          24,
           Math.min(80, Math.floor(Math.min(sqFromW, sqFromH))),
         );
         document.documentElement.style.setProperty("--sq", sq + "px");
@@ -7269,6 +8117,8 @@
       // ═══════════════════════════════════════
       newGame();
       eloInit();
+      buildPlayerUI();
+      applyVisibility(); // set initial state (non-celeb = casual)
     </script>
   </body>
 </html>
