@@ -333,7 +333,8 @@
       .bwrap.flipped .blbl,
       .bwrap.flipped .pc,
       .bwrap.flipped .friz,
-      .bwrap.flipped .dot::after {
+      .bwrap.flipped .dot::after,
+      .bwrap.flipped .ri-board {
         transform: rotate(180deg);
       }
       .pre {
@@ -422,10 +423,10 @@
         background: #aad455 !important;
       }
       .lm {
-        background: rgba(205, 210, 106, 0.55) !important;
+        background: var(--lm-color, rgba(205, 210, 106, 0.55)) !important;
       }
       .lm.dk {
-        background: rgba(170, 175, 80, 0.65) !important;
+        background: var(--lm-color-dk, rgba(170, 175, 80, 0.65)) !important;
       }
       .chk {
         background: rgba(220, 30, 30, 0.7) !important;
@@ -489,6 +490,63 @@
         font-size: calc(var(--sq) * 0.19);
         z-index: 3;
         pointer-events: none;
+      }
+
+      /* When flipped, correct the position of absolute icons so they stay in correct corner */
+      .ri-board {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        z-index: 4;
+        pointer-events: none;
+        width: calc(var(--sq) * 0.38);
+        height: calc(var(--sq) * 0.38);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: calc(var(--sq) * 0.22);
+        font-weight: 900;
+        line-height: 1;
+        background: rgba(205, 210, 106, 0.95);
+        color: #000;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+      }
+      .ri-board.br {
+        color: #000;
+      }
+      .ri-board.gr {
+        color: #fff;
+      }
+      .ri-board.be {
+        color: #000;
+      }
+      .ri-board.ex {
+        color: #000;
+      }
+      .ri-board.go {
+        color: #000;
+      }
+      .ri-board.ok {
+        color: #000;
+      }
+      .ri-board.in {
+        color: #000;
+      }
+      .ri-board.mi {
+        color: #fff;
+      }
+      .ri-board.bl {
+        color: #fff;
+      }
+      .ri-board.ct {
+        color: #fff;
+      }
+      .bwrap.flipped .ri-board {
+        top: auto;
+        left: auto;
+        bottom: 2px;
+        right: 2px;
       }
       .pc.dim {
         opacity: 0.15;
@@ -3828,6 +3886,7 @@
         BEST_ARROW.mv = null;
         const svg = document.getElementById("bestSvg");
         if (svg) svg.innerHTML = "";
+        document.querySelectorAll(".ri-board").forEach((e) => e.remove());
       }
 
       function drawBestArrow(mv) {
@@ -4236,6 +4295,12 @@
         // ── MOVE RATING + TRAINER ────────────────────────────────────────────────
         let ri = RTNG.length - 1;
         clearBestArrow();
+        // Reset lm color to default
+        const _boardEl = document.getElementById("board");
+        if (_boardEl) {
+          _boardEl.style.removeProperty("--lm-color");
+          _boardEl.style.removeProperty("--lm-color-dk");
+        }
         // Only increment analysisGen for human moves — bot moves shouldn't cancel player's analysis
         const _analysisGen = isBot ? G._analysisGen : ++G._analysisGen;
 
@@ -4320,6 +4385,66 @@
                   icon.title = R.l;
                   icon.textContent = R.s;
                   sp.appendChild(icon);
+                }
+                // Color last-move squares with rating color via CSS custom property
+                const lmColor =
+                  {
+                    br: "rgba(0,229,255,.45)",
+                    gr: "rgba(224,64,251,.45)",
+                    be: "rgba(105,240,174,.45)",
+                    ex: "rgba(178,255,89,.45)",
+                    go: "rgba(255,241,118,.45)",
+                    ok: "rgba(165,214,167,.35)",
+                    in: "rgba(255,204,2,.45)",
+                    mi: "rgba(255,112,67,.45)",
+                    bl: "rgba(255,23,68,.5)",
+                    ct: "rgba(255,109,0,.5)",
+                  }[R.c] || "rgba(205,210,106,.55)";
+                const lmColorDk =
+                  {
+                    br: "rgba(0,200,230,.55)",
+                    gr: "rgba(190,30,220,.55)",
+                    be: "rgba(80,210,140,.55)",
+                    ex: "rgba(150,230,60,.55)",
+                    go: "rgba(230,210,80,.55)",
+                    ok: "rgba(130,185,135,.45)",
+                    in: "rgba(220,175,0,.55)",
+                    mi: "rgba(230,80,40,.6)",
+                    bl: "rgba(220,0,50,.6)",
+                    ct: "rgba(220,80,0,.6)",
+                  }[R.c] || "rgba(170,175,80,.65)";
+                const boardEl2 = document.getElementById("board");
+                if (boardEl2) {
+                  boardEl2.style.setProperty("--lm-color", lmColor);
+                  boardEl2.style.setProperty("--lm-color-dk", lmColorDk);
+                }
+                // Badge on destination square
+                document
+                  .querySelectorAll(".ri-board")
+                  .forEach((e) => e.remove());
+                const sqEl = document.querySelector(
+                  `.sq[data-r="${_mv2.tr}"][data-c="${_mv2.tc}"]`,
+                );
+                if (sqEl) {
+                  const bicon = document.createElement("span");
+                  bicon.className = `ri-board ${R.c}`;
+                  bicon.style.background = lmColor.replace(
+                    /[\d.]+\)$/,
+                    "0.95)",
+                  );
+                  // Text color: dark for light backgrounds, white for dark
+                  const darkText = [
+                    "br",
+                    "be",
+                    "ex",
+                    "go",
+                    "ok",
+                    "in",
+                  ].includes(R.c);
+                  bicon.style.color = darkText ? "#000" : "#fff";
+                  bicon.textContent = R.s;
+                  bicon.title = R.l;
+                  sqEl.appendChild(bicon);
                 }
               }
               if (!isBot) eloOnMove(rIdx);
