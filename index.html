@@ -1925,11 +1925,11 @@
               <div class="rl">
                 <span class="ri">❄</span
                 ><span
-                  ><b>Freeze:</b> After any piece moves, all opponent pieces it
-                  now attacks are frozen — they cannot move. Kings & pawns are
-                  never frozen.
-                  <b>A frozen piece cannot freeze others.</b> Freezing is
-                  permanent as long as the attack holds.</span
+                  ><b>Freeze:</b> A piece is frozen if attacked by an opponent
+                  piece of <b>higher value</b> (Q freezes R/B/N · R freezes B/N
+                  · B freezes N). <b>Knight exception:</b> freezes any piece it
+                  attacks, even the Queen. Kings &amp; pawns are never frozen.
+                  Frozen pieces cannot move and cannot freeze others.</span
                 >
               </div>
               <div class="rl">
@@ -2531,60 +2531,72 @@
         }
         return false;
       }
-      // ── Freeze rules (optimized) ──────────────────────────────────────────────
+      // ── Freeze rules ──────────────────────────────────────────────────────────
+      // A piece is frozen if attacked by:
+      //   - A Knight (freezes ANY piece it attacks regardless of value)
+      //   - A piece of strictly higher value (Q>R>B>N by VAL)
+      // Pawns and Kings: never frozen, never freeze.
+      // Frozen pieces cannot move and cannot freeze others.
+      //
       function calcFrz(brd) {
         const frozen = new Set();
 
-        // Pre-collect non-P/K pieces by color for fast iteration
-        const wAtk = [],
-          bAtk = []; // attacker candidates
-        const wTgt = [],
-          bTgt = []; // target candidates
+        // Pre-collect non-P/K pieces by color
+        const wPieces = [],
+          bPieces = [];
         for (let r = 0; r < 8; r++)
           for (let c = 0; c < 8; c++) {
             const p = brd[r][c];
             if (!p) continue;
             if (p[1] === "P" || p[1] === "K") continue;
             const sq = r * 8 + c;
-            if (p[0] === "w") {
-              wAtk.push(sq);
-              wTgt.push(sq);
-            } else {
-              bAtk.push(sq);
-              bTgt.push(sq);
-            }
+            if (p[0] === "w") wPieces.push(sq);
+            else bPieces.push(sq);
           }
 
         // Iterative until stable
         let changed = true;
         while (changed) {
           changed = false;
-          // Check white targets (attacked by black attackers)
-          for (const tsq of wTgt) {
+          // White targets attacked by black pieces
+          for (const tsq of wPieces) {
             if (frozen.has(tsq)) continue;
             const tr = tsq >> 3,
               tc = tsq & 7;
-            for (const asq of bAtk) {
+            const tType = brd[tr][tc][1],
+              tgtVal = VAL[tType];
+            for (const asq of bPieces) {
               if (frozen.has(asq)) continue;
               const ar = asq >> 3,
-                ac = asq & 7;
-              if (reach(brd, ar, ac, tr, tc, brd[ar][ac][1])) {
+                ac = asq & 7,
+                a = brd[ar][ac],
+                aType = a[1];
+              if (aType === tType) continue; // same type never freezes same type
+              // Knight freezes any piece; others need strictly higher value
+              if (aType !== "N" && VAL[aType] <= tgtVal) continue;
+              if (reach(brd, ar, ac, tr, tc, aType)) {
                 frozen.add(tsq);
                 changed = true;
                 break;
               }
             }
           }
-          // Check black targets (attacked by white attackers)
-          for (const tsq of bTgt) {
+          // Black targets attacked by white pieces
+          for (const tsq of bPieces) {
             if (frozen.has(tsq)) continue;
             const tr = tsq >> 3,
               tc = tsq & 7;
-            for (const asq of wAtk) {
+            const tType = brd[tr][tc][1],
+              tgtVal = VAL[tType];
+            for (const asq of wPieces) {
               if (frozen.has(asq)) continue;
               const ar = asq >> 3,
-                ac = asq & 7;
-              if (reach(brd, ar, ac, tr, tc, brd[ar][ac][1])) {
+                ac = asq & 7,
+                a = brd[ar][ac],
+                aType = a[1];
+              if (aType === tType) continue;
+              if (aType !== "N" && VAL[aType] <= tgtVal) continue;
+              if (reach(brd, ar, ac, tr, tc, aType)) {
                 frozen.add(tsq);
                 changed = true;
                 break;
@@ -3571,42 +3583,63 @@
               );
             }
           }
-          // Knight
+          // Knight — special freeze piece
           else if (pieceT === "N") {
-            parts.push(
-              pick([
-                `The Knight on ${to} is well-placed — knights thrive near the centre where they control the maximum number of squares.`,
-                `Knights can't land adjacent to same-type allies in Control Chess, making ${to} an ideal outpost here.`,
-                `The Knight jumps to ${to}, covering several key squares and threatening future activity.`,
-              ]),
-            );
+            const freezeNote =
+              frzCount > 0
+                ? pick([
+                    `In Control Chess the Knight is uniquely powerful — it freezes any piece it attacks regardless of value. From ${to} it now paralyses ${frzCount} opponent piece${frzCount > 1 ? "s" : ""}.`,
+                    `The Knight on ${to} exploits its freeze exception — unlike other pieces it can freeze even a Queen or Rook from this square. ${frzCount} piece${frzCount > 1 ? "s are" : " is"} now immobilised.`,
+                    `Knights are the only pieces that can freeze higher-value opponents. From ${to} this Knight is freezing ${frzCount} enemy piece${frzCount > 1 ? "s" : ""} this turn.`,
+                  ])
+                : pick([
+                    `The Knight jumps to ${to} — in Control Chess knights are uniquely dangerous as they can freeze any piece they attack, even the Queen.`,
+                    `Knights can't land adjacent to same-type allies in Control Chess, making ${to} an ideal outpost. Remember: this Knight can freeze any opponent piece it attacks.`,
+                    `The Knight moves to ${to}, covering several key squares. Its freeze exception makes it one of the most feared pieces in Control Chess.`,
+                  ]);
+            parts.push(freezeNote);
           }
           // Bishop
           else if (pieceT === "B") {
-            parts.push(
-              pick([
-                `The Bishop is now active on ${to}, controlling a long diagonal and putting pressure on the opponent's position.`,
-                `Opening the Bishop's diagonal by moving to ${to} improves coordination and threatens the opponent's structure.`,
-              ]),
-            );
+            const freezeNote =
+              frzCount > 0
+                ? pick([
+                    `The Bishop activates on ${to} and freezes ${frzCount} enemy Knight${frzCount > 1 ? "s" : ""} — Bishops outrank Knights in the freeze hierarchy.`,
+                    `From ${to} the Bishop exerts diagonal pressure and immobilises ${frzCount} opponent piece${frzCount > 1 ? "s" : ""}.`,
+                  ])
+                : pick([
+                    `The Bishop is now active on ${to}, controlling a long diagonal and putting pressure on the opponent's position.`,
+                    `Opening the Bishop's diagonal by moving to ${to} improves coordination. Bishops can freeze Knights they attack.`,
+                  ]);
+            parts.push(freezeNote);
           }
           // Rook
           else if (pieceT === "R") {
-            parts.push(
-              pick([
-                `The Rook slides to ${to} — rooks are most powerful on open files and the 7th rank.`,
-                `Activating the Rook to ${to} increases the pressure along this file.`,
-              ]),
-            );
+            const freezeNote =
+              frzCount > 0
+                ? pick([
+                    `The Rook slides to ${to} and freezes ${frzCount} opponent piece${frzCount > 1 ? "s" : ""} — Rooks outrank both Bishops and Knights in the freeze hierarchy.`,
+                    `From ${to} this Rook controls the file and immobilises ${frzCount} enemy piece${frzCount > 1 ? "s" : ""}.`,
+                  ])
+                : pick([
+                    `The Rook slides to ${to} — rooks are most powerful on open files and the 7th rank.`,
+                    `Activating the Rook to ${to} increases pressure along this file. Rooks can freeze Bishops and Knights they attack.`,
+                  ]);
+            parts.push(freezeNote);
           }
           // Queen
           else if (pieceT === "Q") {
-            parts.push(
-              pick([
-                `The Queen moves to ${to} — be careful not to bring the Queen out too early where it can be attacked.`,
-                `The Queen on ${to} is a powerful centralising move, combining attack and control.`,
-              ]),
-            );
+            const freezeNote =
+              frzCount > 0
+                ? pick([
+                    `The Queen moves to ${to} and freezes ${frzCount} opponent piece${frzCount > 1 ? "s" : ""} — as the highest-value piece the Queen can freeze any Rook, Bishop or Knight it attacks.`,
+                    `From ${to} the Queen dominates the board and immobilises ${frzCount} enemy piece${frzCount > 1 ? "s" : ""}.`,
+                  ])
+                : pick([
+                    `The Queen moves to ${to} — be careful not to bring the Queen out too early where it can be attacked or frozen by an enemy Knight.`,
+                    `The Queen on ${to} is a powerful centralising move. Note that enemy Knights can freeze the Queen if they attack it.`,
+                  ]);
+            parts.push(freezeNote);
           }
 
           // Check
