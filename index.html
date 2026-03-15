@@ -5251,10 +5251,20 @@
           const pt = piece ? piece[1] : "P";
           const cap = brd[mv.tr][mv.tc];
           const frzAfter = calcFrz(nb);
+          // Count opponent pieces frozen by this move (not own frozen pieces)
+          const oppFrzCount =
+            opp(col) === "w" ? frzAfter.byW.length : frzAfter.byB.length;
+          // Knight freeze power: how many pieces this knight attacks (including higher value)
+          const knightFreezeBonus =
+            pt === "N"
+              ? frzAfter.all.filter((sq) => {
+                  const p2 = nb[sq >> 3][sq & 7];
+                  return p2 && p2[0] !== col && VAL[p2[1]] >= VAL["R"];
+                }).length * 60
+              : 0; // big bonus for freezing Rooks/Queens with knight
           let bonus = 0;
 
           if (style === "positional") {
-            // Magnus style: endgame, centralization, freeze exploitation
             if (
               pt === "N" &&
               mv.tr >= 2 &&
@@ -5265,14 +5275,13 @@
               bonus += 35;
             if (mv.flag === "cs" || mv.flag === "cl") bonus += 25;
             if (cap && VAL[cap[1]] > VAL[pt]) bonus += 60;
-            bonus += frzAfter.all.length * 25;
+            bonus += oppFrzCount * 25 + knightFreezeBonus;
             if (pt === "K") bonus -= 40;
           } else if (
             style === "tactical" ||
             style === "aggressive" ||
             style === "sharp"
           ) {
-            // Hikaru/MVL: checks, captures, chaos
             if (inCheck(nb, opp(col))) bonus += 90;
             if (cap) bonus += VAL[cap[1]] * 0.2;
             if (pt === "Q") bonus += 30;
@@ -5280,33 +5289,32 @@
             if (pt === "B" || pt === "Q") {
               bonus += (Math.abs(mv.tc - mv.fc) + Math.abs(mv.tr - mv.fr)) * 4;
             }
+            bonus += knightFreezeBonus; // tactical bots love knight freezes
           } else if (style === "dynamic" || style === "attacking") {
-            // Duda/Nepomniachtchi: knights, pawn storms, initiative
             if (pt === "N") bonus += 50;
             if (pt === "N" && mv.tr >= 2 && mv.tr <= 5) bonus += 25;
             if (inCheck(nb, opp(col))) bonus += 70;
-            bonus += frzAfter.all.length * 30;
+            bonus += oppFrzCount * 30 + knightFreezeBonus * 1.5;
             if (cap) bonus += 25;
           } else if (
             style === "solid" ||
             style === "defensive" ||
             style === "grind"
           ) {
-            // Giri/So/Karjakin: safe, no blunders, king safety
             if (mv.flag === "cs" || mv.flag === "cl") bonus += 40;
             if (pt === "K") bonus -= 60;
-            if (cap && VAL[cap[1]] < VAL[pt]) bonus -= 50; // avoid hanging pieces
+            if (cap && VAL[cap[1]] < VAL[pt]) bonus -= 50;
             if (pt === "N" && mv.tr >= 2 && mv.tr <= 5) bonus += 20;
+            bonus += oppFrzCount * 10; // solid bots still value freezing
           } else if (
             style === "universal" ||
             style === "strategic" ||
             style === "creative"
           ) {
-            // Caruana/Anand/Aronian: balanced, adapts
             if (inCheck(nb, opp(col))) bonus += 40;
             if (cap) bonus += VAL[cap[1]] * 0.1;
             if (mv.flag === "cs" || mv.flag === "cl") bonus += 20;
-            bonus += frzAfter.all.length * 15;
+            bonus += oppFrzCount * 15 + knightFreezeBonus;
           }
 
           // Add calibrated noise based on ELO
