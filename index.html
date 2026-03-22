@@ -382,7 +382,8 @@
         font-family: "Crimson Pro", serif;
       }
       .coach-clear:hover { border-color: var(--gold); color: var(--gold); }
-      .best-arrow-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:11; overflow:visible; fill:none; background:transparent; }
+      .best-from { outline: 3px solid rgba(0,229,255,.9) !important; outline-offset: -3px; background: rgba(0,229,255,.18) !important; }
+      .best-to { outline: 3px solid rgba(0,229,255,.9) !important; outline-offset: -3px; background: rgba(0,229,255,.28) !important; }
       .lb-celeb { border-color: rgba(201,168,76,.4) !important; }
       .lb-celeb.on { background: rgba(201,168,76,.18) !important; border-color: var(--gold) !important; color: var(--gold) !important; }
       .bvb-mode .pnm { color: var(--acc) !important; }
@@ -491,7 +492,6 @@
               <div class="b-left" id="labLeft"></div>
               <div class="board" id="board"></div>
               <svg id="drawSvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10;overflow:visible"></svg>
-              <svg id="bestSvg" class="best-arrow-svg"></svg>
               <div class="b-right" id="labRight"></div>
             </div>
             <div class="b-bot" id="labBot"></div>
@@ -545,6 +545,12 @@
           <div class="chdr" id="hB">🤖 Opponent <i class="arr">▼</i></div>
           <div class="cbody" id="bB" style="padding:0">
             <div style="padding:6px 8px 4px">
+              <div style="font-size:.55rem;color:var(--dim);font-family:Cinzel,serif;letter-spacing:.08em;margin-bottom:4px">PLAY AS</div>
+              <div style="display:flex;gap:4px;margin-bottom:8px">
+                <button class="lb on" id="colorW" style="flex:1;font-size:.7rem">♔ White</button>
+                <button class="lb" id="colorR" style="flex:1;font-size:.7rem">🎲 Random</button>
+                <button class="lb" id="colorB" style="flex:1;font-size:.7rem">♚ Black</button>
+              </div>
               <div style="font-size:.55rem;color:var(--dim);font-family:Cinzel,serif;letter-spacing:.08em;margin-bottom:4px">DIFFICULTY</div>
               <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px">
                 <button class="lb" data-l="1">Trivial</button>
@@ -1219,10 +1225,10 @@ function startProgressiveEval(brd,col,castl,frz,onUpdate){
 }
 
 // ── Rate a move: compare vs best possible move ───────────────────────────
-function rateMoveDeep(snapBrd,mv,movingCol,snapCastl,snapFrz,_unused,isCheckmate){
+function rateMoveDeep(snapBrd,mv,movingCol,snapCastl,snapFrz,_unused,isCheckmate,maxMs=2000){
   if(isCheckmate)return 0;
   const killers=Array.from({length:6},()=>[null,null]);
-  const deadline=Date.now()+3000;
+  const deadline=Date.now()+maxMs;
   const oppCol=opp(movingCol);
   const sign=movingCol==="w"?1:-1;
 
@@ -1235,7 +1241,7 @@ function rateMoveDeep(snapBrd,mv,movingCol,snapCastl,snapFrz,_unused,isCheckmate
     applyMv(nb,m,movingCol);
     const nf=calcFrz(nb);
     const nfrz=oppCol==="w"?new Set(nf.byW):new Set(nf.byB);
-    const sc=abSearch(nb,4,-Infinity,Infinity,oppCol,nc,nfrz,1,deadline,killers);
+    const sc=abSearch(nb,2,-Infinity,Infinity,oppCol,nc,nfrz,1,deadline,killers);
     // sc = best score for opponent; negate = score for movingCol
     return sc===null?evalBoard(nb)*sign:-sc;
   }
@@ -1323,6 +1329,115 @@ function rateMoveDeep(snapBrd,mv,movingCol,snapCastl,snapFrz,_unused,isCheckmate
 // ═══════════════════════════════════════
 let TRAINER={on:false,busy:false};
 let BEST_ARROW={mv:null,gen:0};
+
+// ── Pre-analysis cache ────────────────────────────────────────────────────
+// Scores every legal move for the next position before player moves
+let PRE={
+  gen:0,          // cancel stale computations
+  posKey:null,    // which position was analysed
+  scores:null,    // Map: "fr,fc,tr,tc" -> {ri, score, bestScore}
+  bestMove:null,  // best move in that position
+};
+
+function posKey(brd,col,castl){
+  return brd.map(r=>r.join(",")).join("|")+";"+col+";"+castl.wK+castl.wQ+castl.bK+castl.bQ;
+}
+
+function preAnalysePosition(brd,col,castl,frzSet){
+  PRE.gen++;
+  const gen=PRE.gen;
+  const key=posKey(brd,col,castl);
+  PRE.posKey=null;PRE.scores=null;PRE.bestMove=null;
+
+  const oppCol=opp(col);
+  const sign=col==="w"?1:-1;
+  const ms=allMoves(brd,col,castl,frzSet);
+  if(!ms.length)return;
+  const killers=Array.from({length:6},()=>[null,null]);
+
+  // Phase 1: depth-1 abSearch (detects immediate mates/captures, fast)
+  const scores1=new Map();
+  let best1=-Infinity,bestMove1=ms[0];
+  const dl1=Date.now()+500;
+
+  for(const m of ms){
+    const nb=cp(brd),nc={...castl},p=brd[m.fr][m.fc];
+    if(p==="wK"){nc.wK=false;nc.wQ=false;}if(p==="bK"){nc.bK=false;nc.bQ=false;}
+    if(m.fr===7&&m.fc===7)nc.wK=false;if(m.fr===7&&m.fc===0)nc.wQ=false;
+    if(m.fr===0&&m.fc===7)nc.bK=false;if(m.fr===0&&m.fc===0)nc.bQ=false;
+    applyMv(nb,m,col);
+    const nf=calcFrz(nb);
+    const nfrz=oppCol==="w"?new Set(nf.byW):new Set(nf.byB);
+    const sc=abSearch(nb,1,-Infinity,Infinity,oppCol,nc,nfrz,1,dl1,killers);
+    const score=sc===null?evalBoard(nb)*sign:-sc;
+    scores1.set(`${m.fr},${m.fc},${m.tr},${m.tc}`,score);
+    if(score>best1){best1=score;bestMove1=m;}
+  }
+
+  // Rate phase 1 results
+  const result1=new Map();
+  scores1.forEach((score,k)=>{
+    const delta=score-best1;
+    let ri=RTNG.length-1;
+    for(let i=0;i<RTNG.length;i++){if(delta>=RTNG[i].mn){ri=i;break;}}
+    result1.set(k,{ri,score,bestScore:best1,shallow:true});
+  });
+  PRE.posKey=key;PRE.scores=result1;PRE.bestMove=bestMove1;
+
+  // Phase 2: depth-4 chunked (detects mate in 2 = 4 ply)
+  let idx=0;
+  const scores2=new Map();
+  let best2=-Infinity,bestMove2=bestMove1;
+  const deadline=Date.now()+3500;
+
+  function doChunk(){
+    if(gen!==PRE.gen)return;
+    const end=Math.min(idx+4,ms.length); // 4 moves per chunk
+    for(;idx<end;idx++){
+      if(Date.now()>deadline)return;
+      const m=ms[idx];
+      const nb=cp(brd),nc={...castl},p=brd[m.fr][m.fc];
+      if(p==="wK"){nc.wK=false;nc.wQ=false;}if(p==="bK"){nc.bK=false;nc.bQ=false;}
+      if(m.fr===7&&m.fc===7)nc.wK=false;if(m.fr===7&&m.fc===0)nc.wQ=false;
+      if(m.fr===0&&m.fc===7)nc.bK=false;if(m.fr===0&&m.fc===0)nc.bQ=false;
+      applyMv(nb,m,col);
+      const nf=calcFrz(nb);
+      const nfrz=oppCol==="w"?new Set(nf.byW):new Set(nf.byB);
+      const sc=abSearch(nb,2,-Infinity,Infinity,oppCol,nc,nfrz,1,deadline,killers);
+      const score=sc===null?evalBoard(nb)*sign:-sc;
+      scores2.set(`${m.fr},${m.fc},${m.tr},${m.tc}`,score);
+      if(score>best2){best2=score;bestMove2=m;}
+    }
+    if(idx<ms.length&&Date.now()<deadline){
+      setTimeout(doChunk,0);
+      return;
+    }
+    if(gen!==PRE.gen)return;
+    const result2=new Map();
+    scores2.forEach((score,k)=>{
+      const delta=score-best2;
+      let ri=RTNG.length-1;
+      for(let i=0;i<RTNG.length;i++){if(delta>=RTNG[i].mn){ri=i;break;}}
+      result2.set(k,{ri,score,bestScore:best2,shallow:false});
+    });
+    result1.forEach((v,k)=>{if(!result2.has(k))result2.set(k,v);});
+    PRE.posKey=key;PRE.scores=result2;PRE.bestMove=bestMove2;
+  }
+  setTimeout(doChunk,0);
+}
+
+// Look up pre-computed rating for a move (returns ri or -1 if not cached)
+function preGetRating(brd,mv,col,castl,acceptShallow=false){
+  if(!PRE.scores||!PRE.posKey)return -1;
+  if(PRE.posKey!==posKey(brd,col,castl))return -1;
+  const k=`${mv.fr},${mv.fc},${mv.tr},${mv.tc}`;
+  const entry=PRE.scores.get(k);
+  if(!entry)return -1;
+  // For player moves: reject shallow unless it shows a mate (could miss mate-in-2)
+  // For bot moves: shallow is fine — just needs consistency
+  if(!acceptShallow&&entry.shallow&&Math.abs(entry.bestScore)<9000)return -1;
+  return entry.ri;
+}
 
 function trainerEnabled(){
   if(!TRAINER.on)return false;
@@ -1590,8 +1705,7 @@ function runTrainer(snapBrd,mv,movingCol,note,ri,bestMv,bestNote,evalBefore,eval
 // ── BEST MOVE ARROW ───────────────────────────────────────────────────────
 function clearBestArrow(){
   BEST_ARROW.mv=null;
-  const svg=document.getElementById("bestSvg");
-  if(svg)svg.innerHTML="";
+  document.querySelectorAll(".best-from,.best-to").forEach(el=>el.classList.remove("best-from","best-to"));
   document.querySelectorAll(".ri-board").forEach(e=>e.remove());
 }
 
@@ -1599,60 +1713,15 @@ function drawBestArrow(mv){
   if(!mv)return;
   BEST_ARROW.mv=mv;
   const tog=document.getElementById("togArrow");
-  if(tog&&!tog.checked){clearBestArrow();BEST_ARROW.mv=mv;return;} // store but don't draw
-  const svg=document.getElementById("bestSvg");
-  if(!svg)return;
-  svg.innerHTML="";
-  const board=document.getElementById("board");
-  if(!board)return;
-  const bRect=board.getBoundingClientRect();
-  const sRect=svg.parentElement.getBoundingClientRect();
-  const sqW=bRect.width/8,sqH=bRect.height/8;
-  const bx=bRect.left-sRect.left,by=bRect.top-sRect.top;
-
+  if(tog&&!tog.checked){clearBestArrow();BEST_ARROW.mv=mv;return;}
+  clearBestArrow();
+  BEST_ARROW.mv=mv;
   let fr=mv.fr,fc=mv.fc,tr=mv.tr,tc=mv.tc;
   if(flipped){fr=7-fr;fc=7-fc;tr=7-tr;tc=7-tc;}
-
-  const x1=bx+(fc+.5)*sqW, y1=by+(fr+.5)*sqH;
-  const x2=bx+(tc+.5)*sqW, y2=by+(tr+.5)*sqH;
-  const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
-  if(len<5)return;
-
-  const color="#00e5ff";
-  const sw=sqW*.09,hw=sqW*.18,hl=sqW*.28;
-  const ux=dx/len,uy=dy/len;
-  const ex=x2-ux*hl*.6,ey=y2-uy*hl*.6;
-  const px=-uy*hw,py=ux*hw;
-
-  // Simple static arrow — no filter, no animation
-  const g=document.createElementNS("http://www.w3.org/2000/svg","g");
-  g.setAttribute("opacity","0.85");
-
-  const line=document.createElementNS("http://www.w3.org/2000/svg","line");
-  line.setAttribute("x1",x1);line.setAttribute("y1",y1);
-  line.setAttribute("x2",ex);line.setAttribute("y2",ey);
-  line.setAttribute("stroke",color);line.setAttribute("stroke-width",sw);
-  line.setAttribute("stroke-linecap","round");
-  g.appendChild(line);
-
-  const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
-  poly.setAttribute("points",`${x2},${y2} ${ex+px},${ey+py} ${ex-px},${ey-py}`);
-  poly.setAttribute("fill",color);
-  g.appendChild(poly);
-
-  // Simple static circle on source square — no animation
-  const circle=document.createElementNS("http://www.w3.org/2000/svg","circle");
-  circle.setAttribute("cx",x1);circle.setAttribute("cy",y1);
-  circle.setAttribute("r",sqW*.28);
-  circle.setAttribute("fill","none");
-  circle.setAttribute("stroke",color);
-  circle.setAttribute("stroke-width",sw*.6);
-  circle.setAttribute("opacity","0.5");
-  g.appendChild(circle);
-
-  svg.appendChild(g);
+  document.querySelector(`.sq[data-r="${fr}"][data-c="${fc}"]`)?.classList.add("best-from");
+  document.querySelector(`.sq[data-r="${tr}"][data-c="${tc}"]`)?.classList.add("best-to");
 }
-let G={},botLevel=2,flipped=false;
+let G={},botLevel=2,flipped=false,playerColor="w";
 let BVB={on:false,wLevel:2,bLevel:5,paused:false};
 let RANKED={on:true}; // ranked by default
 
@@ -1694,8 +1763,11 @@ function formatTime(ms,showMs){
 // ═══════════════════════════════════════
 // NEW GAME
 // ═══════════════════════════════════════
-function newGame(tcOverride){
-  stopAnim();
+function newGameBot(){
+  // For bot mode: ask for time control first
+  openLocalTimeModal(tc=>{NET.timeCtrl=tc||null;newGame(tc);});
+}
+function newGame(tcOverride){  stopAnim();
   eloGameStart();
   PMQUEUE=[];PMSEL=null;
   PREMOVE={active:false,fr:-1,fc:-1,tr:-1,tc:-1,poss:[]};
@@ -1717,7 +1789,7 @@ function newGame(tcOverride){
   document.getElementById("mRt").innerHTML="";
   stopTimers();
   const tc=tcOverride||NET.timeCtrl;
-  if(tc){NET.timers={w:tc.base,b:tc.base};showTimers(true);updateTimerDisplay();if(NET.mode==="bot")startTurnTimer("w");}
+  if(tc){NET.timers={w:tc.base,b:tc.base};showTimers(true);updateTimerDisplay();if(NET.mode==="bot")startTurnTimer("w");else if(NET.mode==="local")startTurnTimer("w");}
   else showTimers(false);
   setEval(0,0);
   const showEv=NET.showEval;
@@ -1725,12 +1797,23 @@ function newGame(tcOverride){
   const rCard=document.getElementById("bR");
   if(rCard&&rCard.parentElement)rCard.parentElement.style.display=NET.showRating?"":"none";
   if(NET.mode==="local")flipped=false;
+  if(NET.mode==="bot"){
+    playerColor=_chosenColor==="r"?(Math.random()<0.5?"w":"b"):_chosenColor;
+    flipped=playerColor==="b";
+  }
   render();updStatus();updCaps();
   // BvB: kick off white with comfortable delay
   if(BVB.on&&NET.mode==="bot"&&!G.over){
     document.getElementById("thkEl").classList.add("on");
     document.getElementById("mThk").classList.add("on");
     setTimeout(()=>runBotForColor("w",BVB.wLevel),1200);
+  }
+  // If player chose black, bot (white) goes first
+  if(NET.mode==="bot"&&!BVB.on&&playerColor==="b"&&!G.over){
+    document.getElementById("thkEl").classList.add("on");
+    document.getElementById("mThk").classList.add("on");
+    const delay=[300,500,700,900,400,600,500,700][botLevel-1]||400;
+    setTimeout(runBot,delay);
   }
 }
 
@@ -1748,21 +1831,27 @@ function tickTimer(col){
   if(t<=0){stopTimers();endGame("timeout",opp(col));}
 }
 function updateTimerDisplay(){
-  const botCol=NET.mode==="bot"?"w":NET.mode==="local"?flipped?"b":"w":NET.myCol||"w";
-  const topCol=opp(botCol);
+  // playerCol = color of the human player (bottom), oppCol = top
+  let playerCol,oppCol2;
+  if(NET.mode==="bot"){playerCol=playerColor;oppCol2=opp(playerColor);}
+  else if(NET.mode==="local"){playerCol=flipped?"b":"w";oppCol2=flipped?"w":"b";}
+  else{playerCol=NET.myCol||"w";oppCol2=opp(playerCol);}
   const tb=document.getElementById("timerBot"),tt=document.getElementById("timerTop");
-  const btMs=(NET.timers&&NET.timers[botCol])||0;
-  const topMs=(NET.timers&&NET.timers[topCol])||0;
+  const btMs=(NET.timers&&NET.timers[playerCol])||0;
+  const topMs=(NET.timers&&NET.timers[oppCol2])||0;
   const btLow=btMs<10000&&btMs>0,topLow=topMs<10000&&topMs>0;
-  if(tb){tb.textContent=formatTime(btMs,btLow);tb.classList.toggle("active",G.turn===botCol&&!G.over);tb.classList.toggle("low",btLow);tb.classList.toggle("critical",btLow);}
-  if(tt){tt.textContent=formatTime(topMs,topLow);tt.classList.toggle("active",G.turn===topCol&&!G.over);tt.classList.toggle("low",topLow);tt.classList.toggle("critical",topLow);}
+  if(tb){tb.textContent=formatTime(btMs,btLow);tb.classList.toggle("active",G.turn===playerCol&&!G.over);tb.classList.toggle("low",btLow);tb.classList.toggle("critical",btLow);}
+  if(tt){tt.textContent=formatTime(topMs,topLow);tt.classList.toggle("active",G.turn===oppCol2&&!G.over);tt.classList.toggle("low",topLow);tt.classList.toggle("critical",topLow);}
   if(document.getElementById("mSt"))updMobile();
 }
 
 // ═══════════════════════════════════════
 // PLAY MOVE
 // ═══════════════════════════════════════
+let _moveLock=false;
 async function playMove(mv,isBot,fromNet){
+  if(!isBot&&!fromNet&&_moveLock)return; // block double-click
+  if(!isBot&&!fromNet)_moveLock=true;
   const{fr,fc,tr,tc,flag}=mv;
   const piece=G.brd[fr][fc],cap=G.brd[tr][tc];
   const note=buildNote(G.brd,mv,G.turn);
@@ -1805,13 +1894,13 @@ async function playMove(mv,isBot,fromNet){
 
   // ── MOVE RATING + TRAINER ────────────────────────────────────────────────
   let ri=RTNG.length-1;
+  let _pendingHumanRating=null;
   clearBestArrow();
   const _boardEl=document.getElementById("board");
   if(_boardEl){_boardEl.style.removeProperty("--lm-color");_boardEl.style.removeProperty("--lm-color-dk");}
-  // Only increment analysisGen for human moves — bot moves shouldn't cancel player's analysis
   const _analysisGen=isBot?G._analysisGen:(++G._analysisGen);
 
-  if(!fromNet){
+  if(!fromNet&&!isBot){  // deep rating only for human moves
     if(isCheckmate){
       ri=0;
       if(NET.showRating){
@@ -1829,8 +1918,34 @@ async function playMove(mv,isBot,fromNet){
           const _frzByMover=_col2==="w"?G.frz.byW:G.frz.byB;
           const _frz2=_frzByMover.length;
 
-      // Quick initial rating (instant, from static eval delta)
-      ri=RTNG.length-1;
+      // Check pre-computed cache first (instant)
+      const preRi=preGetRating(snapBrd,mv,movingCol,snapCastl);
+      if(preRi>=0){
+        // Use cached result — instant display
+        const R=RTNG[preRi];ri=preRi;
+        if(NET.showRating){
+          const lbl=BVB.on?(botName(movingCol==="w"?BVB.wLevel:BVB.bLevel)+": "):(movingCol==="w"?"<b>You:</b> ":"<b>Bot:</b> ");
+          let html=`<span class="${R.c}">${R.s} ${R.l}</span>`;
+          if(inCheck(G.brd,oppCol))html+=` <span class="ck">Check!</span>`;
+          document.getElementById("ratingEl").innerHTML=lbl+html;
+          document.getElementById("mRt").innerHTML=`<span class="${R.c}">${R.s}</span>`;
+          // icon + lm applied after addNote via _pendingHumanRating
+          _pendingHumanRating={ri:preRi,R,mv:{...mv}};
+        }
+        // Trainer still runs async with bestMove from PRE
+        const _analysisGen2=_analysisGen;
+        if(trainerEnabled()&&!G.over&&!isOnline){
+          setTimeout(()=>{
+            if(G._analysisGen!==_analysisGen2)return;
+            const bestMv2=PRE.bestMove||null;
+            const bestNote2=bestMv2?buildNote(_snap,bestMv2,_col2):null;
+            const evA=evalBoard(G.brd)*(_col2==="w"?1:-1);
+            runTrainer(_snap,_mv2,_col2,_note2,preRi,bestMv2,bestNote2,_eb2||0,evA,false,_chk2,_frz2,_cap2,_hl);
+          },50);
+        }
+        // Update PRE cache for next position
+        PRE.gen++;
+      } else {
       if(evalBefore!=null){
         const qd=(evalBoard(G.brd)*(movingCol==="w"?1:-1))-evalBefore;
         for(let i=0;i<RTNG.length;i++){if(qd>=RTNG[i].mn){ri=i;break;}}
@@ -1936,16 +2051,22 @@ async function playMove(mv,isBot,fromNet){
           G.lastEngineBest=null;
         }
       },0);
+      } // end else (no pre-cache)
     }
   }
 
-  // ── PROGRESSIVE EVAL BAR — skip in online multiplayer ───────────────────
-  if(NET.showEval&&NET.mode==="bot"){
+  // ── PROGRESSIVE EVAL BAR ─────────────────────────────────────────────────
+  if(NET.showEval){
     setEval(evalBoard(G.brd),0);
     startProgressiveEval(G.brd,oppCol,G.castl,nextFrz,(evWhite,depth)=>{
       if(G.over)return;
       setEval(evWhite,depth);
     });
+  }
+
+  // ── PRE-ANALYSE next side's moves in background ────────────────────────
+  if(!fromNet&&!G.over&&NET.showRating){
+    preAnalysePosition(cp(G.brd),oppCol,{...G.castl},nextFrz);
   }
 
   // ── Compute bestEvalBefore + engine best (for trainer + Impossible bot) ──
@@ -1960,7 +2081,84 @@ async function playMove(mv,isBot,fromNet){
   },0);
 
   addNote(note,movingCol,G.hist.length);
-  G.hist.push(mv);G.turn=oppCol;
+
+  // Apply pending human rating icon (now that addNote has added the element)
+  if(typeof _pendingHumanRating!=="undefined"&&_pendingHumanRating){
+    const _pr=_pendingHumanRating;_pendingHumanRating=null;
+    const sp2=document.getElementById("movesEl").children[G.hist.length];
+    if(sp2&&!sp2.querySelector(".ri-icon")){
+      const icon2=document.createElement("span");
+      icon2.className=`${_pr.R.c} ri-icon`;icon2.style.cssText="font-size:.68rem;margin-left:1px";
+      icon2.title=_pr.R.l;icon2.textContent=_pr.R.s;sp2.appendChild(icon2);
+    }
+    const LMC2={br:"rgba(0,229,255,.45)",gr:"rgba(224,64,251,.45)",be:"rgba(105,240,174,.45)",ex:"rgba(178,255,89,.45)",go:"rgba(255,241,118,.45)",ok:"rgba(165,214,167,.35)",in:"rgba(255,204,2,.45)",mi:"rgba(255,112,67,.45)",bl:"rgba(255,23,68,.5)",ct:"rgba(255,109,0,.5)"};
+    const LMD2={br:"rgba(0,200,230,.55)",gr:"rgba(190,30,220,.55)",be:"rgba(80,210,140,.55)",ex:"rgba(150,230,60,.55)",go:"rgba(230,210,80,.55)",ok:"rgba(130,185,135,.45)",in:"rgba(220,175,0,.55)",mi:"rgba(230,80,40,.6)",bl:"rgba(220,0,50,.6)",ct:"rgba(220,80,0,.6)"};
+    const bEl2=document.getElementById("board");
+    if(bEl2){bEl2.style.setProperty("--lm-color",LMC2[_pr.R.c]||"rgba(205,210,106,.55)");bEl2.style.setProperty("--lm-color-dk",LMD2[_pr.R.c]||"rgba(170,175,80,.65)");}
+  }
+
+  // Rate bot moves from PRE cache (pre-computed while player was thinking)
+  if(!fromNet&&isBot&&NET.showRating&&!isCheckmate){
+    const _snapBot=cp(snapBrd),_mvBot={...mv},_colBot=movingCol,
+          _scBot={...snapCastl},_sfBot=[...snapFrz],_hlBot=G.hist.length,
+          _chkBot=inCheck(G.brd,oppCol),_capBot=cap,_genBot=_analysisGen;
+    const lbl=BVB.on?(botName(movingCol==="w"?BVB.wLevel:BVB.bLevel)+" (Bot): "):"🤖 Bot: ";
+
+    function applyBotRating(botRi){
+      ri=botRi;
+      const R=RTNG[botRi];
+      const html2=`<span class="${R.c}">${R.s} ${R.l}</span>`+(_chkBot?` <span class="ck">Check!</span>`:"");
+      document.getElementById("ratingEl").innerHTML=lbl+html2;
+      document.getElementById("mRt").innerHTML=`<span class="${R.c}">${R.s}</span>`;
+      const spB=document.getElementById("movesEl").children[_hlBot];
+      if(spB){const old=spB.querySelector(".ri-icon");if(old)old.remove();
+        const icon=document.createElement("span");
+        icon.className=`${R.c} ri-icon`;icon.style.cssText="font-size:.68rem;margin-left:1px";
+        icon.title=R.l;icon.textContent=R.s;spB.appendChild(icon);
+      }
+      const LMC={br:"rgba(0,229,255,.45)",gr:"rgba(224,64,251,.45)",be:"rgba(105,240,174,.45)",ex:"rgba(178,255,89,.45)",go:"rgba(255,241,118,.45)",ok:"rgba(165,214,167,.35)",in:"rgba(255,204,2,.45)",mi:"rgba(255,112,67,.45)",bl:"rgba(255,23,68,.5)",ct:"rgba(255,109,0,.5)"};
+      const LMD={br:"rgba(0,200,230,.55)",gr:"rgba(190,30,220,.55)",be:"rgba(80,210,140,.55)",ex:"rgba(150,230,60,.55)",go:"rgba(230,210,80,.55)",ok:"rgba(130,185,135,.45)",in:"rgba(220,175,0,.55)",mi:"rgba(230,80,40,.6)",bl:"rgba(220,0,50,.6)",ct:"rgba(220,80,0,.6)"};
+      const brdEl3=document.getElementById("board");
+      if(brdEl3){brdEl3.style.setProperty("--lm-color",LMC[R.c]||"rgba(205,210,106,.55)");brdEl3.style.setProperty("--lm-color-dk",LMD[R.c]||"rgba(170,175,80,.65)");}
+      document.querySelectorAll(".ri-board").forEach(e=>e.remove());
+      const sqElB=document.querySelector(`.sq[data-r="${_mvBot.tr}"][data-c="${_mvBot.tc}"]`);
+      if(sqElB){
+        const bicon=document.createElement("span");bicon.className=`ri-board ${R.c}`;
+        const bg=LMC[R.c]||"rgba(205,210,106,.55)";
+        bicon.style.background=bg.replace(/[\d.]+\)$/,"0.95)");
+        bicon.style.color=["br","be","ex","go","ok","in"].includes(R.c)?"#000":"#fff";
+        bicon.textContent=R.s;bicon.title=R.l;sqElB.appendChild(bicon);
+      }
+      if(trainerEnabled()&&!G.over){
+        const frzSet2=_colBot==="w"?new Set(calcFrz(_snapBot).byW):new Set(calcFrz(_snapBot).byB);
+        const br=masterBestMove(cp(_snapBot),_colBot,_scBot,frzSet2,600,3);
+        const bestMvBot=br.move,bestNoteBot=bestMvBot?buildNote(_snapBot,bestMvBot,_colBot):"?";
+        const isBestBot=!bestMvBot||(bestMvBot.fr===_mvBot.fr&&bestMvBot.fc===_mvBot.fc&&bestMvBot.tr===_mvBot.tr&&bestMvBot.tc===_mvBot.tc);
+        if(!isBestBot&&bestMvBot)drawBestArrow(bestMvBot);
+        const evA=evalBoard(G.brd)*(oppCol==="w"?1:-1);
+        const frzCnt=(_colBot==="w"?G.frz.byW:G.frz.byB).length;
+        runTrainer(_snapBot,_mvBot,_colBot,note,botRi,bestMvBot,bestNoteBot,0,evA,false,_chkBot,frzCnt,_capBot,_hlBot);
+      }
+    }
+
+    // Rate bot move with rateMoveDeep — same as player, queued immediately
+    const cachedRi=preGetRating(_snapBot,_mvBot,_colBot,_scBot,false); // deep only
+    if(cachedRi>=0){
+      applyBotRating(cachedRi);
+    } else {
+      // Compute now with rateMoveDeep (same depth as player)
+      setTimeout(()=>{
+        if(G._analysisGen!==_genBot)return;
+        const frzSet=_colBot==="w"?new Set(calcFrz(_snapBot).byW):new Set(calcFrz(_snapBot).byB);
+        const rIdx=rateMoveDeep(_snapBot,_mvBot,_colBot,_scBot,frzSet,null,false,1500);
+        applyBotRating(rIdx);
+      },0);
+    }
+  }
+
+  G.hist.push(mv);G.turn=oppCol;_moveLock=false;
+  // Clear any lingering selection when bot's turn starts
+  if(NET.mode==="bot"&&!BVB.on&&G.turn===opp(playerColor)){G.sel=null;G.poss=[];}
   // Record snapshot for analysis
   GAME_SNAP.push({
     brd:cp(G.brd),turn:oppCol,castl:{...G.castl},
@@ -2030,7 +2228,7 @@ async function playMove(mv,isBot,fromNet){
 
       const delay=baseDelay+complexityBonus+Math.random()*200; // slight randomness
       setTimeout(()=>runBotForColor(G.turn,nextLevel),delay);
-    } else if(G.turn==="b"){
+    } else if(G.turn===opp(playerColor)){
       document.getElementById("thkEl").classList.add("on");
       document.getElementById("mThk").classList.add("on");
       const delay=[300,500,700,900,400,600,500,700][botLevel-1]||400;
@@ -3107,15 +3305,18 @@ function runBot(){
   const level=botLevel;
   if(level>=6){
     // All chess player bots
-    setTimeout(()=>celebBotMove(cp(G.brd),{...G.castl},new Set(G.frz.byB),level,gen),0);
+    const _botFrz=opp(playerColor)==="w"?new Set(G.frz.byW):new Set(G.frz.byB);
+    setTimeout(()=>celebBotMove(cp(G.brd),{...G.castl},_botFrz,level,gen),0);
     return;
   }
-  setTimeout(()=>_doBotMove(cp(G.brd),{...G.castl},new Set(G.frz.byB),level,gen),30);
+  const _botFrz2=opp(playerColor)==="w"?new Set(G.frz.byW):new Set(G.frz.byB);
+  setTimeout(()=>_doBotMove(cp(G.brd),{...G.castl},_botFrz2,level,gen),30);
 }
 
 function _doBotMove(brd,castl,frzW,level,gen){
-  if(_botAbort||G.over||G.turn!=="b"||NET.mode!=="bot"||gen!==_botGeneration)return;
-  const ms=allMoves(brd,"b",castl,frzW);
+  const botC=opp(playerColor);
+  if(_botAbort||G.over||G.turn!==botC||NET.mode!=="bot"||gen!==_botGeneration)return;
+  const ms=allMoves(brd,botC,castl,frzW);
   if(!ms.length){postBotMove(null);return;}
 
   // Level 1: random
@@ -3150,10 +3351,13 @@ function _doBotMove(brd,castl,frzW,level,gen){
     for(const mv of ms){
       if(Date.now()>df)break;
       const nb=cp(brd),nc={...castl},p=brd[mv.fr][mv.fc];
-      if(p==="bK"){nc.bK=false;nc.bQ=false;}
-      if(mv.fr===0&&mv.fc===7)nc.bK=false;if(mv.fr===0&&mv.fc===0)nc.bQ=false;
-      applyMv(nb,mv,"b");const nf=calcFrz(nb);
-      const sc=-abSearch(nb,2,-Infinity,Infinity,"w",nc,new Set(nf.byW),1,df,kf);
+      if(p===botC+"K"){nc[botC+"K"]=false;nc[botC+"Q"]=false;}
+      const oppC2=opp(botC);
+      if(botC==="b"){if(mv.fr===0&&mv.fc===7)nc.bK=false;if(mv.fr===0&&mv.fc===0)nc.bQ=false;}
+      else{if(mv.fr===7&&mv.fc===7)nc.wK=false;if(mv.fr===7&&mv.fc===0)nc.wQ=false;}
+      applyMv(nb,mv,botC);const nf=calcFrz(nb);
+      const oppFrzL=oppC2==="w"?new Set(nf.byW):new Set(nf.byB);
+      const sc=-abSearch(nb,2,-Infinity,Infinity,oppC2,nc,oppFrzL,1,df,kf);
       if(sc!==null&&sc>bsf){bsf=sc;bf=mv;}
     }
     postBotMove(bf);return;
@@ -3170,10 +3374,13 @@ function _doBotMove(brd,castl,frzW,level,gen){
     while(idx<ms.length){
       const mv=ms[idx++];
       const nb=cp(brd),nc={...castl},p=brd[mv.fr][mv.fc];
-      if(p==="bK"){nc.bK=false;nc.bQ=false;}
-      if(mv.fr===0&&mv.fc===7)nc.bK=false;if(mv.fr===0&&mv.fc===0)nc.bQ=false;
-      applyMv(nb,mv,"b");const nf=calcFrz(nb);
-      const raw=abSearch(nb,depth-1,-Infinity,Infinity,"w",nc,new Set(nf.byW),1,null,killers);
+      if(p===botC+"K"){nc[botC+"K"]=false;nc[botC+"Q"]=false;}
+      const oppC3=opp(botC);
+      if(botC==="b"){if(mv.fr===0&&mv.fc===7)nc.bK=false;if(mv.fr===0&&mv.fc===0)nc.bQ=false;}
+      else{if(mv.fr===7&&mv.fc===7)nc.wK=false;if(mv.fr===7&&mv.fc===0)nc.wQ=false;}
+      applyMv(nb,mv,botC);const nf=calcFrz(nb);
+      const oppFrzL2=oppC3==="w"?new Set(nf.byW):new Set(nf.byB);
+      const raw=abSearch(nb,depth-1,-Infinity,Infinity,oppC3,nc,oppFrzL2,1,null,killers);
       const sc=(raw===null?-Infinity:-raw)+(Math.random()*2-1)*noise;
       if(sc>bestScore){bestScore=sc;bestMove=mv;}
       if(Date.now()-t>12){setTimeout(doChunk,0);return;}
@@ -3186,7 +3393,7 @@ function _doBotMove(brd,castl,frzW,level,gen){
 function postBotMove(mv){
   document.getElementById("thkEl").classList.remove("on");
   document.getElementById("mThk").classList.remove("on");
-  if(mv&&!G.over&&G.turn==="b"&&NET.mode==="bot")playMove(mv,true,false);
+  if(mv&&!G.over&&G.turn===opp(playerColor)&&NET.mode==="bot")playMove(mv,true,false);
 }
 
 // ═══════════════════════════════════════
@@ -3221,9 +3428,14 @@ function premovePoss(fr,fc,brd,col){
   else{const D=type==="B"?[[1,1],[1,-1],[-1,1],[-1,-1]]:type==="R"?[[1,0],[-1,0],[0,1],[0,-1]]:[[1,1],[1,-1],[-1,1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]];for(const[dr,dc]of D){let nr=fr+dr,nc=fc+dc;while(nr>=0&&nr<8&&nc>=0&&nc<8){const t=brd[nr][nc];if(t){if(t[0]!==col&&t[1]!==type)sq.push({tr:nr,tc:nc});break;}sq.push({tr:nr,tc:nc});nr+=dr;nc+=dc;}}}
   return sq;
 }
-function myColor(){if(NET.mode==="local")return G.turn;if(NET.mode==="bot")return"w";return NET.myCol;}
-function isMyTurn(){if(G.over)return false;if(BVB.on)return false; // no human in BvB
-  if(NET.mode==="local")return true;if(NET.mode==="bot")return G.turn==="w";return G.turn===NET.myCol;}
+function myColor(){if(NET.mode==="local")return G.turn;if(NET.mode==="bot")return playerColor;return NET.myCol;}
+function isMyTurn(){
+  if(G.over)return false;
+  if(BVB.on)return false;
+  if(NET.mode==="local")return true;
+  if(NET.mode==="bot")return G.turn===playerColor&&!_moveLock;
+  return G.turn===NET.myCol;
+}
 
 // ═══════════════════════════════════════
 // RENDER
@@ -3302,8 +3514,11 @@ function render(){
       topName=botName(BVB.bLevel)+primeTag(BVB.bLevel)+" (Black)";
       botDisplayName=botName(BVB.wLevel)+primeTag(BVB.wLevel)+" (White)";
     } else {
-      topName=botName(botLevel)+primeTag(botLevel)+" (Black)";
-      botDisplayName="You (White)";
+      const botC=opp(playerColor);
+      const playerSym=playerColor==="w"?" ♔":" ♚";
+      const botSym=botC==="w"?" ♔":" ♚";
+      topName=botName(botLevel)+primeTag(botLevel)+(botC==="b"?" (Black)":" (White)");
+      botDisplayName="You"+(playerColor==="w"?" (White)":" (Black)");
     }
   }
   else{topName=(NET.oppName||"Opponent")+(opCol==="w"?" ♔":" ♚");botDisplayName=(NET.myName||"You")+(myCol==="w"?" ♔":" ♚");}
@@ -3346,6 +3561,7 @@ function handleClick(r,c){
   }
 
   if(G.over)return;
+  if(NET.mode==="bot"&&!BVB.on&&!AN.active&&(G.turn!==playerColor||_moveLock))return;
   const mc=myColor(),p=G.brd[r][c],myTurn=isMyTurn();
   if(myTurn){
     pmClear();const frz=mc==="w"?new Set(G.frz.byW):new Set(G.frz.byB);
@@ -3641,23 +3857,23 @@ function applyVisibility(){
 
 function setLevel(n){
   botLevel=n;BVB.on=false;
-  document.querySelectorAll(".lb,.mpl").forEach(b=>b.classList.toggle("on",parseInt(b.dataset.l)===n));
+  document.querySelectorAll(".lb[data-l],.mpl[data-l]").forEach(b=>b.classList.toggle("on",parseInt(b.dataset.l)===n));
   document.querySelectorAll(".player-row").forEach(r=>r.classList.toggle("on",parseInt(r.dataset.l)===n));
-  const pTop=document.getElementById("pnmTop");if(pTop&&NET.mode==="bot")pTop.textContent=botName(n)+" (Black)";
+  const pTop2=document.getElementById("pnmTop");if(pTop2&&NET.mode==="bot")pTop2.textContent=botName(n)+(opp(playerColor)==="b"?" (Black)":" (White)");
   if(n>=6){
     // Celebrity — ask ranked/casual first
     showRankedModal(
       `Play vs ${botName(n)} (${PLAYERS[n]?.elo||"?"}${PLAYERS[n]?.isPrime?" 🔥":""}) — ranked or casual?`,
-      ()=>{ RANKED.on=true; applyVisibility(); if(!G.over&&NET.mode==="bot")newGame(); },
-      ()=>{ RANKED.on=false; applyVisibility(); if(!G.over&&NET.mode==="bot")newGame(); }
+      ()=>{ RANKED.on=true; applyVisibility(); if(!G.over&&NET.mode==="bot")newGameBot(); },
+      ()=>{ RANKED.on=false; applyVisibility(); if(!G.over&&NET.mode==="bot")newGameBot(); }
     );
   } else {
     RANKED.on=false; // non-celeb bots never ranked
     applyVisibility();
-    if(!G.over&&NET.mode==="bot")newGame();
+    if(!G.over&&NET.mode==="bot")newGameBot();
   }
 }
-document.querySelectorAll(".lb,.mpl").forEach(b=>b.addEventListener("click",()=>setLevel(parseInt(b.dataset.l))));
+document.querySelectorAll(".lb[data-l],.mpl[data-l]").forEach(b=>b.addEventListener("click",()=>setLevel(parseInt(b.dataset.l))));
 
 // ── BvB Start button ──────────────────────────────────────────────────────
 document.getElementById("bvbStartBtn").addEventListener("click",()=>{
@@ -3781,15 +3997,18 @@ document.addEventListener("keydown",e=>{
 // ═══════════════════════════════════════
 // BUTTON WIRING
 // ═══════════════════════════════════════
-document.getElementById("newBtn").addEventListener("click",()=>{if(NET.mode==="local")openLocalTimeModal(tc=>{NET.timeCtrl=tc||null;newGame(tc);});else if(!animOn&&NET.mode==="bot")newGame();});
+document.getElementById("newBtn").addEventListener("click",()=>{
+  if(NET.mode==="local")openLocalTimeModal(tc=>{NET.timeCtrl=tc||null;newGame(tc);});
+  else if(!animOn&&NET.mode==="bot")newGameBot();
+});
 document.getElementById("flipBtn").addEventListener("click",()=>{flipped=!flipped;render();});
 document.getElementById("resignBtn").addEventListener("click",doResign);
 document.getElementById("drawBtn").addEventListener("click",doDraw);
 document.getElementById("mFlip").addEventListener("click",()=>{flipped=!flipped;render();});
-document.getElementById("mNew").addEventListener("click",()=>{if(NET.mode==="bot")newGame();else if(NET.mode==="local")openLocalTimeModal(tc=>{NET.timeCtrl=tc||null;newGame(tc);});});
+document.getElementById("mNew").addEventListener("click",()=>{if(NET.mode==="bot")newGameBot();else if(NET.mode==="local")openLocalTimeModal(tc=>{NET.timeCtrl=tc||null;newGame(tc);});});
 document.getElementById("mRes").addEventListener("click",doResign);
 document.getElementById("mDrw").addEventListener("click",doDraw);
-document.getElementById("tNew").addEventListener("click",()=>{document.getElementById("toast").classList.remove("on");if(NET.mode==="bot")newGame();else if(NET.mode==="local")openLocalTimeModal(tc=>{NET.timeCtrl=tc||null;newGame(tc);});});
+document.getElementById("tNew").addEventListener("click",()=>{document.getElementById("toast").classList.remove("on");if(NET.mode==="bot")newGameBot();else if(NET.mode==="local")openLocalTimeModal(tc=>{NET.timeCtrl=tc||null;newGame(tc);});});
 document.getElementById("tRematch").addEventListener("click",()=>{document.getElementById("toast").classList.remove("on");if(NET.mode!=="bot"&&P.conn){netSend({type:"rematch_offer"});showMsg("Rematch","Waiting for opponent…");}});
 document.getElementById("togTrainer").addEventListener("change",function(){
   TRAINER.on=this.checked;
@@ -3808,9 +4027,8 @@ document.getElementById("togArrow").addEventListener("change",function(){
     // Redraw if we have a stored arrow
     if(BEST_ARROW.mv)drawBestArrow(BEST_ARROW.mv);
   } else {
-    // Clear SVG but keep BEST_ARROW.mv so it can be restored
-    const svg=document.getElementById("bestSvg");
-    if(svg)svg.innerHTML="";
+    // Clear highlights but keep BEST_ARROW.mv so it can be restored
+    document.querySelectorAll(".best-from,.best-to").forEach(el=>el.classList.remove("best-from","best-to"));
   }
 });
 document.getElementById("coachBtn").addEventListener("click",()=>{
@@ -3827,6 +4045,16 @@ document.getElementById("coachClear").addEventListener("click",()=>{
 });
 
 // ── Ranked / Casual toggle ────────────────────────────────────────────────
+// Color picker
+let _chosenColor="w"; // w, b, r(andom)
+["colorW","colorR","colorB"].forEach(id=>{
+  document.getElementById(id).addEventListener("click",()=>{
+    _chosenColor=id==="colorW"?"w":id==="colorB"?"b":"r";
+    ["colorW","colorR","colorB"].forEach(i=>document.getElementById(i).classList.toggle("on",i===id));
+    if(NET.mode==="bot"&&!BVB.on)newGameBot();
+  });
+});
+
 document.getElementById("btnRanked").addEventListener("click",()=>{
   RANKED.on=true;
   document.getElementById("btnRanked").classList.add("on");
@@ -3849,8 +4077,8 @@ document.getElementById("togEval").addEventListener("change",function(){
 document.getElementById("togRating").addEventListener("change",function(){NET.showRating=this.checked;const rCard=document.getElementById("bR");if(rCard&&rCard.parentElement)rCard.parentElement.style.display=this.checked?"":"none";});
 document.getElementById("togLocal").addEventListener("change",function(){
   if(NET.mode==="host"||NET.mode==="guest"){this.checked=false;return;}
-  if(this.checked){NET.mode="local";NET.myCol="w";flipped=false;_botAbort=true;const bc=document.getElementById("hB");if(bc&&bc.parentElement)bc.parentElement.style.display="none";const mpls=document.getElementById("mBotLvls");if(mpls)mpls.style.display="none";const ml=document.getElementById("mLocal");if(ml)ml.classList.add("on");openLocalTimeModal(tc=>{NET.timeCtrl=tc||null;newGame(tc);});}
-  else{NET.mode="bot";NET.myCol="w";const bc=document.getElementById("hB");if(bc&&bc.parentElement)bc.parentElement.style.display="";const mpls=document.getElementById("mBotLvls");if(mpls)mpls.style.display="flex";const ml=document.getElementById("mLocal");if(ml)ml.classList.remove("on");newGame();}
+  if(this.checked){NET.mode="local";NET.myCol="w";flipped=false;_botAbort=true;const bc=document.getElementById("hB");if(bc&&bc.parentElement)bc.parentElement.style.display="none";const mpls=document.getElementById("mBotLvls");if(mpls)mpls.style.display="none";const ml=document.getElementById("mLocal");if(ml)ml.classList.add("on");applyVisibility();openLocalTimeModal(tc=>{NET.timeCtrl=tc||null;newGame(tc);});}
+  else{NET.mode="bot";NET.myCol="w";const bc=document.getElementById("hB");if(bc&&bc.parentElement)bc.parentElement.style.display="";const mpls=document.getElementById("mBotLvls");if(mpls)mpls.style.display="flex";const ml=document.getElementById("mLocal");if(ml)ml.classList.remove("on");applyVisibility();newGameBot();}
 });
 document.getElementById("mOnline2").addEventListener("click",openLobby);
 document.getElementById("mLocal").addEventListener("click",()=>{if(NET.mode==="host"||NET.mode==="guest")return;const tog=document.getElementById("togLocal");tog.checked=!tog.checked;tog.dispatchEvent(new Event("change"));});
