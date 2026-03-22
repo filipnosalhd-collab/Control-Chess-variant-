@@ -1900,7 +1900,7 @@ async function playMove(mv,isBot,fromNet){
   if(_boardEl){_boardEl.style.removeProperty("--lm-color");_boardEl.style.removeProperty("--lm-color-dk");}
   const _analysisGen=isBot?G._analysisGen:(++G._analysisGen);
 
-  if(!fromNet&&!isBot){  // deep rating only for human moves
+  if((!fromNet&&!isBot)||fromNet){  // rate human moves + online opponent moves
     if(isCheckmate){
       ri=0;
       if(NET.showRating){
@@ -1924,7 +1924,7 @@ async function playMove(mv,isBot,fromNet){
         // Use cached result — instant display
         const R=RTNG[preRi];ri=preRi;
         if(NET.showRating){
-          const lbl=BVB.on?(botName(movingCol==="w"?BVB.wLevel:BVB.bLevel)+": "):(movingCol==="w"?"<b>You:</b> ":"<b>Bot:</b> ");
+          const lbl=BVB.on?(botName(movingCol==="w"?BVB.wLevel:BVB.bLevel)+": "):((NET.mode==="host"||NET.mode==="guest")?(movingCol===NET.myCol?"<b>You:</b> ":"<b>"+(NET.oppName||"Opp")+":</b> "):(movingCol==="w"?"<b>You:</b> ":"<b>Bot:</b> "));
           let html=`<span class="${R.c}">${R.s} ${R.l}</span>`;
           if(inCheck(G.brd,oppCol))html+=` <span class="ck">Check!</span>`;
           document.getElementById("ratingEl").innerHTML=lbl+html;
@@ -1952,7 +1952,7 @@ async function playMove(mv,isBot,fromNet){
       }
       if(NET.showRating){
         const R=RTNG[ri];
-        const lbl=BVB.on?(botName(movingCol==="w"?BVB.wLevel:BVB.bLevel)+": "):(movingCol==="w"?"<b>You:</b> ":"<b>Bot:</b> ");
+        const lbl=BVB.on?(botName(movingCol==="w"?BVB.wLevel:BVB.bLevel)+": "):((NET.mode==="host"||NET.mode==="guest")?(movingCol===NET.myCol?"<b>You:</b> ":"<b>"+(NET.oppName||"Opp")+":</b> "):(movingCol==="w"?"<b>You:</b> ":"<b>Bot:</b> "));
         document.getElementById("ratingEl").innerHTML=lbl+`<span class="${R.c}">${R.s} ${R.l}</span>`;
         document.getElementById("mRt").innerHTML=`<span class="${R.c}">${R.s}</span>`;
       }
@@ -1960,12 +1960,10 @@ async function playMove(mv,isBot,fromNet){
       // Deep analysis deferred — skip if new move arrives before timeout fires
       setTimeout(()=>{
         if(G.over||G._analysisGen!==_analysisGen)return; // stale, skip
-        // Deep rating (skip in online)
-        const isOnline=NET.mode==="host"||NET.mode==="guest";
-        const rIdx=isOnline?ri:rateMoveDeep(_snap,_mv2,_col2,_sc2,_sf2,_eb2,false);
+        const rIdx=rateMoveDeep(_snap,_mv2,_col2,_sc2,_sf2,_eb2,false);
         const R=RTNG[rIdx];
         if(NET.showRating){
-          const lbl=BVB.on?(botName(_col2==="w"?BVB.wLevel:BVB.bLevel)+": "):(_col2==="w"?"<b>You:</b> ":"<b>Bot:</b> ");
+          const lbl=BVB.on?(botName(_col2==="w"?BVB.wLevel:BVB.bLevel)+": "):((NET.mode==="host"||NET.mode==="guest")?(_col2===NET.myCol?"<b>You:</b> ":"<b>"+(NET.oppName||"Opp")+":</b> "):(_col2==="w"?"<b>You:</b> ":"<b>Bot:</b> "));
           let html=`<span class="${R.c}">${R.s} ${R.l}</span>`;
           if(_chk2)html+=` <span class="ck">Check!</span>`;
           document.getElementById("ratingEl").innerHTML=lbl+html;
@@ -2041,7 +2039,7 @@ async function playMove(mv,isBot,fromNet){
             // Also update display if rating changed
             if(finalRIdx!==rIdx&&NET.showRating){
               const R2=RTNG[finalRIdx];
-              const lbl2=BVB.on?(botName(_col2==="w"?BVB.wLevel:BVB.bLevel)+": "):(_col2==="w"?"<b>You:</b> ":"<b>Bot:</b> ");
+              const lbl2=BVB.on?(botName(_col2==="w"?BVB.wLevel:BVB.bLevel)+": "):((NET.mode==="host"||NET.mode==="guest")?(_col2===NET.myCol?"<b>You:</b> ":"<b>"+(NET.oppName||"Opp")+":</b> "):(_col2==="w"?"<b>You:</b> ":"<b>Bot:</b> "));
               document.getElementById("ratingEl").innerHTML=lbl2+`<span class="${R2.c}">${R2.s} ${R2.l}</span>`;
               document.getElementById("mRt").innerHTML=`<span class="${R2.c}">${R2.s}</span>`;
               const sp=document.getElementById("movesEl").children[_hl];
@@ -2186,7 +2184,7 @@ async function playMove(mv,isBot,fromNet){
   if(NET.timeCtrl&&!G.over)startTurnTimer(G.turn);
 
   if(PMQUEUE.length>0&&!G.over){
-    const pmCol=NET.mode==="bot"?"w":NET.mode==="local"?null:NET.myCol;
+    const pmCol=NET.mode==="bot"?playerColor:NET.mode==="local"?null:NET.myCol;
     if(pmCol&&G.turn===pmCol){
       const pm=PMQUEUE.shift();PMSEL=null;pmSync();
       const myFrz2=G.turn==="w"?new Set(G.frz.byW):new Set(G.frz.byB);
@@ -2195,8 +2193,38 @@ async function playMove(mv,isBot,fromNet){
         const validMoves=movesFrom(G.brd,pm.fr,pm.fc,G.castl,myFrz2);
         const pmv=validMoves.find(m=>m.tr===pm.tr&&m.tc===pm.tc);
         if(pmv){G.sel=null;G.poss=[];setTimeout(()=>{if(!G.over&&G.turn===pmCol)playMove(pmv,false,false);},50);return;}
+        // Pre-move invalid — show updated legal moves from this square (black dots)
+        G.sel={r:pm.fr,c:pm.fc};G.poss=validMoves;PMQUEUE=[];PMSEL=null;pmSync();render();
+      } else {
+        // Piece gone — clear everything
+        PMQUEUE=[];PMSEL=null;pmSync();render();
       }
-      PMQUEUE=[];PMSEL=null;pmSync();render();
+    }
+  } else if(PMSEL&&!G.over){
+    // Player had a square selected (orange) — update possible moves from actual board
+    const pmCol=NET.mode==="bot"?playerColor:NET.mode==="local"?null:NET.myCol;
+    if(pmCol&&G.turn===pmCol){
+      const piece=G.brd[PMSEL.fr]?.[PMSEL.fc];
+      if(piece&&piece[0]===pmCol){
+        const myFrz2=pmCol==="w"?new Set(G.frz.byW):new Set(G.frz.byB);
+        G.sel={r:PMSEL.fr,c:PMSEL.fc};
+        G.poss=movesFrom(G.brd,PMSEL.fr,PMSEL.fc,G.castl,myFrz2);
+        PMSEL=null;render();
+      } else {
+        PMSEL=null;G.sel=null;G.poss=[];render();
+      }
+    }
+  }
+
+  if(NET.mode==="bot"&&!G.over&&isBot&&G.sel&&PMQUEUE.length===0){
+    // Bot just played — refresh player's piece selection with actual legal moves
+    const piece=G.brd[G.sel.r]?.[G.sel.c];
+    if(piece&&piece[0]===playerColor&&G.turn===playerColor){
+      const myFrz3=playerColor==="w"?new Set(G.frz.byW):new Set(G.frz.byB);
+      G.poss=movesFrom(G.brd,G.sel.r,G.sel.c,G.castl,myFrz3);
+      render();
+    } else {
+      G.sel=null;G.poss=[];render();
     }
   }
 
@@ -3824,8 +3852,8 @@ function applyVisibility(){
   const mev=document.getElementById("mEv");if(mev)mev.style.display=showEval?"":"none";
   const te=document.getElementById("togEval");if(te)te.checked=showEval;
 
-  // Move ratings: hide if ranked or online
-  const showRating=!isRankedGame&&!isOnline;
+  // Move ratings: show always (online too — affects ELO)
+  const showRating=!isRankedGame;
   NET.showRating=showRating;
   const tr=document.getElementById("togRating");if(tr)tr.checked=showRating;
   const rCard=document.getElementById("bR");if(rCard&&rCard.parentElement)rCard.parentElement.style.display=showRating?"":"none";
